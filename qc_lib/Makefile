@@ -19,6 +19,7 @@ DYLIB = qc_lib.$(DYEXT)
 OBJS =  qc_error.o \
         qc_hash.o \
 		qc_list.o \
+		qc_file.o \
 		qc_log.o \
 		qc_pool.o \
 		qc_queue.o \

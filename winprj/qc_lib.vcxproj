@@ -20,6 +20,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\qc_lib\qc_error.c" />
+    <ClCompile Include="..\qc_lib\qc_file_win.c" />
     <ClCompile Include="..\qc_lib\qc_hash.c" />
     <ClCompile Include="..\qc_lib\qc_list.c" />
     <ClCompile Include="..\qc_lib\qc_log.c" />
@@ -31,6 +32,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\qc_lib\qc_error.h" />
+    <ClInclude Include="..\qc_lib\qc_file.h" />
     <ClInclude Include="..\qc_lib\qc_hash.h" />
     <ClInclude Include="..\qc_lib\qc_list.h" />
     <ClInclude Include="..\qc_lib\qc_log.h" />

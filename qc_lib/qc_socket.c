@@ -44,7 +44,7 @@ int qc_socket_close(QcSocket *socket)
 {
     qc_assert(socket);
 
-    if(0 != _close(socket->sockfd))
+    if(0 != close(socket->sockfd))
     {
         qc_error("socket destroy failed");
         return -1;
@@ -102,8 +102,7 @@ int qc_tcp_bind(QcSocket *socket, char* ip, int port)
     if(NULL == ip || (0 == strcmp(ip, "127.0.0.1")))
         servaddr.sin_addr.s_addr = htonl(INADDR_ANY);
     else
-        //servaddr.sin_addr.s_addr = inet_addr(ip);
-	    inet_pton(AF_INET, ip, &servaddr.sin_addr.s_addr);
+        servaddr.sin_addr.s_addr = inet_addr(ip);
 
     if(0 != bind(socket->sockfd, (struct sockaddr*)&servaddr, sizeof(servaddr)))
     {
@@ -141,7 +140,7 @@ QcSocket* qc_tcp_accept(QcSocket *socket)
 
     addr_len = sizeof(addr);
 
-    new_sock->sockfd = (int)accept(socket->sockfd, &addr, &addr_len);
+    new_sock->sockfd = (int)accept(socket->sockfd, &addr, (socklen_t*)&addr_len);
     if(new_sock->sockfd < 0)
     {
         qc_error("socket accept failed");
@@ -163,8 +162,7 @@ int qc_tcp_connect(QcSocket *socket, char* ip, int port)
 
     addr.sin_family = AF_INET;
     addr.sin_port = htons(port);
-    //addr.sin_addr.s_addr = inet_addr(ip);
-	inet_pton(AF_INET, ip, &addr.sin_addr.s_addr);
+    addr.sin_addr.s_addr = inet_addr(ip);
 
     if(0 != connect(socket->sockfd, (struct sockaddr*)&addr, sizeof(addr)))
     {

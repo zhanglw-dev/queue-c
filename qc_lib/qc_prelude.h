@@ -11,6 +11,7 @@
 #include <time.h>
 #include <fcntl.h>
 #include <errno.h>
+#include <ctype.h>
 
 
 #if (WINDOWS|_WINDOWS|WIN32|_WIN32|WIN64|_WIN64)
@@ -44,6 +45,7 @@
     #define QCAPI __cdecl
 
 #else
+    #include <unistd.h>
     #include <dirent.h>
     #include <sys/socket.h>
     #include <poll.h>
@@ -54,6 +56,7 @@
     #include <sys/file.h>
     #include <sys/wait.h>
     #include <netinet/in.h>
+    #include <arpa/inet.h>
     #include <pthread.h>
     #include <signal.h>
 

@@ -19,29 +19,27 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\qc_lib\qc_error.c" />
-    <ClCompile Include="..\qc_lib\qc_file_win.c" />
-    <ClCompile Include="..\qc_lib\qc_hash.c" />
-    <ClCompile Include="..\qc_lib\qc_list.c" />
-    <ClCompile Include="..\qc_lib\qc_log.c" />
-    <ClCompile Include="..\qc_lib\qc_pool.c" />
-    <ClCompile Include="..\qc_lib\qc_queue.c" />
-    <ClCompile Include="..\qc_lib\qc_socket_win.c" />
-    <ClCompile Include="..\qc_lib\qc_thread_ex.c" />
-    <ClCompile Include="..\qc_lib\qc_thread_win.c" />
+    <ClCompile Include="..\qc_base\qc_error.c" />
+    <ClCompile Include="..\qc_base\qc_file_win.c" />
+    <ClCompile Include="..\qc_base\qc_hash.c" />
+    <ClCompile Include="..\qc_base\qc_list.c" />
+    <ClCompile Include="..\qc_base\qc_log.c" />
+    <ClCompile Include="..\qc_base\qc_pool.c" />
+    <ClCompile Include="..\qc_base\qc_queue.c" />
+    <ClCompile Include="..\qc_base\qc_socket_win.c" />
+    <ClCompile Include="..\qc_base\qc_thread_win.c" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\qc_lib\qc_error.h" />
-    <ClInclude Include="..\qc_lib\qc_file.h" />
-    <ClInclude Include="..\qc_lib\qc_hash.h" />
-    <ClInclude Include="..\qc_lib\qc_list.h" />
-    <ClInclude Include="..\qc_lib\qc_log.h" />
-    <ClInclude Include="..\qc_lib\qc_pool.h" />
-    <ClInclude Include="..\qc_lib\qc_prelude.h" />
-    <ClInclude Include="..\qc_lib\qc_queue.h" />
-    <ClInclude Include="..\qc_lib\qc_socket.h" />
-    <ClInclude Include="..\qc_lib\qc_thread.h" />
-    <ClInclude Include="..\qc_lib\qc_thread_ex.h" />
+    <ClInclude Include="..\qc_base\qc_error.h" />
+    <ClInclude Include="..\qc_base\qc_file.h" />
+    <ClInclude Include="..\qc_base\qc_hash.h" />
+    <ClInclude Include="..\qc_base\qc_list.h" />
+    <ClInclude Include="..\qc_base\qc_log.h" />
+    <ClInclude Include="..\qc_base\qc_pool.h" />
+    <ClInclude Include="..\qc_base\qc_prelude.h" />
+    <ClInclude Include="..\qc_base\qc_queue.h" />
+    <ClInclude Include="..\qc_base\qc_socket.h" />
+    <ClInclude Include="..\qc_base\qc_thread.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{96CA49C5-802B-41C3-8AB4-7A27D640F485}</ProjectGuid>

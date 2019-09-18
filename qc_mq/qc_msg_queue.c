@@ -4,7 +4,7 @@
 #include "qc_list.h"
 #include "qc_error.h"
 #include "qc_getter_list.h"
-#include "qc_putter_list.h"
+#include "qc_putter_chain.h"
 #include "qc_msg_chain.h"
 
 
@@ -16,7 +16,7 @@ struct __QcQueue{
 	QcMsgChain *messageChain;
 
 	QcGetterList *getterList;
-	QcPutterList *putterList;
+	QcPutterChain *putterChain;
 };
 
 
@@ -56,8 +56,8 @@ QcQueue* qc_queue_create(unsigned int limit, unsigned int priority_max, QcErr *e
 		goto failed;
 	}
 
-	queue->putterList = qc_putterlist_create();
-	if(NULL == queue->putterList){
+	queue->putterChain = qc_putterchain_create(priority_max);
+	if(NULL == queue->putterChain){
 		qc_seterr(err, QC_ERR_RUNTIME, "create putterList for queue failed.");
 		goto failed;
 	}
@@ -79,7 +79,7 @@ int qc_queue_destroy(QcQueue *queue, QcErr *err){
 	if(queue->quelock) qc_thread_mutex_destroy(queue->quelock);
 	if(queue->messageChain) qc_msgchain_destroy(queue->messageChain);
 	if(queue->getterList)  qc_getterlist_destroy(queue->getterList);
-	if(queue->putterList)  qc_putterlist_destroy(queue->putterList);
+	if(queue->putterChain)  qc_putterchain_destroy(queue->putterChain);
 
 	qc_free(queue);
 	return 0;
@@ -143,7 +143,8 @@ put_loop:
 			qc_thread_condlock_lock(putter->condlock);
 
 			putter->message = message;
-			qc_putterlist_push(queue->putterList, putter);
+			putter->priority = message->priority;
+			qc_putterchain_push(queue->putterChain, putter);
 
 			qc_thread_mutex_unlock(queue->quelock);
 			int ret = qc_thread_cond_timedwait(putter->cond, putter->condlock, sec);
@@ -155,7 +156,7 @@ put_loop:
 			qc_thread_condlock_unlock(putter->condlock);
 
 			if(putter->is_timedout){
-				int r = qc_putterlist_remove(queue->putterList, putter);
+				int r = qc_putterchain_remove(queue->putterChain, putter);
 				if(r == 0) qc_putter_destroy(putter);  //distroy un-popped timeouted putter
 
 				qc_seterr(err, QC_TIMEOUT, "time out.");
@@ -228,7 +229,7 @@ QcMessage* qc_queue_msgget(QcQueue *queue, int sec, QcErr *err){
 
 pop_loop:
 
-		putter = qc_putterlist_pop(queue->putterList);
+		putter = qc_putterchain_pop(queue->putterChain);
 		if(putter){
 			qc_thread_condlock_lock(putter->condlock);			
 			if(putter->is_timedout){

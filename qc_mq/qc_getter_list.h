@@ -19,10 +19,6 @@ extern "C" {
 #endif
 
 
-QcGetter* qc_getter_create();
-
-int qc_getter_destroy(QcGetter *getter);
-
 QcGetterList* qc_getterlist_create();
 
 int qc_getterlist_destroy(QcGetterList *getterList);

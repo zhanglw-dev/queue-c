@@ -11,9 +11,15 @@ typedef struct __QcPutter {
 	QcCond *cond;
 	QcMessage *message;
 	int is_timedout;
-
+	int priority;
 	QcListEntry *_entry;
 }QcPutter;
+
+
+
+QcPutter* qc_putter_create();
+
+int qc_putter_destroy(QcPutter *putter);
 
 
 #endif  //H_QC_PUTTER

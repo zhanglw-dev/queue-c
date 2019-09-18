@@ -126,7 +126,7 @@
     <ClCompile Include="..\qc_mq\qc_msg_chain.c" />
     <ClCompile Include="..\qc_mq\qc_msg_queue.c" />
     <ClCompile Include="..\qc_mq\qc_putter.c" />
-    <ClCompile Include="..\qc_mq\qc_putter_list.c" />
+    <ClCompile Include="..\qc_mq\qc_putter_chain.c" />
     <ClCompile Include="..\qc_mq\qc_put_bucket.c" />
   </ItemGroup>
   <ItemGroup>
@@ -137,7 +137,7 @@
     <ClInclude Include="..\qc_mq\qc_msg_chain.h" />
     <ClInclude Include="..\qc_mq\qc_msg_queue.h" />
     <ClInclude Include="..\qc_mq\qc_putter.h" />
-    <ClInclude Include="..\qc_mq\qc_putter_list.h" />
+    <ClInclude Include="..\qc_mq\qc_putter_chain.h" />
     <ClInclude Include="..\qc_mq\qc_put_bucket.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

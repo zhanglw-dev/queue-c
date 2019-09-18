@@ -27,6 +27,7 @@ QcPutter* qc_putter_create() {
 
 	putter->message = NULL;
 	putter->is_timedout = 0;
+	putter->priority = 0;
 
 	return putter;
 }

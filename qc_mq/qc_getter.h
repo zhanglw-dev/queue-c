@@ -17,4 +17,10 @@ typedef struct {
 }QcGetter;
 
 
+
+QcGetter* qc_getter_create();
+
+int qc_getter_destroy(QcGetter *getter);
+
+
 #endif  //H_QC_GETTER

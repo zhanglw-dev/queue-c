@@ -4,17 +4,7 @@
 #include "qc_thread.h"
 #include "qc_message.h"
 #include "qc_list.h"
-
-
-
-typedef struct __QcPutter{
-    QcCondLock *condlock;
-    QcCond *cond;
-    QcMessage *message;
-    int is_timedout;
-
-    QcListEntry *_entry;
-}QcPutter;
+#include "qc_putter.h"
 
 
 typedef struct{

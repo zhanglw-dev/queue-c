@@ -5,16 +5,7 @@
 #include "qc_error.h"
 #include "qc_message.h"
 #include "qc_list.h"
-
-
-typedef struct{
-    QcCondLock *condlock;
-    QcCond *cond;
-    QcMessage *message;
-    int is_timedout;
-    
-    QcListEntry *_entry;
-}QcGetter;
+#include "qc_getter.h"
 
 
 typedef struct{

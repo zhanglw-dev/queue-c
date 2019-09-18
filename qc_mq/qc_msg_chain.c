@@ -4,38 +4,11 @@
 
 
 
-static QcMsgBucket* qc_msgbucket_create(){
-
-	QcMsgBucket *msgBucket;
-	qc_malloc(msgBucket, sizeof(QcMsgBucket));
-    if(NULL == msgBucket){
-        return NULL;
-    }
-    QcList *msgList = qc_list_create(0);
-    if(NULL == msgList){
-        qc_free(msgBucket);
-        return NULL;
-    }
-
-    msgBucket->msgList = msgList;
-    return msgBucket;
-}
-
-
-static int qc_msgbucket_destroy(QcMsgBucket *msgBucket){
-    if(NULL == msgBucket){
-        return -1;
-    }
-
-    if(msgBucket->msgList) qc_list_destroy(msgBucket->msgList);
-    qc_free(msgBucket);
-    return 0;
-}
-
-
 //----------------------------------------------------------------------------------------------
 
-QcMsgChain* qc_msgchain_create(int count_limit, int priority_maxlevel){
+QcMsgChain* qc_msgchain_create(int count_limit, int priority_maxlevel)
+{
+	int ret;
 
     if(count_limit <= 0){
         return NULL;
@@ -52,7 +25,6 @@ QcMsgChain* qc_msgchain_create(int count_limit, int priority_maxlevel){
 
     memset(msgChain, 0, sizeof(QcMsgChain));
     msgChain->count_limit  = count_limit;
-    msgChain->current_count = 0;
     msgChain->bucket_count = priority_maxlevel;
     msgChain->cursor_bucketsn = 0;
 
@@ -70,10 +42,10 @@ QcMsgChain* qc_msgchain_create(int count_limit, int priority_maxlevel){
         msgChain->msgBuckets[i] = msgBucket;
     }
 
-    msgChain->rwlock = qc_thread_rwlock_create();
-    if(NULL == msgChain->rwlock){
-        goto failed;
-    }
+	ret = qc_unitpool_init(&msgChain->msgPool, sizeof(QcMessage), count_limit);
+	if (ret != 0) {
+		goto failed;
+	}
 
     return msgChain;
 
@@ -96,8 +68,7 @@ int qc_msgchain_destroy(QcMsgChain *msgChain){
         qc_free(msgChain->msgBuckets);
     }
 
-    if(msgChain->rwlock)
-        qc_thread_rwlock_destroy(msgChain->rwlock);
+	qc_unitpool_release(&msgChain->msgPool);
 
     return 0;
 }
@@ -107,20 +78,29 @@ int qc_msgchain_msgcount(QcMsgChain *msgChain){
     if(NULL == msgChain)
         return -1;
     
-    return msgChain->current_count;
+    return qc_unitpool_usednum(&msgChain->msgPool);
 }
 
 
-int qc_msgchain_pushmsg(QcMsgChain *msgChain, QcMessage *message){
-    
+int qc_msgchain_pushmsg(QcMsgChain *msgChain, QcMessage *message)
+{
+	int idx;
+
     qc_assert(msgChain!=NULL && message!=NULL);
     int bucket_sn = qc_message_priority(message)-1;
     qc_assert(bucket_sn >= 0 && bucket_sn <= (msgChain->bucket_count-1));
 
-    QcMsgBucket *bucket = msgChain->msgBuckets[bucket_sn];
+	QcMessage *_msg = qc_unitpool_get(&msgChain->msgPool, &idx);
+	if (!_msg) {
+		return -1;
+	}
 
-    qc_list_inserttail(bucket->msgList, message);
-    msgChain->current_count++;
+	memcpy(_msg, message, sizeof(QcMessage));
+	_msg->pool_flag = 1;
+	_msg->pool_idx = idx;
+
+	QcMsgBucket *bucket = msgChain->msgBuckets[bucket_sn];
+    qc_list_inserttail(bucket->msgList, _msg);
 
     if(bucket_sn > msgChain->cursor_bucketsn)
         msgChain->cursor_bucketsn = bucket_sn;
@@ -134,7 +114,7 @@ QcMessage* qc_msgchain_popmsg(QcMsgChain *msgChain){
     if(NULL == msgChain){
         return NULL;
     }
-    if(msgChain->current_count == 0){
+    if(qc_unitpool_usednum(&msgChain->msgPool) == 0){
         return NULL;
     }
 
@@ -163,10 +143,12 @@ try_loop:
     if(bucket->pop_counter < counter_max){
         //
         if(qc_list_count(bucket->msgList) > 0){
-            QcMessage *message = qc_list_pophead(bucket->msgList);
-            msgChain->current_count--;
+            QcMessage *_msg = qc_list_pophead(bucket->msgList);
+			qc_assert(_msg->pool_idx >= 0);
+			qc_unitpool_put(&msgChain->msgPool, _msg->pool_idx);
+
             bucket->pop_counter++;
-            return message;
+            return _msg;
         }
         else{
             bucket_sn--;

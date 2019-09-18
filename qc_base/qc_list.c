@@ -7,25 +7,6 @@
 //                               Static List
 ////////////////////////////////////////////////////////////////////////////////*/
 
-#pragma pack(push)
-#pragma pack(1)
-
-typedef struct{
-    int previous;
-    int next;
-}_StaticCell;
-
-
-struct __QcStaticList{
-    int head;            
-    int tail;
-    int limit;
-    int num;
-    void *buff;
-};
-
-#pragma pack(pop)
-
 
 
 #define QC_STLIST_CELL_SIZE sizeof(_StaticCell)
@@ -37,26 +18,21 @@ void *get_staticlist_cell(char *buff, int cell)
 }
 
 
-QcStaticList* qc_staticlist_create(int limit)
+int qc_staticlist_init(QcStaticList *staticList, int limit)
 {
     int i;
     _StaticCell *curCell = NULL;
-    QcStaticList *staticList;
 
     if(limit <= 0)
     {
-        return NULL;
+        return -1;
     }
 
-    if(NULL == (staticList = malloc(sizeof(QcStaticList))))
-    {
-        return NULL;
-    }
+	memset(staticList, 0, sizeof(QcStaticList));
 
     if(NULL == (staticList->buff = malloc(limit*QC_STLIST_CELL_SIZE)))
     {
-        free(staticList);
-        return NULL;
+        return -1;
     }
 
     memset(staticList->buff, 0, limit*QC_STLIST_CELL_SIZE);
@@ -78,7 +54,7 @@ QcStaticList* qc_staticlist_create(int limit)
     staticList->tail = limit-1;
     staticList->num  = limit;
 
-    return staticList;
+    return 0;
 }
 
 
@@ -95,10 +71,10 @@ void qc_staticlist_clear(QcStaticList *staticList)
 }
 
 
-void qc_staticlist_destroy(QcStaticList *staticList)
+void qc_staticlist_release(QcStaticList *staticList)
 {
     free(staticList->buff);
-    free(staticList);
+    //free(staticList);  no!
 }
 
 

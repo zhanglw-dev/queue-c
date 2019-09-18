@@ -25,6 +25,8 @@ void* putroutine(void *arg){
             qc_perror("qc_queue_msgput failed, ret=%d", ret);
             return NULL;
         }
+
+		qc_message_release(message, 0);
     }
 
     return 0;

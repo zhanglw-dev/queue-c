@@ -1,115 +1,47 @@
 #include "qc_pool.h"
-#include "qc_thread.h"
 #include "qc_list.h"
 #include "qc_log.h"
+
 
 //////////////////////////////////////////////////////////////////////////////////
 //                               NumPool
 //////////////////////////////////////////////////////////////////////////////////
 
 
-struct __QcNumPool{
-    int with_rwlock;
-    QcMutex *mutex;
-    QcStaticList *qc_freeList;
-    int limit;
-};
-
-
-QcNumPool* qc_numpool_create(int init_count, int with_rwlock)
+int qc_numpool_init(QcNumPool *numPool, int init_count)
 {
-	QcNumPool *acqHdl = NULL;
+	int ret;
 
-	qc_malloc(acqHdl, sizeof(QcNumPool))
-    if(NULL == acqHdl)
+	memset(numPool, 0, sizeof(QcNumPool));
+
+	ret = qc_staticlist_init(&numPool->qc_freeList, init_count);
+	if(ret != 0)
 	{
-		qc_error("qc_malloc numpool failed");
-		return NULL;
+		return -1;
 	}
 
-    acqHdl->qc_freeList = NULL;
-    acqHdl->limit = -1;
-    acqHdl->mutex = NULL;
-    acqHdl->with_rwlock = with_rwlock;
-
-    if(with_rwlock)
-    {
-        acqHdl->mutex = qc_thread_mutex_create();
-        if(NULL == acqHdl->mutex)
-        {
-            qc_error("create mutex for numpool failed");
-            return NULL;
-        }
-    }
-
-	acqHdl->qc_freeList = qc_staticlist_create(init_count);
-	if(NULL == acqHdl->qc_freeList)
-	{
-		qc_free(acqHdl);
-		return NULL;
-	}
-
-	acqHdl->limit = init_count;
-
-	return acqHdl;
-}
-
-
-void qc_numpool_destroy(QcNumPool *numpool)
-{
-	qc_staticlist_destroy(numpool->qc_freeList);
-    if(numpool->with_rwlock)
-	    qc_thread_mutex_destroy(numpool->mutex);
-	qc_free(numpool);
-}
-
-/*
-int qc_numpool_expand(QcNumPool *qcResHdl, int expd_num)
-{
 	return 0;
 }
-*/
 
-int qc_numpool_freenum(QcNumPool *numpool)
+
+void qc_numpool_release(QcNumPool *numPool)
 {
-	int num;
-
-    if(numpool->with_rwlock) qc_thread_mutex_lock(numpool->mutex);
-    num = qc_staticlist_count(numpool->qc_freeList);
-    if(numpool->with_rwlock) qc_thread_mutex_unlock(numpool->mutex);
-
-	return num;
+	qc_staticlist_release(&numPool->qc_freeList);
 }
 
 
-int qc_numpool_usednum(QcNumPool *numpool)
-{
-	int used;
-
-	used = numpool->limit - qc_numpool_freenum(numpool);
-	return used;
-}
-
-
-int qc_numpool_get(QcNumPool *numpool)
+int qc_numpool_get(QcNumPool *numPool)
 {
 	int idx;
-
-	if(numpool->with_rwlock) qc_thread_mutex_lock(numpool->mutex);
-	idx = qc_staticlist_get_head(numpool->qc_freeList);
-	if(numpool->with_rwlock) qc_thread_mutex_unlock(numpool->mutex);
-
+	idx = qc_staticlist_get_head(&numPool->qc_freeList);
 	return idx;
 }
 
 
-int qc_numpool_put(QcNumPool *numpool, int idx)
+int qc_numpool_put(QcNumPool *numPool, int idx)
 {
     int ret;
-
-	if(numpool->with_rwlock) qc_thread_mutex_lock(numpool->mutex);
-	ret = qc_staticlist_add_tail(numpool->qc_freeList, idx);
-	if(numpool->with_rwlock) qc_thread_mutex_unlock(numpool->mutex);
+	ret = qc_staticlist_add_tail(&numPool->qc_freeList, idx);
 
     if(ret>0)
         return 0;
@@ -118,79 +50,77 @@ int qc_numpool_put(QcNumPool *numpool, int idx)
 }
 
 
-
-//////////////////////////////////////////////////////////////////////////////////
-//                               Unit Pool
-//////////////////////////////////////////////////////////////////////////////////
-
-
-struct __QcUnitPool{
-    QcNumPool *numpool;
-    char *unit_buff;
-    int unit_size;
-    int unit_num;
-    int with_rwlock;
-};
-
-
-
-QcUnitPool* qc_unitpool_create(int unit_size, int unit_num, int with_rwlock)
+int qc_numpool_count(QcNumPool *numPool)
 {
-    QcUnitPool *unitpool;
+	return numPool->qc_freeList.limit;
+}
 
-    qc_malloc(unitpool, sizeof(QcUnitPool));
-    if(NULL == unitpool)
-    {
-        return NULL;
-    }
 
-    unitpool->numpool = NULL;
-    unitpool->unit_buff = NULL;
-    unitpool->unit_size = unit_size;
-    unitpool->unit_num  = unit_num;
-    unitpool->with_rwlock = with_rwlock;
+int qc_numpool_freenum(QcNumPool *numPool)
+{
+	return numPool->qc_freeList.num;
+}
 
-    unitpool->numpool = qc_numpool_create(unit_num, with_rwlock);
-    if(NULL == unitpool->numpool)
+
+int qc_numpool_usednum(QcNumPool *numPool)
+{
+	return numPool->qc_freeList.limit - numPool->qc_freeList.num;
+}
+
+
+//////////////////////////////////////////////////////////////////////////////////
+//                               UnitPool
+//////////////////////////////////////////////////////////////////////////////////
+
+
+int qc_unitpool_init(QcUnitPool *unitPool, int unit_size, int unit_count)
+{
+	int ret;
+
+	memset(unitPool, 0, sizeof(QcUnitPool));
+
+    unitPool->unit_buff = NULL;
+    unitPool->unit_size = unit_size;
+    unitPool->unit_count  = unit_count;
+
+    ret = qc_numpool_init(&unitPool->numPool, unit_count);
+    if(ret != 0)
     {
         goto failed;
     }
 
-    qc_malloc(unitpool->unit_buff, unit_size*unit_num);
-    if(NULL == unitpool->unit_buff)
+    qc_malloc(unitPool->unit_buff, unit_size*unit_count);
+    if(NULL == unitPool->unit_buff)
     {
         goto failed;
     }
 
-    return unitpool;
+    return 0;
 
 failed:
-    qc_unitpool_destroy(unitpool);
-    return NULL;
+    qc_unitpool_release(unitPool);
+    return -1;
 }
 
 
-void qc_unitpool_destroy(QcUnitPool *unitpool)
+void qc_unitpool_release(QcUnitPool *unitPool)
 {
-    if(NULL == unitpool)
+    if(NULL == unitPool)
         return;
 
-    if(unitpool->unit_buff)
-        qc_free(unitpool->unit_buff);
+    if(unitPool->unit_buff)
+        qc_free(unitPool->unit_buff);
 
-    if(unitpool->numpool)
-        qc_numpool_destroy(unitpool->numpool);
-
-    qc_free(unitpool);
+    qc_numpool_release(&unitPool->numPool);
 }
 
 
-void* qc_unitpool_get(QcUnitPool *unitpool, int *idx)
+void* qc_unitpool_get(QcUnitPool *unitPool, int *idx)
 {
     int index;
     char *ptr;
 
-    index = qc_numpool_get(unitpool->numpool);
+    index = qc_numpool_get(&unitPool->numPool);
     if(index<0)
     {
         if(idx)
@@ -198,7 +128,7 @@ void* qc_unitpool_get(QcUnitPool *unitpool, int *idx)
         return NULL;
     }
 
-    ptr = (char*)unitpool->unit_buff + index*(unitpool->unit_size);
+    ptr = (char*)unitPool->unit_buff + index*(unitPool->unit_size);
     if(idx)
         *idx = index;
 
@@ -206,31 +136,40 @@ void* qc_unitpool_get(QcUnitPool *unitpool, int *idx)
 }
 
 
-int qc_unitpool_put(QcUnitPool *unitpool, void *unit)
+int qc_unitpool_put(QcUnitPool *unitPool, int index)
 {
-    int index, ret;
-
-    index = (int)((char*)unit - unitpool->unit_buff)/unitpool->unit_size;
-    ret = qc_numpool_put(unitpool->numpool, index);
-
+    int ret;
+    ret = qc_numpool_put(&unitPool->numPool, index);
     return ret;
 }
 
 
-void* qc_unitpool_ptr_byindex(QcUnitPool *unitpool, int index)
+void* qc_unitpool_ptr_byindex(QcUnitPool *unitPool, int index)
 {
     char *ptr;
 
-    qc_assert(unitpool);
-    qc_assert(unitpool->unit_num > index);
+    qc_assert(unitPool);
+    qc_assert(unitPool->unit_count > index);
 
-    ptr = unitpool->unit_buff + index*(unitpool->unit_size);
+    ptr = unitPool->unit_buff + index*(unitPool->unit_size);
 
     return ptr;
 }
 
 
-int qc_unitpool_usednum(QcUnitPool *unitpool)
+int qc_unitpool_count(QcUnitPool *unitPool)
 {
-    return qc_numpool_usednum(unitpool->numpool);
+	return qc_numpool_count(&unitPool->numPool);
+}
+
+
+int qc_unitpool_usednum(QcUnitPool *unitPool)
+{
+    return qc_numpool_usednum(&unitPool->numPool);
+}
+
+
+int qc_unitpool_freenum(QcUnitPool *unitPool)
+{
+	return qc_numpool_freenum(&unitPool->numPool);
 }

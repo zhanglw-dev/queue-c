@@ -2,16 +2,9 @@
 
 
 
-struct __QcMessage{
-    char *buff;
-    int  bufflen;
-    int  priority;
-};
-
-
-
 QcMessage* qc_message_create(const char *buff, int len, int flag_dupbuff){
     QcMessage *message;
+
     qc_malloc(message, sizeof(QcMessage));
     if(NULL == message)
         return NULL;
@@ -27,11 +20,14 @@ QcMessage* qc_message_create(const char *buff, int len, int flag_dupbuff){
         memcpy(message->buff, buff, len);
     }
     else{
-        message->buff = (char *)buff;        
+        message->buff = (char *)buff;
     }
 
     message->bufflen = len;
     message->priority = 1;
+	message->pool_flag = 0;
+	message->pool_idx = -1;
+	message->getter_holding = 1;
 
     return message;
 }
@@ -41,8 +37,11 @@ void qc_message_release(QcMessage *message, int flag_freebuff){
     if(NULL == message)
         return;
 
+	if(message->getter_holding) return;
+
     if(flag_freebuff && message->buff) qc_free(message->buff);
-    qc_free(message);
+    if(!message->pool_flag) qc_free(message);
+
     return;
 }
 

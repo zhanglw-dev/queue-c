@@ -4,32 +4,20 @@
 #include "qc_prelude.h"
 #include "qc_message.h"
 #include "qc_list.h"
+#include "qc_pool.h"
 #include "qc_thread.h"
+#include "qc_msg_bucket.h"
 
 
 
 typedef struct{
-    QcList *msgList;
-    int pop_counter;
-}QcMsgBucket;
-
-
-typedef struct{
-    QcMessage *message;
-    QcMsgBucket *bucket;
-    int cell_idx;  //for presistent feature
-}QcMsgEntry;
-
-
-typedef struct{
-    int count_limit;  //limit of message count
-    int current_count;
+    int count_limit;    //limit of message count
 
     int bucket_count;
     QcMsgBucket **msgBuckets;
     int cursor_bucketsn;
 
-    QcRWLock *rwlock;
+	QcUnitPool msgPool;
 }QcMsgChain;
 
 

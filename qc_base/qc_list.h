@@ -10,11 +10,31 @@ extern "C" {
 //                               Static List
 ////////////////////////////////////////////////////////////////////////////////*/
 
+#pragma pack(push)
+#pragma pack(1)
+
+	typedef struct {
+		int previous;
+		int next;
+	}_StaticCell;
+
+
+	struct __QcStaticList {
+		int head;
+		int tail;
+		int limit;
+		int num;
+		void *buff;
+	};
+
+#pragma pack(pop)
+
+
 typedef struct __QcStaticList QcStaticList;
 
 
-QcStaticList* qc_staticlist_create(int limit);
-void qc_staticlist_destroy(QcStaticList *staticList);
+int qc_staticlist_init(QcStaticList *staticList, int limit);
+void qc_staticlist_release(QcStaticList *staticList);
 
 int  qc_staticlist_count(QcStaticList *staticList);
 void qc_staticlist_clear(QcStaticList *staticList);

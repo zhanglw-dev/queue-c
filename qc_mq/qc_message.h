@@ -4,6 +4,21 @@
 #include "qc_prelude.h"
 
 
+#pragma pack(push)
+#pragma pack(1)
+
+struct __QcMessage {
+	int priority;
+	int pool_flag;
+	unsigned int pool_idx;
+	int getter_holding;
+	int bufflen;
+	char *buff;
+};
+
+#pragma pack(pop)
+
+
 typedef struct __QcMessage QcMessage;
 
 

@@ -124,6 +124,8 @@ put_loop:
 		}
 
 		getter->message = message;
+		getter->message->getter_holding = 1;    //do not free msg
+
 		qc_thread_cond_signal(getter->cond);
 		qc_thread_condlock_unlock(getter->condlock);
 
@@ -216,11 +218,12 @@ QcMessage* qc_queue_msgget(QcQueue *queue, int sec, QcErr *err){
 		}
 
 		qc_getter_destroy(getter);
+
+		message->getter_holding = 0;   //can be free
 		return message;
 	}
 	else{
 		QcMessage *message = qc_msgchain_popmsg(queue->messageChain);
-
         QcPutter *putter;  //must before loop??
 
 pop_loop:

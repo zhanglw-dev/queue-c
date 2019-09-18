@@ -1,6 +1,8 @@
 #ifndef QCLIB_POOL_H
 #define QCLIB_POOL_H
 
+#include "qc_list.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -10,20 +12,26 @@ extern "C" {
 //                               Num pool
 //////////////////////////////////////////////////////////////////////////////////
 
+struct __QcNumPool {
+	QcStaticList qc_freeList;
+};
+
 typedef struct __QcNumPool QcNumPool;
 
 
-QcNumPool* qc_numpool_create(int init_count, int with_rwlock);
+int qc_numpool_init(QcNumPool *numPool, int init_count);
 
-void qc_numpool_destroy(QcNumPool *numpool);
+void qc_numpool_release(QcNumPool *numPool);
 
-int qc_numpool_freenum(QcNumPool *numpool);
+int qc_numpool_count(QcNumPool *numPool);
 
-int qc_numpool_usednum(QcNumPool *numpool);
+int qc_numpool_freenum(QcNumPool *numPool);
 
-int qc_numpool_get(QcNumPool *numpool);
+int qc_numpool_usednum(QcNumPool *numPool);
 
-int qc_numpool_put(QcNumPool *numpool, int idx);
+int qc_numpool_get(QcNumPool *numPool);
+
+int qc_numpool_put(QcNumPool *numPool, int idx);
 
 
 
@@ -31,21 +39,32 @@ int qc_numpool_put(QcNumPool *numpool, int idx);
 //                               Unit Pool
 //////////////////////////////////////////////////////////////////////////////////
 
+struct __QcUnitPool {
+	QcNumPool numPool;
+	int unit_size;
+	int unit_count;
+	char *unit_buff;
+};
+
+
 typedef struct __QcUnitPool QcUnitPool;
 
 
-QcUnitPool* qc_unitpool_create(int unit_size, int unit_num, int with_rwlock);
+int qc_unitpool_init(QcUnitPool *unitPool, int unit_size, int unit_num);
 
-void qc_unitpool_destroy(QcUnitPool *unitpool);
+void qc_unitpool_release(QcUnitPool *unitPool);
 
-void* qc_unitpool_get(QcUnitPool *unitpool, int *idx);
+void* qc_unitpool_get(QcUnitPool *unitPool, int *idx);
 
-int qc_unitpool_put(QcUnitPool *unitpool, void *unit);
+int qc_unitpool_put(QcUnitPool *unitPool, int idx);
 
-int qc_unitpool_usednum(QcUnitPool *unitpool);
+int qc_unitpool_count(QcUnitPool *unitPool);
 
-void* qc_unitpool_ptr_byindex(QcUnitPool *unitpool, int idx);
+int qc_unitpool_usednum(QcUnitPool *unitPool);
 
+int qc_unitpool_freenum(QcUnitPool *unitPool);
+
+void* qc_unitpool_ptr_byindex(QcUnitPool *unitPool, int idx);
 
 
 

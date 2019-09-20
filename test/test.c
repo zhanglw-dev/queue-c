@@ -26,7 +26,7 @@ void* putroutine(void *arg){
             return NULL;
         }
 
-		qc_message_release(message, 0);
+		////qc_message_release(message, 0);
     }
 
     return 0;

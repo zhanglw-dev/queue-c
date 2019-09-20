@@ -12,12 +12,12 @@
 
 typedef struct{
     int count_limit;    //limit of message count
+	int msg_count;      //current message count
 
     int bucket_count;
     QcMsgBucket **msgBuckets;
     int cursor_bucketsn;
 
-	QcUnitPool msgPool;
 }QcMsgChain;
 
 

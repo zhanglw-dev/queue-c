@@ -9,6 +9,14 @@ struct __QcFile{
 
 
 
+wchar_t* convertW(const char *input)
+{
+	int num = MultiByteToWideChar(0, 0, input, -1, NULL, 0);
+	wchar_t *wide = malloc(num * sizeof(wchar_t));
+	MultiByteToWideChar(0, 0, input, -1, wide, num);
+	return wide;
+}
+
 
 QcFile* qc_file_open(const char *pathname, int oflag)
 {
@@ -43,6 +51,7 @@ QcFile* qc_file_open(const char *pathname, int oflag)
 	if(O_CREAT & oflag) dwCreatDis = OPEN_ALWAYS;
 	if(O_EXCL  & oflag) dwCreatDis = CREATE_NEW;
 	if(O_TRUNC & oflag) dwCreatDis = TRUNCATE_EXISTING;
+	if (0 == oflag) dwCreatDis = OPEN_EXISTING;
 
 	//dwFlagsAndAttributes
 	dwFlagsAndAttrs = FILE_ATTRIBUTE_NORMAL;
@@ -50,8 +59,10 @@ QcFile* qc_file_open(const char *pathname, int oflag)
 	//hTemplateFile
 	hTempFile = NULL;
 
-	File->hdl = CreateFile((LPCTSTR)pathname, dwAccess, dwShard, \
+	LPCTSTR lpfname = convertW(pathname);
+	File->hdl = CreateFileW((LPCTSTR)lpfname, dwAccess, dwShard, \
 		               qcSecurity, dwCreatDis, dwFlagsAndAttrs, hTempFile );
+	free((void*)lpfname);
 
 	if(INVALID_HANDLE_VALUE == File->hdl)
 	{
@@ -169,7 +180,7 @@ off_t qc_file_tell(QcFile *file)
 }
 
 
-int qc_file_exist(char *pathname)
+int qc_file_exist(const char *pathname)
 {
 	qc_assert(pathname);
 
@@ -182,11 +193,25 @@ int qc_file_exist(char *pathname)
 }
 
 
+size_t qc_file_size(const char *pathname)
+{
+	size_t filesize = -1;
+	struct stat statbuff;
+	if (stat(pathname, &statbuff) < 0) {
+		return filesize;
+	}
+	else {
+		filesize = statbuff.st_size;
+	}
+	return filesize;
+}
+
+
 int qc_file_remove(const char *pathname)
 {
 	qc_assert(pathname);
 
-     if (!DeleteFile((LPCWSTR)pathname))
+     if (!DeleteFileW((LPCWSTR)pathname))
 	 {
 		 qc_error("file(%s) remove failed");
          return -1;
@@ -210,6 +235,45 @@ int qc_file_rename(const char *oldname, const char *newname)
 	return 0;
 }
 
+
+int qc_file_truncate(const char *pathname, off_t length)
+{
+	HANDLE hdl;
+	LPCTSTR lpfname = convertW(pathname);
+
+	hdl = CreateFileW((LPCTSTR)lpfname, GENERIC_WRITE, FILE_SHARE_WRITE, \
+		NULL, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+
+	free((void*)lpfname);
+
+	if (INVALID_HANDLE_VALUE == hdl)
+		return -1;
+
+	DWORD ret = SetFilePointer(hdl, length, 0, FILE_BEGIN);
+	if (INVALID_SET_FILE_POINTER == ret) {
+		DWORD r = GetLastError();
+		CloseHandle(hdl);
+		return -1;
+	}
+	/*
+	if (!SetFileValidData(hdl, length)) {
+		DWORD r = GetLastError();
+		CloseHandle(hdl);
+		return -1;
+	}
+	*/
+
+	if (!SetEndOfFile(hdl)) {
+		DWORD r = GetLastError();
+		CloseHandle(hdl);
+		return -1;
+	}
+
+
+	CloseHandle(hdl);
+
+	return 0;
+}
 
 /*--------------------------------------------------------------------------------------------------*/
 

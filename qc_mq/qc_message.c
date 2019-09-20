@@ -1,6 +1,19 @@
 #include "qc_message.h"
 
 
+#pragma pack(push)
+#pragma pack(1)
+
+struct __QcMessage {
+	int priority;
+	int persist_id;
+	int bufflen;
+	char *buff;
+};
+
+#pragma pack(pop)
+
+
 
 QcMessage* qc_message_create(const char *buff, int len, int flag_dupbuff){
     QcMessage *message;
@@ -25,9 +38,6 @@ QcMessage* qc_message_create(const char *buff, int len, int flag_dupbuff){
 
     message->bufflen = len;
     message->priority = 1;
-	message->pool_flag = 0;
-	message->pool_idx = -1;
-	message->getter_holding = 1;
 
     return message;
 }
@@ -37,10 +47,10 @@ void qc_message_release(QcMessage *message, int flag_freebuff){
     if(NULL == message)
         return;
 
-	if(message->getter_holding) return;
+    if(flag_freebuff && message->buff) 
+		qc_free(message->buff);
 
-    if(flag_freebuff && message->buff) qc_free(message->buff);
-    if(!message->pool_flag) qc_free(message);
+    qc_free(message);
 
     return;
 }

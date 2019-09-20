@@ -7,11 +7,6 @@
 #include "qc_putter.h"
 #include "qc_put_bucket.h"
 
-/*
-typedef struct{
-    QcList *_putterList;
-}QcPutterChain;
-*/
 
 typedef struct {
 	QcPutBucket **putBuckets;

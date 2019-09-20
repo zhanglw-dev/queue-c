@@ -138,7 +138,7 @@ off_t qc_file_tell(QcFile *file)
 }
 
 
-int qc_file_exist(char *pathname)
+int qc_file_exist(const char *pathname)
 {
     qc_assert(pathname);
 
@@ -150,6 +150,21 @@ int qc_file_exist(char *pathname)
 
     return 0;
 }
+
+
+size_t qc_file_size(const char *pathname)
+{
+	size_t filesize = -1;
+	struct stat statbuff;
+	if (stat(pathname, &statbuff) < 0) {
+		return filesize;
+	}
+	else {
+		filesize = statbuff.st_size;
+	}
+	return filesize;
+}
+
 
 
 int qc_file_remove(const char *pathname)

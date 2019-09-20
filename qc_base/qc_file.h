@@ -30,12 +30,15 @@ off_t qc_file_seek(QcFile *file, off_t offset, int whence);
 
 off_t qc_file_tell(QcFile *file);
 
-int qc_file_exist(char *pathname);
+int qc_file_exist(const char *pathname);
+
+size_t qc_file_size(const char *pathname);
 
 int qc_file_remove(const char *pathname);
 
 int qc_file_rename(const char *oldname, const char *newname);
 
+int qc_file_truncate(const char *pathname, off_t length);
 
 /*---------------------------------------------------------------------*/
 

@@ -6,6 +6,7 @@
 #include "qc_getter_list.h"
 #include "qc_putter_chain.h"
 #include "qc_msg_chain.h"
+#include "qc_message.h"
 
 
 
@@ -124,7 +125,6 @@ put_loop:
 		}
 
 		getter->message = message;
-		getter->message->getter_holding = 1;    //do not free msg
 
 		qc_thread_cond_signal(getter->cond);
 		qc_thread_condlock_unlock(getter->condlock);
@@ -143,7 +143,7 @@ put_loop:
 			qc_thread_condlock_lock(putter->condlock);
 
 			putter->message = message;
-			putter->priority = message->priority;
+			putter->priority = qc_message_priority(message);
 			qc_putterchain_push(queue->putterChain, putter);
 
 			qc_thread_mutex_unlock(queue->quelock);
@@ -219,8 +219,6 @@ QcMessage* qc_queue_msgget(QcQueue *queue, int sec, QcErr *err){
 		}
 
 		qc_getter_destroy(getter);
-
-		message->getter_holding = 0;   //can be free
 		return message;
 	}
 	else{

@@ -17,7 +17,7 @@ typedef struct{
 
 typedef struct {
 	int flag;       //0: no used, 1: used
-	int properties;
+	int priority;
 	int bufflen;
 }Qc_MsgInfo;
 
@@ -125,7 +125,7 @@ int qc_persist_file_append(QcPersistFile *persistFile, Qc_MsgEqual *msgEqual, Qc
 	
 	Qc_MsgInfo msgInfo;
 	msgInfo.flag = 1;
-	msgInfo.properties = msgEqual->priority;
+	msgInfo.priority = msgEqual->priority;
 	msgInfo.bufflen = msgEqual->bufflen;
 
 	qc_file_seek(file, offset_msghead, 0);
@@ -144,7 +144,7 @@ int qc_persist_file_remove(QcPersistFile *persistFile, Qc_MsgEqual *msgEqual, Qc
 
 	Qc_MsgInfo msgInfo;
 	msgInfo.flag = 0;
-	msgInfo.properties = 0;
+	msgInfo.priority = 0;
 	msgInfo.bufflen = 0;
 
 	QcFile *file = persistFile->file;
@@ -156,3 +156,55 @@ int qc_persist_file_remove(QcPersistFile *persistFile, Qc_MsgEqual *msgEqual, Qc
 	return 0;
 }
 
+
+int qc_persist_file_fetch_ready(QcPersistFile *persistFile, QcErr *err)
+{
+	QcFile *file = persistFile->file;
+	qc_file_seek(file, persistFile->head_offset, 0);
+	return 0;
+}
+
+
+int qc_persist_file_do_fetch(QcPersistFile *persistFile, Qc_MsgEqual *msgEqual, QcErr *err)
+{
+	QcFile *file = persistFile->file;
+	off_t offset = qc_file_tell(file);
+
+	//size_t filesize = persistFile->body_offset + (persistFile->fileInfo->msgbuff_size) * (persistFile->fileInfo->msgcount_limit);
+	Qc_MsgInfo msgInfo;
+
+	while (1) {
+		if (offset == persistFile->head_offset)
+			return 1;   //the end
+
+		int persist_id = (offset - sizeof(QcPersistFileInfo))/ sizeof(Qc_MsgInfo);
+
+		size_t hsz = qc_file_read(file, &msgInfo, sizeof(Qc_MsgInfo));
+		if (hsz != sizeof(Qc_MsgInfo))
+			return -1;
+
+		offset += (off_t)hsz;
+
+		if (0 == msgInfo.flag){
+			continue;  //not in use, next..
+		}
+		else{
+			int offset_buff = persistFile->body_offset + persist_id * (persistFile->fileInfo->msgbuff_size);
+			qc_file_seek(file, offset_buff, 0);
+
+			char *buff = (char*)malloc(persistFile->fileInfo->msgbuff_size);
+			size_t bsz = qc_file_read(file, buff, persistFile->fileInfo->msgbuff_size);
+			if (bsz != persistFile->fileInfo->msgbuff_size)
+				return -1;
+
+			msgEqual->persist_id = persist_id;
+			msgEqual->priority = msgInfo.priority;
+			msgEqual->bufflen = msgInfo.bufflen;
+			msgEqual->buff = buff;
+			break;
+		}
+	}
+
+	qc_file_seek(file, offset, 0);
+	return 0;
+}

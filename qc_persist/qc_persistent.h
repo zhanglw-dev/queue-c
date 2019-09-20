@@ -18,6 +18,7 @@ int qc_persist_append(QcQuePersist *qcQuePersist, QcMessage *message, QcErr *err
 
 int qc_persist_remove(QcQuePersist *qcQuePersist, QcMessage *message, QcErr *err);
 
+int qc_persist_loadqueue(QcQuePersist *qcQuePersist, QcQueue *queue, QcErr *err);
 
 
 #endif //H_QC_PERSISTENT

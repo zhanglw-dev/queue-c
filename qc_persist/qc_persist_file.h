@@ -25,11 +25,15 @@ typedef struct __QcPersistFile QcPersistFile;
 
 QcPersistFile* qc_persist_file_open(int msgbuff_size, int msgcount_limit, const char* persit_filename, QcErr *err);
 
-void qc_persist_file_close(QcPersistFile *quePersist);
+void qc_persist_file_close(QcPersistFile *persistFile);
 
-int qc_persist_file_append(QcPersistFile *qcQuePersist, Qc_MsgEqual *msgEqual, QcErr *err);
+int qc_persist_file_append(QcPersistFile *persistFile, Qc_MsgEqual *msgEqual, QcErr *err);
 
-int qc_persist_file_remove(QcPersistFile *qcQuePersist, Qc_MsgEqual *msgEqual, QcErr *err);
+int qc_persist_file_remove(QcPersistFile *persistFile, Qc_MsgEqual *msgEqual, QcErr *err);
+
+int qc_persist_file_fetch_ready(QcPersistFile *persistFile, QcErr *err);
+
+int qc_persist_file_do_fetch(QcPersistFile *persistFile, Qc_MsgEqual *msgEqual, QcErr *err);
 
 
 #endif  //QC_PERSIST_FILE_H

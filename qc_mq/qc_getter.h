@@ -10,7 +10,7 @@
 typedef struct {
 	QcCondLock *condlock;
 	QcCond *cond;
-	QcMessage *message;
+	//QcMessage *message;
 	int is_timedout;
 
 	QcListEntry *_entry;

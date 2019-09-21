@@ -6,7 +6,7 @@
 #include "qc_thread.h"
 
 
-const int queue_limit = 1000000;
+const int queue_limit = 1000;
 const int message_num = 100000;
 const char *buff = "hello queue!";
 
@@ -19,7 +19,8 @@ void* putroutine(void *arg){
 
     for(int i=0; i<message_num; i++){
         QcMessage *message = qc_message_create(buff, (int)strlen(buff), 0);
-        
+		qc_message_setpriority(message, 10);
+
         ret = qc_queue_msgput(queue, message, -1, NULL);
         if(ret != 0){
             qc_perror("qc_queue_msgput failed, ret=%d", ret);

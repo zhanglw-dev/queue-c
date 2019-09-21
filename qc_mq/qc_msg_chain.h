@@ -18,6 +18,7 @@ typedef struct{
     QcMsgBucket **msgBuckets;
     int cursor_bucketsn;
 
+	QcList *tempList;  //for blocking getter
 }QcMsgChain;
 
 
@@ -36,6 +37,10 @@ int qc_msgchain_msgcount(QcMsgChain *msgChain);
 int qc_msgchain_pushmsg(QcMsgChain *msgChain, QcMessage *message);
 
 QcMessage* qc_msgchain_popmsg(QcMsgChain *msgChain);
+
+int qc_msgchain_puttemp(QcMsgChain *msgChain, QcMessage *message);  //for getter
+
+QcMessage* qc_msgchain_gettemp(QcMsgChain *msgChain);  //for getter
 
 
 #ifdef __cplusplus

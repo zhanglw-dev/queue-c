@@ -25,7 +25,7 @@ QcGetter* qc_getter_create() {
 		return NULL;
 	}
 
-	getter->message = NULL;
+	//getter->message = NULL;
 	getter->is_timedout = 0;
 
 	return getter;

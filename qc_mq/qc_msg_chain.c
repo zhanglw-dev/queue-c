@@ -38,8 +38,11 @@ QcMsgChain* qc_msgchain_create(int count_limit, int priority_maxlevel)
         if(NULL == msgBucket){
             goto failed;
         }
-        msgChain->msgBuckets[i] = msgBucket;
+		msgBucket->pop_counter = 0;
+		msgChain->msgBuckets[i] = msgBucket;
     }
+
+	msgChain->tempList = qc_list_create(1);
 
     return msgChain;
 
@@ -117,7 +120,7 @@ QcMessage* qc_msgchain_popmsg(QcMsgChain *msgChain){
 try_loop:
 
     bucket = msgChain->msgBuckets[bucket_sn];
-    int counter_max = bucket_sn + 1;
+    int counter_max = bucket_sn+1;
 
     if(bucket->pop_counter < counter_max){
         //
@@ -134,6 +137,13 @@ try_loop:
         }
     }
     else{
+		//no message in other bucket...
+		if (qc_list_count(msgChain->msgBuckets[bucket_sn]->msgList) == msgChain->msg_count) {
+			QcMessage *message = qc_list_pophead(bucket->msgList);
+			msgChain->msg_count--;
+			return message;
+		}
+
         bucket_sn--;
         if(bucket_sn < 0){
             bucket_sn = msgChain->bucket_count - 1;
@@ -144,4 +154,26 @@ try_loop:
         goto try_loop;
     }
 
+}
+
+
+//for getter
+int qc_msgchain_puttemp(QcMsgChain *msgChain, QcMessage *message)
+{
+	qc_list_w_lock(msgChain->tempList);
+	qc_list_inserttail(msgChain->tempList, message);
+	qc_list_w_unlock(msgChain->tempList);
+	return 0;
+}
+
+
+//for getter
+QcMessage* qc_msgchain_gettemp(QcMsgChain *msgChain)
+{
+	QcMessage *message = NULL;
+	qc_list_w_lock(msgChain->tempList);
+	message = qc_list_pophead(msgChain->tempList);
+	qc_list_w_unlock(msgChain->tempList);
+
+	return message;
 }

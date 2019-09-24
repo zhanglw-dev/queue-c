@@ -1,5 +1,5 @@
 
-#include "qc_msg_queue.h"
+#include "qc_mqueue.h"
 #include "qc_message.h"
 #include "qc_log.h"
 #include "qc_error.h"
@@ -11,6 +11,7 @@ const int message_num = 100000;
 const char *buff = "hello queue!";
 
 #define THREAD_NUM 10
+
 
 
 void* putroutine(void *arg){

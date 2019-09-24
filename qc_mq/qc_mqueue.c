@@ -1,5 +1,5 @@
 #include "qc_prelude.h"
-#include "qc_msg_queue.h"
+#include "qc_mqueue.h"
 #include "qc_log.h"
 #include "qc_list.h"
 #include "qc_error.h"

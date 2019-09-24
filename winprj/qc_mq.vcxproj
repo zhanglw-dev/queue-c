@@ -122,9 +122,9 @@
     <ClCompile Include="..\qc_mq\qc_getter.c" />
     <ClCompile Include="..\qc_mq\qc_getter_list.c" />
     <ClCompile Include="..\qc_mq\qc_message.c" />
+    <ClCompile Include="..\qc_mq\qc_mqueue.c" />
     <ClCompile Include="..\qc_mq\qc_msg_bucket.c" />
     <ClCompile Include="..\qc_mq\qc_msg_chain.c" />
-    <ClCompile Include="..\qc_mq\qc_msg_queue.c" />
     <ClCompile Include="..\qc_mq\qc_putter.c" />
     <ClCompile Include="..\qc_mq\qc_putter_chain.c" />
     <ClCompile Include="..\qc_mq\qc_put_bucket.c" />
@@ -133,9 +133,9 @@
     <ClInclude Include="..\qc_mq\qc_getter.h" />
     <ClInclude Include="..\qc_mq\qc_getter_list.h" />
     <ClInclude Include="..\qc_mq\qc_message.h" />
+    <ClInclude Include="..\qc_mq\qc_mqueue.h" />
     <ClInclude Include="..\qc_mq\qc_msg_bucket.h" />
     <ClInclude Include="..\qc_mq\qc_msg_chain.h" />
-    <ClInclude Include="..\qc_mq\qc_msg_queue.h" />
     <ClInclude Include="..\qc_mq\qc_putter.h" />
     <ClInclude Include="..\qc_mq\qc_putter_chain.h" />
     <ClInclude Include="..\qc_mq\qc_put_bucket.h" />

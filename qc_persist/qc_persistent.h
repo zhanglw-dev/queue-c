@@ -2,7 +2,7 @@
 #define H_QC_PERSISTENT
 
 #include "qc_message.h"
-#include "qc_msg_queue.h"
+#include "qc_mqueue.h"
 #include "qc_error.h"
 
 

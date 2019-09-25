@@ -95,7 +95,7 @@ unsigned int qc_queue_msgcount(QcQueue *queue){
 }
 
 
-int qc_queue_msgput(QcQueue *queue, QcMessage *message, int sec, QcErr *err){
+int qc_queue_msgput(QcQueue *queue, QcMessage *message, int msec, QcErr *err){
 
 	if(NULL == queue){
 		qc_seterr(err, QC_ERR_BADPARAM, "invalid input parameter, QcQueue* is NULL.");
@@ -148,7 +148,7 @@ put_loop:
 			qc_putterchain_push(queue->putterChain, putter);
 
 			qc_thread_mutex_unlock(queue->quelock);
-			int ret = qc_thread_cond_timedwait(putter->cond, putter->condlock, sec);
+			int ret = qc_thread_cond_timedwait(putter->cond, putter->condlock, msec);
 			
 			if(QC_TIMEOUT == ret){
 				putter->is_timedout = 1;

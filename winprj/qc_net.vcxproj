@@ -118,22 +118,26 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\qc_net\qc_client.c" />
-    <ClCompile Include="..\qc_net\qc_consumer.c" />
-    <ClCompile Include="..\qc_net\qc_producer.c" />
+    <ClCompile Include="..\qc_net\qc_cli_pubsub.c" />
+    <ClCompile Include="..\qc_net\qc_cli_queue.c" />
+    <ClCompile Include="..\qc_net\qc_hdl_pubsub.c" />
+    <ClCompile Include="..\qc_net\qc_hdl_queue.c" />
     <ClCompile Include="..\qc_net\qc_protocol.c" />
-    <ClCompile Include="..\qc_net\qc_publisher.c" />
+    <ClCompile Include="..\qc_net\qc_svc_pubsub.c" />
+    <ClCompile Include="..\qc_net\qc_svc_queue.c" />
+    <ClCompile Include="..\qc_net\qc_client.c" />
     <ClCompile Include="..\qc_net\qc_server.c" />
-    <ClCompile Include="..\qc_net\qc_subscriber.c" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\qc_net\qc_client.h" />
-    <ClInclude Include="..\qc_net\qc_consumer.h" />
-    <ClInclude Include="..\qc_net\qc_producer.h" />
+    <ClInclude Include="..\qc_net\qc_cli_pubsub.h" />
+    <ClInclude Include="..\qc_net\qc_cli_queue.h" />
+    <ClInclude Include="..\qc_net\qc_hdl_pubsub.h" />
+    <ClInclude Include="..\qc_net\qc_hdl_queue.h" />
     <ClInclude Include="..\qc_net\qc_protocol.h" />
-    <ClInclude Include="..\qc_net\qc_publisher.h" />
+    <ClInclude Include="..\qc_net\qc_svc_pubsub.h" />
+    <ClInclude Include="..\qc_net\qc_svc_queue.h" />
+    <ClInclude Include="..\qc_net\qc_client.h" />
     <ClInclude Include="..\qc_net\qc_server.h" />
-    <ClInclude Include="..\qc_net\qc_subscriber.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

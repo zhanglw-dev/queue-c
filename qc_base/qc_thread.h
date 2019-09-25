@@ -72,7 +72,7 @@ int qc_thread_cond_destroy(QcCond *cond);
 
 int qc_thread_cond_wait(QcCond *cond, QcCondLock *condlock);
 
-int qc_thread_cond_timedwait(QcCond *cond, QcCondLock *condlock, int sec);
+int qc_thread_cond_timedwait(QcCond *cond, QcCondLock *condlock, int msec);
 
 int qc_thread_cond_signal(QcCond *cond);
 

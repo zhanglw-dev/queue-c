@@ -243,9 +243,9 @@ int qc_thread_cond_wait(QcCond *cond, QcCondLock *condlock)
 }
 
 
-int qc_thread_cond_timedwait(QcCond *cond, QcCondLock *condlock, int nsec)
+int qc_thread_cond_timedwait(QcCond *cond, QcCondLock *condlock, int msec)
 {
-	if (!SleepConditionVariableCS(&cond->cond_hdl, &condlock->lock_hdl, nsec)) {
+	if (!SleepConditionVariableCS(&cond->cond_hdl, &condlock->lock_hdl, msec)) {
 		if (ERROR_TIMEOUT == GetLastError())
 			return QC_TIMEOUT;
 		return -1;

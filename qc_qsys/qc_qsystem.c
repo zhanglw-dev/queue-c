@@ -2,13 +2,17 @@
 #include "qc_qmanager.h"
 
 
+
 struct __QcQSystem {
 	QcQueManager *qManager;
 };
 
 
+QcQSystem *globalQSystem;
 
-QcQSystem* qc_qsys_create()
+
+
+QcQSystem* qc_qsys_init()
 {
 	QcQueManager *qManager = (QcQueManager*)malloc(sizeof(QcQueManager));
 	qc_assert(qManager);
@@ -22,17 +26,23 @@ QcQSystem* qc_qsys_create()
 }
 
 
-QcQSystem* qc_qsys_create_byconfig(const char* config_file, QcErr *err)
+QcQSystem* qc_qsys_init_byconfig(const char* config_file, QcErr *err)
 {
 	//
 	return NULL;
 }
 
 
-void qc_qsys_destory(QcQSystem *qSys)
+void qc_qsys_release(QcQSystem *qSys)
 {
 	qc_qmng_destory(qSys->qManager);
 	qc_free(qSys);
+}
+
+
+QcQSystem* getQSystem()
+{
+	return globalQSystem;
 }
 
 

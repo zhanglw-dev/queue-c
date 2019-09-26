@@ -18,6 +18,28 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\qc_net\qc_client.c" />
+    <ClCompile Include="..\qc_net\qc_protocol.c" />
+    <ClCompile Include="..\qc_net\qc_pubsub_cli.c" />
+    <ClCompile Include="..\qc_net\qc_pubsub_hdl.c" />
+    <ClCompile Include="..\qc_net\qc_pubsub_svc.c" />
+    <ClCompile Include="..\qc_net\qc_queue_cli.c" />
+    <ClCompile Include="..\qc_net\qc_queue_hdl.c" />
+    <ClCompile Include="..\qc_net\qc_queue_svc.c" />
+    <ClCompile Include="..\qc_net\qc_server.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\qc_net\qc_client.h" />
+    <ClInclude Include="..\qc_net\qc_protocol.h" />
+    <ClInclude Include="..\qc_net\qc_pubsub_cli.h" />
+    <ClInclude Include="..\qc_net\qc_pubsub_hdl.h" />
+    <ClInclude Include="..\qc_net\qc_pubsub_svc.h" />
+    <ClInclude Include="..\qc_net\qc_queue_cli.h" />
+    <ClInclude Include="..\qc_net\qc_queue_hdl.h" />
+    <ClInclude Include="..\qc_net\qc_queue_svc.h" />
+    <ClInclude Include="..\qc_net\qc_server.h" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
     <ProjectGuid>{FEB1584C-1C43-421A-AE2D-87153E85E8DA}</ProjectGuid>
@@ -79,6 +101,7 @@
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>../qc_mq;../qc_persist;../qc_base;../qc_qsys</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -117,28 +140,6 @@
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
   </ItemDefinitionGroup>
-  <ItemGroup>
-    <ClCompile Include="..\qc_net\qc_cli_pubsub.c" />
-    <ClCompile Include="..\qc_net\qc_cli_queue.c" />
-    <ClCompile Include="..\qc_net\qc_hdl_pubsub.c" />
-    <ClCompile Include="..\qc_net\qc_hdl_queue.c" />
-    <ClCompile Include="..\qc_net\qc_protocol.c" />
-    <ClCompile Include="..\qc_net\qc_svc_pubsub.c" />
-    <ClCompile Include="..\qc_net\qc_svc_queue.c" />
-    <ClCompile Include="..\qc_net\qc_client.c" />
-    <ClCompile Include="..\qc_net\qc_server.c" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="..\qc_net\qc_cli_pubsub.h" />
-    <ClInclude Include="..\qc_net\qc_cli_queue.h" />
-    <ClInclude Include="..\qc_net\qc_hdl_pubsub.h" />
-    <ClInclude Include="..\qc_net\qc_hdl_queue.h" />
-    <ClInclude Include="..\qc_net\qc_protocol.h" />
-    <ClInclude Include="..\qc_net\qc_svc_pubsub.h" />
-    <ClInclude Include="..\qc_net\qc_svc_queue.h" />
-    <ClInclude Include="..\qc_net\qc_client.h" />
-    <ClInclude Include="..\qc_net\qc_server.h" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

@@ -21,9 +21,6 @@
   <ItemGroup>
     <ClCompile Include="..\qc_net\qc_client.c" />
     <ClCompile Include="..\qc_net\qc_protocol.c" />
-    <ClCompile Include="..\qc_net\qc_pubsub_cli.c" />
-    <ClCompile Include="..\qc_net\qc_pubsub_hdl.c" />
-    <ClCompile Include="..\qc_net\qc_pubsub_svc.c" />
     <ClCompile Include="..\qc_net\qc_queue_cli.c" />
     <ClCompile Include="..\qc_net\qc_queue_hdl.c" />
     <ClCompile Include="..\qc_net\qc_queue_svc.c" />
@@ -32,9 +29,6 @@
   <ItemGroup>
     <ClInclude Include="..\qc_net\qc_client.h" />
     <ClInclude Include="..\qc_net\qc_protocol.h" />
-    <ClInclude Include="..\qc_net\qc_pubsub_cli.h" />
-    <ClInclude Include="..\qc_net\qc_pubsub_hdl.h" />
-    <ClInclude Include="..\qc_net\qc_pubsub_svc.h" />
     <ClInclude Include="..\qc_net\qc_queue_cli.h" />
     <ClInclude Include="..\qc_net\qc_queue_hdl.h" />
     <ClInclude Include="..\qc_net\qc_queue_svc.h" />
@@ -100,7 +94,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>../qc_mq;../qc_persist;../qc_base;../qc_qsys</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../qc_mq;../qc_persist;../qc_art;../qc_qsys</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
   </ItemDefinitionGroup>

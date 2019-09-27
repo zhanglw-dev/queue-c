@@ -11,8 +11,8 @@ struct __QcQueueSvc {
 	char svc_ip[256];
 	int svc_port;
 
-	QcThread *listen_thread;
-	QcList *procList;
+	QcThread *listenThread;
+	QcList *workThreadList;
 	QcProduceHdl *produceHdl;
 	QcConsumeHdl *consumeHdl;
 };

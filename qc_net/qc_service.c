@@ -1,4 +1,4 @@
-#include "qc_queue_svc.h"
+#include "qc_service.h"
 #include "qc_protocol.h"
 
 
@@ -19,32 +19,44 @@ typedef struct __WorkParam WorkParam;
 
 
 
-void* process_thread_routine(void *param)
+
+int process_produce()
+{
+	//QcProduceHdl *produceHdl = qc_producehdl_create(workParam->queueSvc->qSystem, &err);
+}
+
+
+int process_consume()
+{
+	//QcConsumeHdl *consumeHdl = qc_consumehdl_create(workParam->queueSvc->qSystem, &err);
+
+}
+
+
+void* work_thread_routine(void *param)
 {
 	WorkParam *workParam = param;
 	QcSocket *socket = workParam->socket;
+	QcErr err;
 
-	QcProduceHdl *produceHdl = workParam->queueSvc->produceHdl;
-	QcConsumeHdl *consumeHdl = workParam->queueSvc->consumeHdl;
 
 	int ret;
-	QcErr err;
-	while (1) {
-		//ret = qc_tcp_recvall(socket, char *recvbuf, int len)
-		//
-		//parse head
-		//read body
-		int client_type;
-		if (client_type == QC_TYPE_PRODUCER) {
-			//ret = qc_producehdl_put(QcProduceHdl *produceHdl, const char* qname, QcMessage *message, int msec, &err);
-		}
-		else if (client_type == QC_TYPE_CONSUMER) {
-			//QcMessage* qc_consumehdl_get(QcConsumeHdl *consumeHdl, const char* qname, int msec, QcErr *err);
-		}
+	//QcErr err;
 
-		//Reply to socket
-		
-	}
+	//ret = qc_tcp_recvall(socket, char *recvbuf, int len)
+	//
+	//parse head
+	//read body
+	//int client_type;
+	//if (client_type == QC_TYPE_PRODUCER) {
+		//ret = qc_producehdl_put(QcProduceHdl *produceHdl, const char* qname, QcMessage *message, int msec, &err);
+	//}
+	//else if (client_type == QC_TYPE_CONSUMER) {
+		//QcMessage* qc_consumehdl_get(QcConsumeHdl *consumeHdl, const char* qname, int msec, QcErr *err);
+	//}
+
+	//process_produce()
+	//process_consume()
 }
 
 
@@ -59,7 +71,7 @@ void* listen_thread_routine(void *param)
 		WorkParam *workParam = (WorkParam*)malloc(sizeof(WorkParam));
 		workParam->queueSvc = listenParam->queueSvc;
 		workParam->socket = socket;
-		QcThread* thread = qc_thread_create(process_thread_routine, (void*)workParam);
+		QcThread* thread = qc_thread_create(work_thread_routine, (void*)workParam);
 
 		qc_list_inserttail(listenParam->queueSvc->workThreadList, thread);
 	}
@@ -74,17 +86,13 @@ QcQueueSvc* qc_queuesvc_create(const char* ip, int port, QcQSystem *qSystem, QcE
 	qc_assert(queueSvc);
 	memset(queueSvc, 0, sizeof(QcQueueSvc));
 
-	QcProduceHdl *produceHdl = qc_producehdl_create(qSystem, err);
-	QcConsumeHdl *consumeHdl = qc_consumehdl_create(qSystem, err);
-
 	QcList *procList = qc_list_create(1);
 
 	strcpy(queueSvc->svc_ip, ip);
 	queueSvc->svc_port = port;
-	queueSvc->consumeHdl = consumeHdl;
-	queueSvc->produceHdl = produceHdl;
 	queueSvc->workThreadList = procList;
 	queueSvc->listenThread = NULL;
+	queueSvc->qSystem = qSystem;
 
 	return queueSvc;
 }

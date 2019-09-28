@@ -1,10 +1,11 @@
-#ifndef QC_QUEUE_SVC_H
-#define QC_QUEUE_SVC_H
+#ifndef QC_SERVICE_H
+#define QC_SERVICE_H
 
 #include "qc_list.h"
 #include "qc_thread.h"
 #include "qc_error.h"
-#include "qc_queue_hdl.h"
+#include "qc_consume_hdl.h"
+#include "qc_produce_hdl.h"
 
 
 struct __QcQueueSvc {
@@ -13,8 +14,8 @@ struct __QcQueueSvc {
 
 	QcThread *listenThread;
 	QcList *workThreadList;
-	QcProduceHdl *produceHdl;
-	QcConsumeHdl *consumeHdl;
+
+	QcQSystem *qSystem;
 };
 
 
@@ -30,4 +31,4 @@ int qc_queuesvc_start(QcQueueSvc *queueSvc, QcErr *err);
 void qc_queuesvc_stop(QcQueueSvc *queueSvc);
 
 
-#endif /*QC_QUEUE_SVC_H*/
+#endif /*QC_SERVICE_H*/

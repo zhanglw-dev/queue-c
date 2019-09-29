@@ -20,15 +20,15 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\qc_net\qc_client.c" />
-    <ClCompile Include="..\qc_net\qc_consume_hdl.c" />
-    <ClCompile Include="..\qc_net\qc_produce_hdl.c" />
+    <ClCompile Include="..\qc_net\qc_consumer_proc.c" />
+    <ClCompile Include="..\qc_net\qc_producer_proc.c" />
     <ClCompile Include="..\qc_net\qc_protocol.c" />
     <ClCompile Include="..\qc_net\qc_service.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\qc_net\qc_client.h" />
-    <ClInclude Include="..\qc_net\qc_consume_hdl.h" />
-    <ClInclude Include="..\qc_net\qc_produce_hdl.h" />
+    <ClInclude Include="..\qc_net\qc_consumer_proc.h" />
+    <ClInclude Include="..\qc_net\qc_producer_proc.h" />
     <ClInclude Include="..\qc_net\qc_protocol.h" />
     <ClInclude Include="..\qc_net\qc_service.h" />
   </ItemGroup>

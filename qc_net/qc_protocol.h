@@ -20,7 +20,7 @@ typedef struct {
 	unsigned short type;
 	unsigned short subtype;
 	unsigned int packsn;
-	unsigned int bodysize;
+	unsigned int body_len;
 	char reserve[16];
 }QcPrtclHead;
 
@@ -33,16 +33,19 @@ typedef struct {
 typedef struct {
 	int wait_msec;
 	unsigned short msg_prioriy;
+	unsigned int msg_len;
 }QcPrtclProduce;
 
 
 typedef struct {
 	int wait_msec;
+	//unsigned int msg_len;
 }QcPrtclConsume;
 
 
 typedef struct {
 	int result;
+	unsigned int msg_len;
 }QcPrtclReply;
 
 
@@ -51,6 +54,9 @@ typedef struct {
 
 void qc_prtcl_head_hton(QcPrtclHead *head);
 void qc_prtcl_head_ntoh(QcPrtclHead *head);
+
+void qc_prtcl_register_hton(QcPrtclRegister *regist);
+void qc_prtcl_register_ntoh(QcPrtclRegister *regist);
 
 void qc_prtcl_produce_hton(QcPrtclProduce *produce);
 void qc_prtcl_produce_ntoh(QcPrtclProduce *produce);

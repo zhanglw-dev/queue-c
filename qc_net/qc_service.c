@@ -1,5 +1,7 @@
 #include "qc_service.h"
 #include "qc_protocol.h"
+#include "qc_producer_proc.h"
+#include "qc_consumer_proc.h"
 
 
 struct __ListenParam {
@@ -19,44 +21,64 @@ typedef struct __WorkParam WorkParam;
 
 
 
-
-int process_produce()
-{
-	//QcProduceHdl *produceHdl = qc_producehdl_create(workParam->queueSvc->qSystem, &err);
-}
-
-
-int process_consume()
-{
-	//QcConsumeHdl *consumeHdl = qc_consumehdl_create(workParam->queueSvc->qSystem, &err);
-
-}
-
-
 void* work_thread_routine(void *param)
 {
+	int ret;
+	QcErr err;
+	char *msg_buff;
+	int msg_len = 0;
+	char *reply_buff;
 	WorkParam *workParam = param;
 	QcSocket *socket = workParam->socket;
-	QcErr err;
+	QcPrtclRegister *prtclRegister;
 
+	char* head_buff = NULL;
+	char *body_buff = NULL;
+	char qname[32];
 
-	int ret;
-	//QcErr err;
+	memset(qname, 0, sizeof(qname));
 
-	//ret = qc_tcp_recvall(socket, char *recvbuf, int len)
-	//
-	//parse head
-	//read body
-	//int client_type;
-	//if (client_type == QC_TYPE_PRODUCER) {
-		//ret = qc_producehdl_put(QcProduceHdl *produceHdl, const char* qname, QcMessage *message, int msec, &err);
-	//}
-	//else if (client_type == QC_TYPE_CONSUMER) {
-		//QcMessage* qc_consumehdl_get(QcConsumeHdl *consumeHdl, const char* qname, int msec, QcErr *err);
-	//}
+	int head_len = sizeof(QcPrtclHead);
+	head_buff = (char*)malloc(sizeof(QcPrtclHead));
 
-	//process_produce()
-	//process_consume()
+	QcPrtclReply *prtclReply = (char*)malloc(sizeof(QcPrtclReply));
+
+	while (1) {
+		ret = qc_tcp_recvall(socket, head_buff, head_len);
+		if (ret <= 0)
+			goto failed;
+
+		QcPrtclHead *prtclHead = head_buff;
+		qc_prtcl_head_ntoh(prtclHead);
+		int body_len = prtclHead->body_len;
+
+		body_buff = (char*)malloc(body_len);
+		body_len = prtclHead->body_len;
+		ret = qc_tcp_recvall(socket, body_buff, body_len);
+		if (ret <= 0)
+			goto failed;
+		
+		QcProducerProc producerProc;
+		QcConsumerProc consumerProc;
+
+		switch (prtclHead->type) {
+		case QC_TYPE_PRODUCER:
+			producerProc.qSystem = workParam->queueSvc->qSystem;
+			ret = qc_proc_producer(&producerProc, head_buff, &err);
+			if (ret < 0)
+				goto failed;
+			break;
+		case QC_TYPE_CONSUMER:
+			ret = qc_proc_consumer(&producerProc, head_buff, &err);
+			if (ret < 0)
+				goto failed;
+			break;
+		}
+	}
+
+failed:
+	if (head_buff) qc_free(head_buff);
+	if (body_buff) qc_free(body_buff);
 }
 
 
@@ -76,7 +98,6 @@ void* listen_thread_routine(void *param)
 		qc_list_inserttail(listenParam->queueSvc->workThreadList, thread);
 	}
 
-	//
 }
 
 

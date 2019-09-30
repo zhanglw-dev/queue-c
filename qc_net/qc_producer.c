@@ -1,71 +1,20 @@
-#include "qc_producer_proc.h"
+#include "qc_producer.h"
 #include "qc_socket.h"
 #include "qc_qsystem.h"
 #include "qc_protocol.h"
 
 
-/*
-QcProduceHdl* qc_producehdl_create(QcQSystem *qSystem, const char* qname, QcErr *err)
-{
-	QcProduceHdl *produceHdl = (QcProduceHdl*)malloc(sizeof(QcProduceHdl));
-	qc_assert(produceHdl);
 
-	produceHdl->qSystem = qSystem;
-	strcpy(produceHdl->qname, qname);
-
-	return produceHdl;
-}
-
-
-void qc_producehdl_destory(QcProduceHdl *produceHdl)
-{
-	qc_free(produceHdl);
-}
-
-
-int qc_producehdl_register(QcProduceHdl *produceHdl, char *prtcl_body, QcErr *err)
-{
-
-}
-
-
-int qc_producehdl_put(QcProduceHdl *produceHdl, char *prtcl_body, QcErr *err)
-{
-	int ret;
-
-	QcPrtclProduce* prtclProduce = prtcl_body;
-	qc_prtcl_produce_ntoh(prtclProduce);
-
-	unsigned short msg_prioriy = prtclProduce->msg_prioriy;
-	int wait_msec = prtclProduce->wait_msec;
-	unsigned int msg_len = prtclProduce->msg_len;
-
-	QcQueue *queue = qc_qsys_queue_get(produceHdl->qSystem, produceHdl->qname, err);
-	if (!queue)
-		return -1;
-
-	char *buff = prtcl_body + sizeof(QcPrtclProduce);
-	QcMessage *message = qc_message_create(buff, msg_len, 1);
-
-	ret = qc_queue_msgput(queue, message, wait_msec, err);
-	if (0 != ret)
-		return -1;
-
-	return 0;
-}
-*/
-
-
-int qc_proc_producer(QcProducerProc *producerProc, char *prtcl_buff, QcErr *err)
+int qc_proc_producer(QcProducerHdl *producerHdl, char *prtcl_buff, QcErr *err)
 {
 	int ret;
 	char *head_buff;
 	char *body_buff;
-	QcSocket *socket = producerProc->socket;
+	QcSocket *socket = producerHdl->socket;
 
 	QcPrtclReply *prtclReply = (char*)malloc(sizeof(QcPrtclReply));
 	QcPrtclRegister* prtclResiter = prtcl_buff + sizeof(QcPrtclRegister);
-	strcpy(producerProc->qname, prtclResiter->qname);
+	strcpy(producerHdl->qname, prtclResiter->qname);
 
 
 	QcPrtclHead *prtclHead = prtcl_buff;
@@ -117,7 +66,7 @@ int qc_proc_producer(QcProducerProc *producerProc, char *prtcl_buff, QcErr *err)
 			int wait_msec = prtclProduce->wait_msec;
 			unsigned int msg_len = prtclProduce->msg_len;
 
-			QcQueue *queue = qc_qsys_queue_get(producerProc->qSystem, producerProc->qname, err);
+			QcQueue *queue = qc_qsys_queue_get(producerHdl->qSystem, producerHdl->qname, err);
 			if (!queue)
 				goto failed;
 

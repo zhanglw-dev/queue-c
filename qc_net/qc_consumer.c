@@ -1,62 +1,21 @@
-#include "qc_consumer_proc.h"
+#include "qc_consumer.h"
 #include "qc_socket.h"
 #include "qc_qsystem.h"
 #include "qc_protocol.h"
 
 
-/*
-QcConsumeHdl* qc_consumehdl_create(QcQSystem *qSystem, const char* qname, QcErr *err)
-{
-	QcConsumeHdl *consumeHdl = (QcConsumeHdl*)malloc(sizeof(QcConsumeHdl));
-	qc_assert(consumeHdl);
 
-	consumeHdl->qSystem = qSystem;
-	strcpy(consumeHdl->qname, qname);
-
-	return consumeHdl;
-}
-
-
-void qc_consumehdl_destory(QcConsumeHdl *consumeHdl)
-{
-	qc_free(consumeHdl);
-}
-
-
-int qc_consumehdl_get(QcConsumeHdl *consumeHdl, char *prtcl_body, int body_len, char **out_buff, int *bufflen, QcErr *err)
-{
-	int ret;
-	QcPrtclConsume *prtclConsume = prtcl_body;
-	qc_prtcl_consume_ntoh(prtclConsume);
-
-	QcQueue *queue = qc_qsys_queue_get(consumeHdl->qSystem, consumeHdl->qname, err);
-	if (!queue)
-		return -1;
-
-	QcMessage* message = qc_queue_msgget(queue, prtclConsume->wait_msec, err);
-	if (!message)
-		return -1;
-
-	int msg_len = qc_message_bufflen(message);
-	*out_buff = qc_message_buff(message);
-
-	*bufflen = msg_len;
-	return 0;
-}
-*/
-
-
-int qc_proc_consumer(QcConsumerProc *consumerProc, char *prtcl_buff, QcErr *err)
+int qc_proc_consumer(QcConsumerHdl *consumerHdl, char *prtcl_buff, QcErr *err)
 {
 	int ret;
 	char *head_buff;
 	char *body_buff;
 	int msg_len;
-	QcSocket *socket = consumerProc->socket;
+	QcSocket *socket = consumerHdl->socket;
 
 	QcPrtclReply *prtclReply = (char*)malloc(sizeof(QcPrtclReply));
 	QcPrtclRegister* prtclResiter = prtcl_buff + sizeof(QcPrtclRegister);
-	strcpy(consumerProc->qname, prtclResiter->qname);
+	strcpy(consumerHdl->qname, prtclResiter->qname);
 
 
 	QcPrtclHead *prtclHead = prtcl_buff;
@@ -106,7 +65,7 @@ int qc_proc_consumer(QcConsumerProc *consumerProc, char *prtcl_buff, QcErr *err)
 
 			int wait_msec = prtclConsume->wait_msec;
 
-			QcQueue *queue = qc_qsys_queue_get(consumerProc->qSystem, consumerProc->qname, err);
+			QcQueue *queue = qc_qsys_queue_get(consumerHdl->qSystem, consumerHdl->qname, err);
 			if (!queue)
 				goto failed;
 

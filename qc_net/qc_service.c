@@ -1,7 +1,7 @@
 #include "qc_service.h"
 #include "qc_protocol.h"
-#include "qc_producer_proc.h"
-#include "qc_consumer_proc.h"
+#include "qc_producer.h"
+#include "qc_consumer.h"
 
 
 struct __ListenParam {
@@ -58,18 +58,19 @@ void* work_thread_routine(void *param)
 		if (ret <= 0)
 			goto failed;
 		
-		QcProducerProc producerProc;
-		QcConsumerProc consumerProc;
+		QcProducerHdl producerHdl;
+		QcConsumerHdl consumerHdl;
 
 		switch (prtclHead->type) {
 		case QC_TYPE_PRODUCER:
-			producerProc.qSystem = workParam->queueSvc->qSystem;
-			ret = qc_proc_producer(&producerProc, head_buff, &err);
+			producerHdl.qSystem = workParam->queueSvc->qSystem;
+			ret = qc_proc_producer(&producerHdl, head_buff, &err);
 			if (ret < 0)
 				goto failed;
 			break;
 		case QC_TYPE_CONSUMER:
-			ret = qc_proc_consumer(&producerProc, head_buff, &err);
+			producerHdl.qSystem = workParam->queueSvc->qSystem;
+			ret = qc_proc_consumer(&consumerHdl, head_buff, &err);
 			if (ret < 0)
 				goto failed;
 			break;

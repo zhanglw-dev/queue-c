@@ -4,8 +4,8 @@
 #include "qc_list.h"
 #include "qc_thread.h"
 #include "qc_error.h"
-#include "qc_producer_proc.h"
-#include "qc_consumer_proc.h"
+#include "qc_producer.h"
+#include "qc_consumer.h"
 
 
 struct __QcQueueSvc {

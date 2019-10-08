@@ -386,7 +386,7 @@ unsigned int qc_bincompare( void *str1, int str1_len, void *str2, int str2_len )
  */
 int qc_strcompare( void *str1, void *str2 )
 {
-#ifdef IS_MS_WINDOWS
+#ifdef IS_WINDOWS
 	return _stricmp((char *)str1, (char *)str2);
 #else
 	/*return stricmp((char *)str1, (char *)str2);*/

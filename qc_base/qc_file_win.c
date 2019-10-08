@@ -255,20 +255,12 @@ int qc_file_truncate(const char *pathname, off_t length)
 		CloseHandle(hdl);
 		return -1;
 	}
-	/*
-	if (!SetFileValidData(hdl, length)) {
-		DWORD r = GetLastError();
-		CloseHandle(hdl);
-		return -1;
-	}
-	*/
 
 	if (!SetEndOfFile(hdl)) {
 		DWORD r = GetLastError();
 		CloseHandle(hdl);
 		return -1;
 	}
-
 
 	CloseHandle(hdl);
 

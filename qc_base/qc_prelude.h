@@ -1,5 +1,5 @@
-#ifndef QCLIB_PRELUDE_H
-#define QCLIB_PRELUDE_H
+#ifndef QC_PRELUDE_H
+#define QC_PRELUDE_H
 
 
 #include <stdarg.h>
@@ -14,10 +14,8 @@
 #include <ctype.h>
 
 
-#if (WINDOWS|_WINDOWS|WIN32|_WIN32|WIN64|_WIN64)
+#if (IS_WINDOWS|WINDOWS|_WINDOWS|WIN32|_WIN32|WIN64|_WIN64)
 
-    #define IS_MS_WINDOWS
-    //#include <windows.h>
     #include <WinSock2.h>
     #include <Ws2tcpip.h>
     #include <process.h>
@@ -66,7 +64,6 @@
     #ifndef INFTIM
         #define INFTIM (-1)
     #endif
-
     #ifndef INFINITE
         #define INFINITE (-1)
     #endif
@@ -77,27 +74,14 @@
 #endif
 
 
-#define QC_INVALID_INT  -99
+//#define QC_INVALID_INT  -99
 #define QC_TIMEOUT -33
 #define QC_FULLED  -100
 
-/*
+
 typedef size_t qc_size_t;
 #define qc_off_t off_t
 
-#define THREADSAFE_YES 1
-#define THREADSAFE_NO  0
-
-typedef void *(*qc_start_routine)(void *);
-typedef void (*qc_destruct_routine)(void *);
-
-typedef unsigned int (*HASHFUNC)(void *key, unsigned int bucket_num);
-typedef int  (*COMPAREFUNC)(void *key1, void *key2);
-typedef void (*DESTROYFUNC)(void *data);
-typedef void *(*COPYFUNC)(void *data);
-typedef unsigned int (*GETKEYFUNC)(void *data, unsigned int key_index);
-typedef void (*TRAVERSEFUNC)(void *data);
-*/
 
 #define qc_stderr(fmt, ...) \
                     { \
@@ -124,4 +108,4 @@ typedef void (*TRAVERSEFUNC)(void *data);
                         }
 
 
-#endif /*QCLIB_PRELUDE_H*/
+#endif /*QC_PRELUDE_H*/

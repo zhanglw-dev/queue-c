@@ -1,5 +1,5 @@
-#ifndef QCLIB_FILE_H
-#define QCLIB_FILE_H
+#ifndef QC_FILE_H
+#define QC_FILE_H
 
 
 #include "qc_prelude.h"
@@ -58,5 +58,4 @@ int qc_dir_rename(char *dirname, char *newname);
 #endif
 
 
-#endif  /*QCLIB_FILE_H*/
-
+#endif  /*QC_FILE_H*/

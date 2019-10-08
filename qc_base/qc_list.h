@@ -1,10 +1,6 @@
 #ifndef QCLIB_LIST_H
 #define QCLIB_LIST_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 
 /*////////////////////////////////////////////////////////////////////////////////
 //                               Static List
@@ -13,25 +9,30 @@ extern "C" {
 #pragma pack(push)
 #pragma pack(1)
 
-	typedef struct {
-		int previous;
-		int next;
-	}_StaticCell;
+typedef struct {
+	int previous;
+	int next;
+}_StaticCell;
 
 
-	struct __QcStaticList {
-		int head;
-		int tail;
-		int limit;
-		int num;
-		void *buff;
-	};
+struct __QcStaticList {
+	int head;
+	int tail;
+	int limit;
+	int num;
+	void *buff;
+};
 
 #pragma pack(pop)
 
 
+#define QC_INVALID_INT  -99
 typedef struct __QcStaticList QcStaticList;
 
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 int qc_staticlist_init(QcStaticList *staticList, int limit);
 void qc_staticlist_release(QcStaticList *staticList);
@@ -67,8 +68,6 @@ typedef int (*QC_LIST_COMPAREFUNC)(void *data1, void *data2);
 QcList* qc_list_create(int with_rwlock);
 void qc_list_destroy(QcList *list);
 
-unsigned int qc_list_count(QcList *list);
-
 int qc_list_inserthead(QcList *list, void *data);
 int qc_list_inserttail(QcList *list, void *data);
 int qc_list_inserttail2(QcList *list, void *data, QcListEntry **pp_entry);
@@ -80,10 +79,10 @@ void  qc_list_enumbegin(QcList *list);
 QcListEntry* qc_list_enumentry(QcList *list);
 
 void* qc_list_data(QcListEntry *entry);
+unsigned int qc_list_count(QcList *list);
+
 int qc_list_removeentry(QcList *list, QcListEntry *entry);
-
 int qc_list_removefirst(QcList *list, void *data);
-
 int qc_list_insertsort(QcList *list, QC_LIST_COMPAREFUNC CompareFunc);
 
 void qc_list_w_lock(QcList *list);

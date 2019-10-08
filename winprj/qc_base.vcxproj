@@ -19,27 +19,27 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\qc_art\qc_error.c" />
-    <ClCompile Include="..\qc_art\qc_file_win.c" />
-    <ClCompile Include="..\qc_art\qc_hash.c" />
-    <ClCompile Include="..\qc_art\qc_list.c" />
-    <ClCompile Include="..\qc_art\qc_log.c" />
-    <ClCompile Include="..\qc_art\qc_pool.c" />
-    <ClCompile Include="..\qc_art\qc_queue.c" />
-    <ClCompile Include="..\qc_art\qc_socket_win.c" />
-    <ClCompile Include="..\qc_art\qc_thread_win.c" />
+    <ClCompile Include="..\qc_base\qc_error.c" />
+    <ClCompile Include="..\qc_base\qc_file_win.c" />
+    <ClCompile Include="..\qc_base\qc_hash.c" />
+    <ClCompile Include="..\qc_base\qc_list.c" />
+    <ClCompile Include="..\qc_base\qc_log.c" />
+    <ClCompile Include="..\qc_base\qc_pool.c" />
+    <ClCompile Include="..\qc_base\qc_queue.c" />
+    <ClCompile Include="..\qc_base\qc_socket_win.c" />
+    <ClCompile Include="..\qc_base\qc_thread_win.c" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\qc_art\qc_error.h" />
-    <ClInclude Include="..\qc_art\qc_file.h" />
-    <ClInclude Include="..\qc_art\qc_hash.h" />
-    <ClInclude Include="..\qc_art\qc_list.h" />
-    <ClInclude Include="..\qc_art\qc_log.h" />
-    <ClInclude Include="..\qc_art\qc_pool.h" />
-    <ClInclude Include="..\qc_art\qc_prelude.h" />
-    <ClInclude Include="..\qc_art\qc_queue.h" />
-    <ClInclude Include="..\qc_art\qc_socket.h" />
-    <ClInclude Include="..\qc_art\qc_thread.h" />
+    <ClInclude Include="..\qc_base\qc_error.h" />
+    <ClInclude Include="..\qc_base\qc_file.h" />
+    <ClInclude Include="..\qc_base\qc_hash.h" />
+    <ClInclude Include="..\qc_base\qc_list.h" />
+    <ClInclude Include="..\qc_base\qc_log.h" />
+    <ClInclude Include="..\qc_base\qc_pool.h" />
+    <ClInclude Include="..\qc_base\qc_prelude.h" />
+    <ClInclude Include="..\qc_base\qc_queue.h" />
+    <ClInclude Include="..\qc_base\qc_socket.h" />
+    <ClInclude Include="..\qc_base\qc_thread.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{96CA49C5-802B-41C3-8AB4-7A27D640F485}</ProjectGuid>
@@ -114,7 +114,7 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>_DEBUG;_LIB;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>IS_WINDOWS;_DEBUG;_LIB;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
     </ClCompile>
     <Link>

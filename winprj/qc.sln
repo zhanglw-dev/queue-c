@@ -5,7 +5,6 @@ VisualStudioVersion = 15.0.28307.572
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "test", "test.vcxproj", "{32E7A56E-A055-4B7A-A60A-2AF7090BD890}"
 	ProjectSection(ProjectDependencies) = postProject
-		{96CA49C5-802B-41C3-8AB4-7A27D640F485} = {96CA49C5-802B-41C3-8AB4-7A27D640F485}
 		{682497FB-BF1B-47C8-86AA-D8BFAFA6116C} = {682497FB-BF1B-47C8-86AA-D8BFAFA6116C}
 	EndProjectSection
 EndProject
@@ -17,7 +16,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "qc_net", "qc_net.vcxproj", 
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "qc_qdb", "qc_qdb.vcxproj", "{24196AEC-24F1-4503-97BB-D9B64AEF5C16}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "qc_art", "qc_art.vcxproj", "{96CA49C5-802B-41C3-8AB4-7A27D640F485}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "qc_base", "qc_base.vcxproj", "{96CA49C5-802B-41C3-8AB4-7A27D640F485}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

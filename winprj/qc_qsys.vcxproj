@@ -78,7 +78,8 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>../qc_art;../qc_mq;../qc_persist</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../qc_base;../qc_mq;../qc_persist</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>IS_WINDOWS;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">

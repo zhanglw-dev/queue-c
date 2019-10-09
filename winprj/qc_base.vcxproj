@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\qc_base\cjson.c" />
     <ClCompile Include="..\qc_base\qc_error.c" />
     <ClCompile Include="..\qc_base\qc_file_win.c" />
     <ClCompile Include="..\qc_base\qc_hash.c" />
@@ -30,6 +31,7 @@
     <ClCompile Include="..\qc_base\qc_thread_win.c" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\qc_base\cjson.h" />
     <ClInclude Include="..\qc_base\qc_error.h" />
     <ClInclude Include="..\qc_base\qc_file.h" />
     <ClInclude Include="..\qc_base\qc_hash.h" />

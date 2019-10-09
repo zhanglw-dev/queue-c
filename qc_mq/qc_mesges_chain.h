@@ -6,8 +6,13 @@
 #include "qc_list.h"
 #include "qc_pool.h"
 #include "qc_thread.h"
-#include "qc_msg_bucket.h"
 
+
+
+typedef struct {
+	QcList *msgList;
+	int pop_counter;
+}QcMsgBucket;
 
 
 typedef struct{
@@ -27,6 +32,12 @@ typedef struct{
 extern "C" {
 #endif
 
+
+QcMsgBucket* qc_msgbucket_create();
+
+int qc_msgbucket_destroy(QcMsgBucket *msgBucket);
+
+//-------------------------------------------------------------------------------------
 
 QcMsgChain* qc_msgchain_create(int count_limit, int priority_max);
 

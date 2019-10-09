@@ -3,9 +3,9 @@
 #include "qc_log.h"
 #include "qc_list.h"
 #include "qc_error.h"
-#include "qc_getter_list.h"
-#include "qc_putter_chain.h"
-#include "qc_msg_chain.h"
+#include "qc_getters_list.h"
+#include "qc_putters_chain.h"
+#include "qc_mesges_chain.h"
 #include "qc_message.h"
 
 
@@ -14,10 +14,10 @@ struct __QcQueue{
 	QcMutex *quelock;
 
 	unsigned int limit;
-	QcMsgChain *messageChain;
+	QcMsgChain *mesgesChain;
 
-	QcGetterList *getterList;
-	QcPutterChain *putterChain;
+	QcGettersList *gettersList;
+	QcPuttersChain *puttersChain;
 };
 
 
@@ -45,20 +45,20 @@ QcQueue* qc_queue_create(unsigned int limit, unsigned int priority_max, QcErr *e
 		goto failed;
 	}
 
-	queue->messageChain = qc_msgchain_create(limit, priority_max);
-	if(NULL == queue->messageChain){
-		qc_seterr(err, QC_ERR_RUNTIME, "create messageChain for queue failed.");
+	queue->mesgesChain = qc_msgchain_create(limit, priority_max);
+	if(NULL == queue->mesgesChain){
+		qc_seterr(err, QC_ERR_RUNTIME, "create mesgesChain for queue failed.");
 		goto failed;
 	}
 
-	queue->getterList = qc_getterlist_create();
-	if(NULL == queue->getterList){
-		qc_seterr(err, QC_ERR_RUNTIME, "create getterList for queue failed.");
+	queue->gettersList = qc_getterslist_create();
+	if(NULL == queue->gettersList){
+		qc_seterr(err, QC_ERR_RUNTIME, "create gettersList for queue failed.");
 		goto failed;
 	}
 
-	queue->putterChain = qc_putterchain_create(priority_max);
-	if(NULL == queue->putterChain){
+	queue->puttersChain = qc_putterschain_create(priority_max);
+	if(NULL == queue->puttersChain){
 		qc_seterr(err, QC_ERR_RUNTIME, "create putterList for queue failed.");
 		goto failed;
 	}
@@ -78,9 +78,9 @@ int qc_queue_destroy(QcQueue *queue, QcErr *err){
 	}
 
 	if(queue->quelock) qc_thread_mutex_destroy(queue->quelock);
-	if(queue->messageChain) qc_msgchain_destroy(queue->messageChain);
-	if(queue->getterList)  qc_getterlist_destroy(queue->getterList);
-	if(queue->putterChain)  qc_putterchain_destroy(queue->putterChain);
+	if(queue->mesgesChain) qc_msgchain_destroy(queue->mesgesChain);
+	if(queue->gettersList)  qc_getterslist_destroy(queue->gettersList);
+	if(queue->puttersChain)  qc_putterschain_destroy(queue->puttersChain);
 
 	qc_free(queue);
 	return 0;
@@ -91,7 +91,7 @@ unsigned int qc_queue_msgcount(QcQueue *queue){
 	if(NULL == queue){
 		return -1;
 	}
-	return qc_msgchain_msgcount(queue->messageChain);
+	return qc_msgchain_msgcount(queue->mesgesChain);
 }
 
 
@@ -110,7 +110,7 @@ put_loop:
 
 	qc_thread_mutex_lock(queue->quelock);
 
-	QcGetter *getter = qc_getterlist_pop(queue->getterList);
+	QcGetter *getter = qc_getterslist_pop(queue->gettersList);
 
 	//if there are getters waiting
 	if(getter){
@@ -125,7 +125,7 @@ put_loop:
 		}
 
 		//getter->message = message;
-		qc_msgchain_puttemp(queue->messageChain, message);
+		qc_msgchain_puttemp(queue->mesgesChain, message);
 
 		qc_thread_cond_signal(getter->cond);
 		qc_thread_condlock_unlock(getter->condlock);
@@ -133,7 +133,7 @@ put_loop:
 		return 0;
 	}
 	else{
-		if(qc_msgchain_msgcount(queue->messageChain) == queue->limit){  //overloaded
+		if(qc_msgchain_msgcount(queue->mesgesChain) == queue->limit){  //overloaded
 			QcPutter *putter = qc_putter_create();
 			if(NULL == putter){
 				qc_thread_mutex_unlock(queue->quelock);
@@ -145,7 +145,7 @@ put_loop:
 
 			putter->message = message;
 			putter->priority = qc_message_priority(message);
-			qc_putterchain_push(queue->putterChain, putter);
+			qc_putterschain_push(queue->puttersChain, putter);
 
 			qc_thread_mutex_unlock(queue->quelock);
 			int ret = qc_thread_cond_timedwait(putter->cond, putter->condlock, msec);
@@ -157,7 +157,7 @@ put_loop:
 			qc_thread_condlock_unlock(putter->condlock);
 
 			if(putter->is_timedout){
-				int r = qc_putterchain_remove(queue->putterChain, putter);
+				int r = qc_putterschain_remove(queue->puttersChain, putter);
 				if(r == 0) qc_putter_destroy(putter);  //distroy un-popped timeouted putter
 
 				qc_seterr(err, QC_TIMEOUT, "time out.");
@@ -168,7 +168,7 @@ put_loop:
 			return 0;
 		}
 		else{		
-			qc_msgchain_pushmsg(queue->messageChain, message);
+			qc_msgchain_pushmsg(queue->mesgesChain, message);
 			qc_thread_mutex_unlock(queue->quelock);
 
 			return 0;
@@ -188,7 +188,7 @@ QcMessage* qc_queue_msgget(QcQueue *queue, int sec, QcErr *err){
 
 	qc_thread_mutex_lock(queue->quelock);
 
-	if(0 == qc_msgchain_msgcount(queue->messageChain)){	//no message in list
+	if(0 == qc_msgchain_msgcount(queue->mesgesChain)){	//no message in list
 		QcGetter *getter = qc_getter_create();
 		if(NULL == getter){
 			qc_thread_mutex_unlock(queue->quelock);
@@ -198,7 +198,7 @@ QcMessage* qc_queue_msgget(QcQueue *queue, int sec, QcErr *err){
 
 		qc_thread_condlock_lock(getter->condlock);
 
-		qc_getterlist_push(queue->getterList, getter);
+		qc_getterslist_push(queue->gettersList, getter);
 
 		qc_thread_mutex_unlock(queue->quelock);
 		
@@ -210,14 +210,14 @@ QcMessage* qc_queue_msgget(QcQueue *queue, int sec, QcErr *err){
 		}
 		else {
 			//QcMessage *message = getter->message;
-			message = qc_msgchain_gettemp(queue->messageChain);
+			message = qc_msgchain_gettemp(queue->mesgesChain);
 			qc_assert(message);
 		}
 
 		qc_thread_condlock_unlock(getter->condlock);
 
 		if(getter->is_timedout){
-			int r = qc_getterlist_remove(queue->getterList, getter);
+			int r = qc_getterslist_remove(queue->gettersList, getter);
 			if(r == 0) qc_getter_destroy(getter);  //distroy un-popped timeouted getter
 
 			qc_seterr(err, QC_TIMEOUT, "time out.");
@@ -228,12 +228,12 @@ QcMessage* qc_queue_msgget(QcQueue *queue, int sec, QcErr *err){
 		return message;
 	}
 	else{
-		QcMessage *message = qc_msgchain_popmsg(queue->messageChain);
+		QcMessage *message = qc_msgchain_popmsg(queue->mesgesChain);
         QcPutter *putter;  //must before loop??
 
 pop_loop:
 
-		putter = qc_putterchain_pop(queue->putterChain);
+		putter = qc_putterschain_pop(queue->puttersChain);
 		if(putter){
 			qc_thread_condlock_lock(putter->condlock);			
 			if(putter->is_timedout){
@@ -243,7 +243,7 @@ pop_loop:
 			}
 			else{
 				QcMessage *putmsg = putter->message;
-				qc_msgchain_pushmsg(queue->messageChain, putmsg);
+				qc_msgchain_pushmsg(queue->mesgesChain, putmsg);
 				qc_thread_cond_signal(putter->cond);
 			}
 

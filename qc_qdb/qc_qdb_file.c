@@ -1,7 +1,7 @@
 #include "qc_qdb_file.h"
 #include "qc_file.h"
 
-#define QC_PERSIST_PATHLEN  512
+#define QC_QDB_PATHLEN  512
 
 
 #pragma pack(push)
@@ -26,7 +26,7 @@ typedef struct {
 
 
 struct __QcQdbFile {
-	char filename[QC_PERSIST_PATHLEN + 1];
+	char filename[QC_QDB_PATHLEN + 1];
 	QcQdbFileInfo *fileInfo;
 
 	off_t head_offset;
@@ -37,10 +37,10 @@ struct __QcQdbFile {
 
 
 
-QcQdbFile* qc_persist_file_open(int msgbuff_size, int msgcount_limit, const char* persist_filename, QcErr *err)
+QcQdbFile* qc_qdb_file_open(int msgbuff_size, int msgcount_limit, const char* persist_filename, QcErr *err)
 {
 	qc_assert(msgbuff_size > 0 && msgcount_limit > 0 && persist_filename);
-	qc_assert(strlen(persist_filename) <= QC_PERSIST_PATHLEN);
+	qc_assert(strlen(persist_filename) <= QC_QDB_PATHLEN);
 
 	QcQdbFile *qdb = (QcQdbFile*)malloc(sizeof(QcQdbFile));
 	qc_assert(qdb);
@@ -103,7 +103,7 @@ failed:
 }
 
 
-void qc_persist_file_close(QcQdbFile *qdb)
+void qc_qdb_file_close(QcQdbFile *qdb)
 {
 	if (qdb->file) qc_file_close(qdb->file);
 	if(qdb->fileInfo) qc_free(qdb->fileInfo);
@@ -113,7 +113,7 @@ void qc_persist_file_close(QcQdbFile *qdb)
 }
 
 
-int qc_persist_file_append(QcQdbFile *qdb, Qc_MsgEqual *msgEqual, QcErr *err)
+int qc_qdb_file_append(QcQdbFile *qdb, Qc_MsgEqual *msgEqual, QcErr *err)
 {
 	int persist_id = msgEqual->persist_id;
 	off_t offset_msghead = qdb->head_offset + persist_id * sizeof(Qc_MsgInfo);
@@ -137,7 +137,7 @@ int qc_persist_file_append(QcQdbFile *qdb, Qc_MsgEqual *msgEqual, QcErr *err)
 }
 
 
-int qc_persist_file_remove(QcQdbFile *qdb, Qc_MsgEqual *msgEqual, QcErr *err)
+int qc_qdb_file_remove(QcQdbFile *qdb, Qc_MsgEqual *msgEqual, QcErr *err)
 {
 	int persist_id = msgEqual->persist_id;
 	off_t offset_msghead = qdb->head_offset + persist_id * sizeof(Qc_MsgInfo);
@@ -157,7 +157,7 @@ int qc_persist_file_remove(QcQdbFile *qdb, Qc_MsgEqual *msgEqual, QcErr *err)
 }
 
 
-int qc_persist_file_fetch_ready(QcQdbFile *qdb, QcErr *err)
+int qc_qdb_file_fetch_ready(QcQdbFile *qdb, QcErr *err)
 {
 	QcFile *file = qdb->file;
 	qc_file_seek(file, qdb->head_offset, 0);
@@ -165,7 +165,7 @@ int qc_persist_file_fetch_ready(QcQdbFile *qdb, QcErr *err)
 }
 
 
-int qc_persist_file_do_fetch(QcQdbFile *qdb, Qc_MsgEqual *msgEqual, QcErr *err)
+int qc_qdb_file_do_fetch(QcQdbFile *qdb, Qc_MsgEqual *msgEqual, QcErr *err)
 {
 	QcFile *file = qdb->file;
 	off_t offset = qc_file_tell(file);

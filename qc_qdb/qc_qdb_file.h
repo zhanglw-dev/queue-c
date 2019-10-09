@@ -23,17 +23,17 @@ typedef struct __QcQdbFile QcQdbFile;
 
 
 
-QcQdbFile* qc_persist_file_open(int msgbuff_size, int msgcount_limit, const char* persit_filename, QcErr *err);
+QcQdbFile* qc_qdb_file_open(int msgbuff_size, int msgcount_limit, const char* persit_filename, QcErr *err);
 
-void qc_persist_file_close(QcQdbFile *qdb);
+void qc_qdb_file_close(QcQdbFile *qdb);
 
-int qc_persist_file_append(QcQdbFile *qdb, Qc_MsgEqual *msgEqual, QcErr *err);
+int qc_qdb_file_append(QcQdbFile *qdb, Qc_MsgEqual *msgEqual, QcErr *err);
 
-int qc_persist_file_remove(QcQdbFile *qdb, Qc_MsgEqual *msgEqual, QcErr *err);
+int qc_qdb_file_remove(QcQdbFile *qdb, Qc_MsgEqual *msgEqual, QcErr *err);
 
-int qc_persist_file_fetch_ready(QcQdbFile *qdb, QcErr *err);
+int qc_qdb_file_fetch_ready(QcQdbFile *qdb, QcErr *err);
 
-int qc_persist_file_do_fetch(QcQdbFile *qdb, Qc_MsgEqual *msgEqual, QcErr *err);
+int qc_qdb_file_do_fetch(QcQdbFile *qdb, Qc_MsgEqual *msgEqual, QcErr *err);
 
 
 #endif  //QC_PERSIST_FILE_H

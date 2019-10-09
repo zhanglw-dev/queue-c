@@ -8,9 +8,6 @@ struct __QcQSystem {
 };
 
 
-QcQSystem *globalQSystem;
-
-
 
 QcQSystem* qc_qsys_init()
 {
@@ -40,13 +37,7 @@ void qc_qsys_release(QcQSystem *qSys)
 }
 
 
-QcQSystem* getQSystem()
-{
-	return globalQSystem;
-}
-
-
-int qc_qsys_queue_register(QcQSystem *qSys, const char *qname, QcQueue *queue, QcErr *err)
+int qc_qsys_queue_add(QcQSystem *qSys, const char *qname, QcQueue *queue, QcErr *err)
 {
 	int ret;
 	ret = qc_qmng_addque(qSys->qManager, qname, queue, err);
@@ -54,7 +45,7 @@ int qc_qsys_queue_register(QcQSystem *qSys, const char *qname, QcQueue *queue, Q
 }
 
 
-QcQueue* qc_qsys_queue_get(QcQSystem *qSys, const char *qname, QcErr *err)
+QcQueue* qc_qsys_queue_find(QcQSystem *qSys, const char *qname, QcErr *err)
 {
 	QcQueue *queue;
 	queue = qc_qmng_getque(qSys->qManager, qname, err);

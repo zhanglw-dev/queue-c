@@ -1,12 +1,41 @@
 #include "qc_log.h"
-#include "qc_putter_chain.h"
+#include "qc_putters_chain.h"
 
+
+
+QcPutBucket* qc_putbucket_create() {
+
+	QcPutBucket *putBucket;
+	qc_malloc(putBucket, sizeof(QcPutBucket));
+	if (NULL == putBucket) {
+		return NULL;
+	}
+	QcList *puttersChain = qc_list_create(0);
+	if (NULL == puttersChain) {
+		qc_free(putBucket);
+		return NULL;
+	}
+
+	putBucket->puttersChain = puttersChain;
+	return putBucket;
+}
+
+
+int qc_putbucket_destroy(QcPutBucket *putBucket) {
+	if (NULL == putBucket) {
+		return -1;
+	}
+
+	if (putBucket->puttersChain) qc_list_destroy(putBucket->puttersChain);
+	qc_free(putBucket);
+	return 0;
+}
 
 //--------------------------------------------------------------------------------
 
-QcPutterChain* qc_putterchain_create(int bucket_count){
-	QcPutterChain *putterChain;
-	qc_malloc(putterChain, sizeof(QcPutterChain));
+QcPuttersChain* qc_putterschain_create(int bucket_count){
+	QcPuttersChain *putterChain;
+	qc_malloc(putterChain, sizeof(QcPuttersChain));
     if(NULL == putterChain){
         return NULL;
     }
@@ -19,7 +48,7 @@ QcPutterChain* qc_putterchain_create(int bucket_count){
 	if (NULL == putterChain->putBuckets) {
 		return NULL;
 	}
-	memset(putterChain->putBuckets, 0, sizeof(QcPutterChain*)*putterChain->bucket_count);
+	memset(putterChain->putBuckets, 0, sizeof(QcPuttersChain*)*putterChain->bucket_count);
 
 	for (int i = 0; i < putterChain->bucket_count; i++) {
 		QcPutBucket *putBucket = qc_putbucket_create();
@@ -32,12 +61,12 @@ QcPutterChain* qc_putterchain_create(int bucket_count){
     return putterChain;
 
 failed:
-	qc_putterchain_destroy(putterChain);
+	qc_putterschain_destroy(putterChain);
 	return NULL;
 }
 
 
-int qc_putterchain_destroy(QcPutterChain *putterChain){
+int qc_putterschain_destroy(QcPuttersChain *putterChain){
     if(NULL == putterChain){
         return -1;
     }
@@ -56,7 +85,7 @@ int qc_putterchain_destroy(QcPutterChain *putterChain){
 }
 
 
-int qc_putterchain_push(QcPutterChain *putterChain, QcPutter *putter){
+int qc_putterschain_push(QcPuttersChain *putterChain, QcPutter *putter){
 
     qc_assert(NULL!= putterChain && NULL!=putter);
 	qc_assert(putter->message);
@@ -64,7 +93,7 @@ int qc_putterchain_push(QcPutterChain *putterChain, QcPutter *putter){
     QcListEntry *listEntry;
 
 	int bucket_sn = putter->priority - 1;
-    int ret = qc_list_inserttail2(putterChain->putBuckets[bucket_sn]->putterList, putter, &listEntry);
+    int ret = qc_list_inserttail2(putterChain->putBuckets[bucket_sn]->puttersChain, putter, &listEntry);
     qc_assert(ret == 0);
 
     putter->_entry = listEntry;
@@ -78,7 +107,7 @@ int qc_putterchain_push(QcPutterChain *putterChain, QcPutter *putter){
 }
 
 
-QcPutter* qc_putterchain_pop(QcPutterChain *putterChain){
+QcPutter* qc_putterschain_pop(QcPuttersChain *putterChain){
 
 	if (putterChain->putter_count == 0)
 		return NULL;
@@ -90,7 +119,7 @@ QcPutter* qc_putterchain_pop(QcPutterChain *putterChain){
 	//locate the cursor_bucketsn
 	while (1) {
 		bucket = putterChain->putBuckets[bucket_sn];
-		if (qc_list_count(bucket->putterList) > 0) {
+		if (qc_list_count(bucket->puttersChain) > 0) {
 			putterChain->cursor_bucketsn = bucket_sn;
 			break;
 		}
@@ -107,8 +136,8 @@ try_loop:
 	QcPutter *putter;
 
 	if (bucket->pop_counter < counter_max) {
-		if (qc_list_count(bucket->putterList) > 0) {
-			putter = qc_list_pophead(putterChain->putBuckets[bucket_sn]->putterList);
+		if (qc_list_count(bucket->puttersChain) > 0) {
+			putter = qc_list_pophead(putterChain->putBuckets[bucket_sn]->puttersChain);
 			bucket->pop_counter++;
 			putterChain->putter_count--;
 			return putter;
@@ -121,8 +150,8 @@ try_loop:
 	}
 	else {
 		//no message in other bucket...
-		if (qc_list_count(putterChain->putBuckets[bucket_sn]->putterList) == putterChain->putter_count) {
-			putter = qc_list_pophead(bucket->putterList);
+		if (qc_list_count(putterChain->putBuckets[bucket_sn]->puttersChain) == putterChain->putter_count) {
+			putter = qc_list_pophead(bucket->puttersChain);
 			putterChain->putter_count--;
 			return putter;
 		}
@@ -141,12 +170,12 @@ try_loop:
 }
 
 
-int qc_putterchain_remove(QcPutterChain *putterChain, QcPutter *putter){
+int qc_putterschain_remove(QcPuttersChain *putterChain, QcPutter *putter){
     qc_assert(NULL!= putterChain && NULL!=putter);
 
     QcListEntry *listEntry = putter->_entry;
 	int bucket_sn = putter->priority - 1;
-    int ret = qc_list_removeentry(putterChain->putBuckets[bucket_sn]->putterList, listEntry);
+    int ret = qc_list_removeentry(putterChain->putBuckets[bucket_sn]->puttersChain, listEntry);
     qc_assert(ret == 0);
 
 	putterChain->putter_count--;

@@ -10,8 +10,6 @@
 typedef struct __QcQSystem QcQSystem;
 
 
-extern QcQSystem *globalQSystem;
-
 
 QcQSystem* qc_qsys_init();
 
@@ -19,11 +17,9 @@ QcQSystem* qc_qsys_init_byconfig(const char* config_file, QcErr *err);
 
 void qc_qsys_release(QcQSystem *qSys);
 
-QcQSystem* getQSystem();
+int qc_qsys_queue_add(QcQSystem *qSys, const char *qname, QcQueue *queue, QcErr *err);
 
-int qc_qsys_queue_register(QcQSystem *qSys, const char *qname, QcQueue *queue, QcErr *err);
-
-QcQueue* qc_qsys_queue_get(QcQSystem *qSys, const char *qname, QcErr *err);
+QcQueue* qc_qsys_queue_find(QcQSystem *qSys, const char *qname, QcErr *err);
 
 
 #endif //QC_QSYSTEM_H

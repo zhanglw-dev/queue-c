@@ -4,7 +4,7 @@
 #include "qc_message.h"
 #include "qc_error.h"
 #include "qc_socket.h"
-#include "qc_mqueue.h"
+#include "qc_queue.h"
 #include "qc_qsystem.h"
 
 

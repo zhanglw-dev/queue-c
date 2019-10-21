@@ -1,6 +1,6 @@
 #include "test_mq.h"
 
-#include "qc_mqueue.h"
+#include "qc_queue.h"
 #include "qc_message.h"
 #include "qc_log.h"
 #include "qc_error.h"

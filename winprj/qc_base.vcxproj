@@ -19,24 +19,24 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\qc_base\cjson.c" />
     <ClCompile Include="..\qc_base\qc_error.c" />
     <ClCompile Include="..\qc_base\qc_file_win.c" />
     <ClCompile Include="..\qc_base\qc_hash.c" />
     <ClCompile Include="..\qc_base\qc_list.c" />
     <ClCompile Include="..\qc_base\qc_log.c" />
+    <ClCompile Include="..\qc_base\qc_profile.c" />
     <ClCompile Include="..\qc_base\qc_socket_win.c" />
     <ClCompile Include="..\qc_base\qc_thread_win.c" />
     <ClCompile Include="..\qc_base\qc_utils.c" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\qc_base\cjson.h" />
     <ClInclude Include="..\qc_base\qc_error.h" />
     <ClInclude Include="..\qc_base\qc_file.h" />
     <ClInclude Include="..\qc_base\qc_hash.h" />
     <ClInclude Include="..\qc_base\qc_list.h" />
     <ClInclude Include="..\qc_base\qc_log.h" />
     <ClInclude Include="..\qc_base\qc_prelude.h" />
+    <ClInclude Include="..\qc_base\qc_profile.h" />
     <ClInclude Include="..\qc_base\qc_socket.h" />
     <ClInclude Include="..\qc_base\qc_thread.h" />
     <ClInclude Include="..\qc_base\qc_utils.h" />

@@ -1,5 +1,5 @@
-#ifndef QC_PERSIST_FILE_H
-#define QC_PERSIST_FILE_H
+#ifndef QC_TABLE_FILE_H
+#define QC_TABLE_FILE_H
 
 #include "qc_error.h"
 #include "qc_message.h"
@@ -14,7 +14,7 @@ typedef struct {
 	int persist_id;
 	int bufflen;
 	char *buff;
-}Qc_MsgEqual;
+}Qc_MsgRecord;
 
 #pragma pack(pop)
 
@@ -27,13 +27,13 @@ QcQTblFile* qc_qtbl_file_open(int msgbuff_size, int msgcount_limit, const char* 
 
 void qc_qtbl_file_close(QcQTblFile *qtbl);
 
-int qc_qtbl_file_append(QcQTblFile *qtbl, Qc_MsgEqual *msgEqual, QcErr *err);
+int qc_qtbl_file_append(QcQTblFile *qtbl, Qc_MsgRecord *msgRecord, QcErr *err);
 
-int qc_qtbl_file_remove(QcQTblFile *qtbl, Qc_MsgEqual *msgEqual, QcErr *err);
+int qc_qtbl_file_remove(QcQTblFile *qtbl, Qc_MsgRecord *msgRecord, QcErr *err);
 
 int qc_qtbl_file_fetch_ready(QcQTblFile *qtbl, QcErr *err);
 
-int qc_qtbl_file_do_fetch(QcQTblFile *qtbl, Qc_MsgEqual *msgEqual, QcErr *err);
+int qc_qtbl_file_do_fetch(QcQTblFile *qtbl, Qc_MsgRecord *msgRecord, QcErr *err);
 
 
-#endif  //QC_PERSIST_FILE_H
+#endif  //QC_TABLE_FILE_H

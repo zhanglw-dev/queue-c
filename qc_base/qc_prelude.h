@@ -92,8 +92,10 @@ typedef size_t qc_size_t;
 
 
 #define qc_malloc(ptr, size)  ptr=malloc(size); \
-                              if(NULL == ptr) \
-                                 fprintf(stderr, "malloc failed. [%s  line:%d]\n", __FILE__, __LINE__); \
+                              if(NULL == ptr) { \
+                                  fprintf(stderr, "malloc failed. [%s  line:%d]\n", __FILE__, __LINE__); \
+								  assert(ptr); \
+                              } \
                               else \
                                  memset(ptr, 0, size);
 

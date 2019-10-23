@@ -1,0 +1,1 @@
+queue: name=q1, count_limit=1000, persist=true

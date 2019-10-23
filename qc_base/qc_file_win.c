@@ -98,7 +98,7 @@ int qc_file_close(QcFile *file)
 
 size_t qc_file_read(QcFile *file, void *buf, size_t nbytes)
 {
-	size_t ssz;
+	size_t ssz=0;
 
 	qc_assert(file);
 
@@ -114,7 +114,7 @@ size_t qc_file_read(QcFile *file, void *buf, size_t nbytes)
 
 size_t qc_file_write(QcFile *file, const void *buf, size_t nbytes)
 {
-	size_t ssz;
+	size_t ssz=0;
 
 	qc_assert(file);
 
@@ -325,3 +325,10 @@ int qc_dir_make(char *dirname)
 
 	return 0;
 }
+
+
+char* qc_dir_getcwd(char *buff, int maxlen)
+{
+	return _getcwd(buff, maxlen);
+}
+

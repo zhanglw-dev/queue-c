@@ -10,7 +10,7 @@ typedef struct __QcQTbl QcQTbl;
 
 
 
-QcQTbl* qc_qtbl_open(int msgbuff_size, int msgcount_limit, char *table_filepath, QcErr *err);
+QcQTbl* qc_qtbl_open(int msgbuff_size, int msgcount_limit, const char *table_filepath, QcErr *err);
 
 void qc_qtbl_close(QcQTbl *qTable);
 

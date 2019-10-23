@@ -7,9 +7,9 @@
 #include "qc_thread.h"
 
 
-const int queue_limit = 1000;
-const int message_num = 100000;
-const char *buff = "hello queue!";
+static const int queue_limit = 1000;
+static const int message_num = 100000;
+static const char *buff = "hello queue!";
 
 #define THREAD_NUM 10
 

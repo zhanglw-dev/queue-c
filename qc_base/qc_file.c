@@ -254,3 +254,9 @@ int qc_dir_make(char *dirname)
 
     return 0;
 }
+
+
+char* qc_dir_getcwd(char *buff, int maxlen)
+{
+	return getcwd(buff, maxlen);
+}

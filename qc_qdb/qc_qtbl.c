@@ -6,12 +6,12 @@
 
 struct __QcQTbl {
 	QcQTblFile *qtbl;
-	QcNumPool *rcdIdPool;
+	QcNumPool *persistIdPool;
 };
 
 
 
-QcQTbl* qc_qtbl_open(int msgbuff_size, int msgcount_limit, char *table_filepath, QcErr *err)
+QcQTbl* qc_qtbl_open(int msgbuff_size, int msgcount_limit, const char *table_filepath, QcErr *err)
 {
 	qc_assert(table_filepath);
 
@@ -24,12 +24,12 @@ QcQTbl* qc_qtbl_open(int msgbuff_size, int msgcount_limit, char *table_filepath,
 		return NULL;
 	}
 
-	QcNumPool *rcdIdPool;
-	qc_malloc(rcdIdPool, sizeof(QcNumPool));
-	qc_numpool_init(rcdIdPool, msgcount_limit);
+	QcNumPool *persistIdPool;
+	qc_malloc(persistIdPool, sizeof(QcNumPool));
+	qc_numpool_init(persistIdPool, msgcount_limit);
 
 	queQdb->qtbl = qtbl;
-	queQdb->rcdIdPool = rcdIdPool;
+	queQdb->persistIdPool = persistIdPool;
 
 	return queQdb;
 }
@@ -38,50 +38,63 @@ QcQTbl* qc_qtbl_open(int msgbuff_size, int msgcount_limit, char *table_filepath,
 void qc_qtbl_close(QcQTbl *queQdb)
 {
 	qc_qtbl_file_close(queQdb->qtbl);
-	qc_numpool_release(queQdb->rcdIdPool);
+	qc_numpool_release(queQdb->persistIdPool);
 	qc_free(queQdb);
 }
 
 
-int qc_qtbl_append(QcQTbl *qcQueQdb, QcMessage *message, QcErr *err)
+int qc_qtbl_append(QcQTbl *qTbl, QcMessage *message, QcErr *err)
 {
 	int ret;
-	ret = qc_qtbl_file_append(qcQueQdb->qtbl, (Qc_MsgRecord*)message, err);
-	if (0 != ret)
-		return 0;
-	return -1;
-}
 
-
-int qc_qtbl_remove(QcQTbl *qcQueQdb, QcMessage *message, QcErr *err)
-{
-	int ret;
-	ret = qc_qtbl_file_remove(qcQueQdb->qtbl, (Qc_MsgRecord*)message, err);
-	if (0 != ret)
-		return 0;
-	return -1;
-}
-
-
-int qc_qtbl_loadqueue(QcQTbl *qcQueQdb, QcQueue *queue, QcErr *err)
-{
-	int ret;
-	QcQTblFile *qtbl = qcQueQdb->qtbl;
-
-	if (!qc_qtbl_file_fetch_ready(qtbl, err))
+	Qc_MsgRecord *msgRecord = (Qc_MsgRecord*)message;
+	msgRecord->persist_id = qc_numpool_get(qTbl->persistIdPool);
+	if (msgRecord->persist_id < 0)
 		return -1;
 
-	QcMessage *message;
-	qc_malloc(message, sizeof(Qc_MsgRecord));  //Qc_MsgRecord === QcMessage :-|
+	ret = qc_qtbl_file_append(qTbl->qtbl, msgRecord, err);
+	if (0 != ret)
+		return -1;
+
+	return 0;
+}
+
+
+int qc_qtbl_remove(QcQTbl *qTbl, QcMessage *message, QcErr *err)
+{
+	int ret;
+
+	Qc_MsgRecord *msgRecord = (Qc_MsgRecord*)message;
+	ret = qc_qtbl_file_remove(qTbl->qtbl, (Qc_MsgRecord*)message, err);
+	if (0 != ret)
+		return -1;
+
+	qc_numpool_put(qTbl->persistIdPool, msgRecord->persist_id);
+
+	return 0;
+}
+
+
+int qc_qtbl_loadqueue(QcQTbl *qTbl, QcQueue *queue, QcErr *err)
+{
+	int ret;
+	QcQTblFile *qtbl = qTbl->qtbl;
+
+	if (0 != qc_qtbl_file_fetch_ready(qtbl, err))
+		return -1;
+
+	Qc_MsgRecord *msgRecord = NULL;
 
 	while (1) {
-		ret = qc_qtbl_file_do_fetch(qtbl, (Qc_MsgRecord*)message, err);
+		qc_malloc(msgRecord, sizeof(Qc_MsgRecord));  //Qc_MsgRecord === QcMessage :-|
+		ret = qc_qtbl_file_do_fetch(qtbl, msgRecord, err);
 		if (0 == ret) {
-			ret = qc_queue_msgput(queue, message, 0, err);
+			ret = qc_queue_msgput(queue, (QcMessage*)msgRecord, 0, err);
 			if (ret < 0)
 				goto failed;
 		}
 		else if (1 == ret) { //completed!
+			qc_free(msgRecord);
 			break;
 		}
 		else {
@@ -91,6 +104,6 @@ int qc_qtbl_loadqueue(QcQTbl *qcQueQdb, QcQueue *queue, QcErr *err)
 	return 0;
 
 failed:
-	qc_free(message);
+	qc_free(msgRecord);
 	return -1;
 }

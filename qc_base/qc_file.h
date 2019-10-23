@@ -51,6 +51,7 @@ int qc_dir_remove(char *dirname);
 
 int qc_dir_rename(char *dirname, char *newname);
 
+char* qc_dir_getcwd(char *buff, int maxlen);
 
 
 #ifdef __cplusplus

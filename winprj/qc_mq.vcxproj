@@ -120,21 +120,17 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\qc_mq\qc_getter.c" />
-    <ClCompile Include="..\qc_mq\qc_getters_list.c" />
-    <ClCompile Include="..\qc_mq\qc_mesges_chain.c" />
+    <ClCompile Include="..\qc_mq\qc_getters.c" />
     <ClCompile Include="..\qc_mq\qc_message.c" />
-    <ClCompile Include="..\qc_mq\qc_putter.c" />
-    <ClCompile Include="..\qc_mq\qc_putters_chain.c" />
+    <ClCompile Include="..\qc_mq\qc_msgchain.c" />
+    <ClCompile Include="..\qc_mq\qc_putters.c" />
     <ClCompile Include="..\qc_mq\qc_queue.c" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\qc_mq\qc_getter.h" />
-    <ClInclude Include="..\qc_mq\qc_getters_list.h" />
-    <ClInclude Include="..\qc_mq\qc_mesges_chain.h" />
+    <ClInclude Include="..\qc_mq\qc_getters.h" />
     <ClInclude Include="..\qc_mq\qc_message.h" />
-    <ClInclude Include="..\qc_mq\qc_putter.h" />
-    <ClInclude Include="..\qc_mq\qc_putters_chain.h" />
+    <ClInclude Include="..\qc_mq\qc_msgchain.h" />
+    <ClInclude Include="..\qc_mq\qc_putters.h" />
     <ClInclude Include="..\qc_mq\qc_queue.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

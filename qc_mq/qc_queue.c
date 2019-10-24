@@ -3,9 +3,9 @@
 #include "qc_log.h"
 #include "qc_list.h"
 #include "qc_error.h"
-#include "qc_getters_list.h"
-#include "qc_putters_chain.h"
-#include "qc_mesges_chain.h"
+#include "qc_getters.h"
+#include "qc_putters.h"
+#include "qc_msgchain.h"
 #include "qc_message.h"
 
 

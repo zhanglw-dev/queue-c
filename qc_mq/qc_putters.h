@@ -1,10 +1,19 @@
-#ifndef H_QC_PUTTER_LIST
-#define H_QC_PUTTER_LIST
+#ifndef H_QC_PUTTER
+#define H_QC_PUTTER
 
 #include "qc_thread.h"
 #include "qc_message.h"
 #include "qc_list.h"
-#include "qc_putter.h"
+
+
+typedef struct __QcPutter {
+	QcCondLock *condlock;
+	QcCond *cond;
+	QcMessage *message;
+	int is_timedout;
+	int priority;
+	QcListEntry *_entry;
+}QcPutter;
 
 
 typedef struct {
@@ -26,13 +35,16 @@ typedef struct {
 extern "C" {
 #endif
 
+QcPutter* qc_putter_create();
 
+int qc_putter_destroy(QcPutter *putter);
+
+//----------------------------------------------------------------------
 QcPutBucket* qc_putbucket_create();
 
 int qc_putbucket_destroy(QcPutBucket *putBucket);
 
 //----------------------------------------------------------------------
-
 QcPuttersChain* qc_putterschain_create(int bucket_count);
 
 int qc_putterschain_destroy(QcPuttersChain *puttersChain);
@@ -49,4 +61,4 @@ int qc_putterschain_remove(QcPuttersChain *puttersChain, QcPutter *putter);
 #endif
 
 
-#endif /*H_QC_PUTTER_LIST*/
+#endif  //H_QC_PUTTER

@@ -1,6 +1,11 @@
 #include "qc_qmanager.h"
 
 
+struct __QcQueManager {
+	QcHashTbl *queueTable;
+};
+
+
 
 QcQueManager* qc_qmng_create()
 {
@@ -18,14 +23,13 @@ QcQueManager* qc_qmng_create()
 
 void qc_qmng_destory(QcQueManager *qManager)
 {
-	int ret;
 	QcErr err;
 
 	qc_hashtbl_enumbegin(qManager->queueTable);
 
 	QcQueue *queue = (QcQueue*)qc_hashtbl_enumnext(qManager->queueTable);
 	while (queue) {
-		ret = qc_queue_destroy(queue, &err);
+		qc_queue_destroy(queue, &err);
 		queue = (QcQueue*)qc_hashtbl_enumnext(qManager->queueTable);
 	}
 
@@ -58,6 +62,5 @@ int qc_qmng_removeque(QcQueManager *qManager, const char *qname, QcErr *err)
 QcQueue* qc_qmng_getque(QcQueManager *qManager, const char *qname, QcErr *err)
 {
 	QcQueue *queue = qc_hashtbl_find(qManager->queueTable, (void*)qname);
-
 	return queue;
 }

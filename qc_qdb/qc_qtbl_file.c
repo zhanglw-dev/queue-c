@@ -178,7 +178,7 @@ void qc_qtbl_file_close(QcQTblFile *qtbl)
 
 int qc_qtbl_file_append(QcQTblFile *qtbl, Qc_MsgRecord *msgRecord, QcErr *err)
 {
-	int ret;
+	size_t sz;
 	int persist_id = msgRecord->persist_id;
 
 	off_t offset_msghead = qtbl->head_offset + persist_id*sizeof(Qc_MsgInfo);
@@ -186,8 +186,8 @@ int qc_qtbl_file_append(QcQTblFile *qtbl, Qc_MsgRecord *msgRecord, QcErr *err)
 
 	QcFile *file = qtbl->file;
 	qc_file_seek(file, offset_msgbody, 0);
-	ret = qc_file_write(file, msgRecord->buff, msgRecord->bufflen);
-	if (ret <= 0)
+	sz = qc_file_write(file, msgRecord->buff, msgRecord->bufflen);
+	if (sz <= 0)
 		return -1;
 	
 	Qc_MsgInfo msgInfo;
@@ -197,8 +197,8 @@ int qc_qtbl_file_append(QcQTblFile *qtbl, Qc_MsgRecord *msgRecord, QcErr *err)
 
 	qc_file_seek(file, offset_msghead, 0);
 	qc_msginfo_hton(&msgInfo);
-	ret = qc_file_write(file, &msgInfo, sizeof(Qc_MsgInfo));
-	if (ret <= 0)
+	sz = qc_file_write(file, &msgInfo, sizeof(Qc_MsgInfo));
+	if (sz <= 0)
 		return -1;
 
 	//qc_file_sync(file);

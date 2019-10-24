@@ -6,12 +6,6 @@
 #include "qc_hash.h"
 
 
-
-struct __QcQueManager {
-	QcHashTbl *queueTable;
-};
-
-
 typedef struct __QcQueManager QcQueManager;
 
 

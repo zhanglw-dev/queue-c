@@ -183,7 +183,7 @@ int mq_test_all()
 	count = qc_queue_msgcount(queue);
 	qc_assert(count == 0);
 
-	ret = qc_queue_destroy(queue, NULL);
+	ret = qc_queue_destroy(queue);
 	qc_assert(ret == 0);
 
 

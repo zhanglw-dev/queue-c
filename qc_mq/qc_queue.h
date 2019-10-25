@@ -16,7 +16,7 @@ typedef struct __QcQueue QcQueue;
 
 QcQueue* qc_queue_create(unsigned int limit, unsigned int priority_max, QcErr *err);
 
-int qc_queue_destroy(QcQueue *queue, QcErr *err);
+int qc_queue_destroy(QcQueue *queue);
 
 unsigned int qc_queue_msgcount(QcQueue *queue);
 

@@ -8,6 +8,7 @@
 #define QC_ERR_BADPARAM  -10
 #define QC_ERR_BADLENGTH -11
 #define QC_ERR_RUNTIME   -20
+#define QC_ERR_SOCKET    -30
 
 
 #define QC_MAXSIZE_ERRDESC 255

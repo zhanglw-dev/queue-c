@@ -66,16 +66,12 @@ QcQueue* qc_queue_create(unsigned int limit, unsigned int priority_max, QcErr *e
 	return queue;
 
 failed:
-	qc_queue_destroy(queue, NULL);
+	qc_queue_destroy(queue);
 	return NULL;
 }
 
 
-int qc_queue_destroy(QcQueue *queue, QcErr *err){
-	if(NULL == queue){
-		qc_seterr(err, QC_ERR_BADPARAM, "invalid input parameter, QcQueue* is NULL.");
-		return -1;
-	}
+int qc_queue_destroy(QcQueue *queue){
 
 	if(queue->quelock) qc_thread_mutex_destroy(queue->quelock);
 	if(queue->mesgesChain) qc_msgchain_destroy(queue->mesgesChain);

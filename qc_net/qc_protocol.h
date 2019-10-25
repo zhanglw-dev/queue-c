@@ -41,7 +41,6 @@ typedef struct {
 
 typedef struct {
 	int wait_msec;
-	//unsigned int msg_len;
 }QcPrtclConsume;
 
 

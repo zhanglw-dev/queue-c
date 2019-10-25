@@ -4,19 +4,7 @@
 #include "qc_list.h"
 #include "qc_thread.h"
 #include "qc_error.h"
-#include "qc_producer.h"
-#include "qc_consumer.h"
-
-
-struct __QcQueueSvc {
-	char svc_ip[256];
-	int svc_port;
-
-	QcThread *listenThread;
-	QcList *workThreadList;
-
-	QcQSystem *qSystem;
-};
+#include "qc_qsystem.h"
 
 
 typedef struct __QcQueueSvc QcQueueSvc;

@@ -4,6 +4,17 @@
 #include "qc_consumer.h"
 
 
+struct __QcQueueSvc {
+	char svc_ip[256];
+	int svc_port;
+
+	QcThread *listenThread;
+	QcList *workThreadList;
+
+	QcQSystem *qSystem;
+};
+
+
 struct __ListenParam {
 	QcQueueSvc *queueSvc;
 	QcSocket* socket;
@@ -25,12 +36,9 @@ void* work_thread_routine(void *param)
 {
 	int ret;
 	QcErr err;
-	char *msg_buff;
 	int msg_len = 0;
-	char *reply_buff;
 	WorkParam *workParam = param;
 	QcSocket *socket = workParam->socket;
-	QcPrtclRegister *prtclRegister;
 
 	char* head_buff = NULL;
 	char *body_buff = NULL;
@@ -41,14 +49,15 @@ void* work_thread_routine(void *param)
 	int head_len = sizeof(QcPrtclHead);
 	head_buff = (char*)malloc(sizeof(QcPrtclHead));
 
-	QcPrtclReply *prtclReply = (char*)malloc(sizeof(QcPrtclReply));
+	QcPrtclReply *prtclReply;
+	qc_malloc(prtclReply, sizeof(QcPrtclReply));
 
 	while (1) {
 		ret = qc_tcp_recvall(socket, head_buff, head_len);
 		if (ret <= 0)
 			goto failed;
 
-		QcPrtclHead *prtclHead = head_buff;
+		QcPrtclHead *prtclHead = (QcPrtclHead*)head_buff;
 		qc_prtcl_head_ntoh(prtclHead);
 		int body_len = prtclHead->body_len;
 
@@ -77,9 +86,11 @@ void* work_thread_routine(void *param)
 		}
 	}
 
+	return NULL;
 failed:
 	if (head_buff) qc_free(head_buff);
 	if (body_buff) qc_free(body_buff);
+	return NULL;
 }
 
 
@@ -104,9 +115,8 @@ void* listen_thread_routine(void *param)
 
 QcQueueSvc* qc_queuesvc_create(const char* ip, int port, QcQSystem *qSystem, QcErr *err)
 {
-	QcQueueSvc *queueSvc = (QcQueueSvc*)malloc(sizeof(QcQueueSvc));
-	qc_assert(queueSvc);
-	memset(queueSvc, 0, sizeof(QcQueueSvc));
+	QcQueueSvc *queueSvc;
+	qc_malloc(queueSvc, sizeof(QcQueueSvc));
 
 	QcList *procList = qc_list_create(1);
 
@@ -122,7 +132,7 @@ QcQueueSvc* qc_queuesvc_create(const char* ip, int port, QcQSystem *qSystem, QcE
 
 void qc_queuesvc_destory(QcQueueSvc *queueSvc)
 {
-	qc_staticlist_release(queueSvc->workThreadList);
+	qc_list_destroy(queueSvc->workThreadList);
 	qc_free(queueSvc);
 }
 
@@ -132,11 +142,14 @@ int qc_queuesvc_start(QcQueueSvc *queueSvc, QcErr *err)
 	int ret;
 	QcSocket* socket = qc_socket_create(AF_INET, SOCK_STREAM, 0);
 
-	ListenParam *listenParam = (ListenParam*)malloc(sizeof(ListenParam));
+	ListenParam *listenParam;
+	qc_malloc(listenParam, sizeof(ListenParam));
 
 	ret = qc_tcp_bind(socket, queueSvc->svc_ip, queueSvc->svc_port);
-	if (0 != ret)
+	if (0 != ret) {
+		qc_seterr(err, QC_ERR_SOCKET, "socket bind failed.");
 		return -1;
+	}
 
 	listenParam->socket = socket;
 	listenParam->queueSvc = queueSvc;
@@ -148,5 +161,16 @@ int qc_queuesvc_start(QcQueueSvc *queueSvc, QcErr *err)
 
 void qc_queuesvc_stop(QcQueueSvc *queueSvc)
 {
-	//
+	int excode = 0;
+
+	while (1) {
+		QcThread *thread = qc_list_pophead(queueSvc->workThreadList);
+		if (!thread)
+			break;
+		qc_thread_cancel(thread);
+		qc_thread_join(thread, &excode);
+	}
+
+	qc_thread_cancel(queueSvc->listenThread);
+	qc_thread_join(queueSvc->listenThread, &excode);
 }

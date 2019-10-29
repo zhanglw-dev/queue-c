@@ -133,6 +133,9 @@
     <ClInclude Include="..\qc_mq\qc_putters.h" />
     <ClInclude Include="..\qc_mq\qc_queue.h" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="qc_art.vcxproj" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

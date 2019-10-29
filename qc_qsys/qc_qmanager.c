@@ -23,13 +23,11 @@ QcQueManager* qc_qmng_create()
 
 void qc_qmng_destory(QcQueManager *qManager)
 {
-	QcErr err;
-
 	qc_hashtbl_enumbegin(qManager->queueTable);
 
 	QcQueue *queue = (QcQueue*)qc_hashtbl_enumnext(qManager->queueTable);
 	while (queue) {
-		qc_queue_destroy(queue, &err);
+		qc_queue_destroy(queue);
 		queue = (QcQueue*)qc_hashtbl_enumnext(qManager->queueTable);
 	}
 

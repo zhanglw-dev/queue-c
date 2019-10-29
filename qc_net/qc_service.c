@@ -98,6 +98,9 @@ void* listen_thread_routine(void *param)
 {
 	ListenParam *listenParam = param;
 
+	if (0 != qc_tcp_listen(listenParam->socket))
+		return NULL;
+
 	while (1) {
 		QcSocket* socket = qc_tcp_accept(listenParam->socket);
 		qc_assert(socket);
@@ -109,7 +112,6 @@ void* listen_thread_routine(void *param)
 
 		qc_list_inserttail(listenParam->queueSvc->workThreadList, thread);
 	}
-
 }
 
 
@@ -139,7 +141,7 @@ void qc_queuesvc_destory(QcQueueSvc *queueSvc)
 
 int qc_queuesvc_start(QcQueueSvc *queueSvc, QcErr *err)
 {
-	int ret;
+	int ret, excode=0;
 	QcSocket* socket = qc_socket_create(AF_INET, SOCK_STREAM, 0);
 
 	ListenParam *listenParam;
@@ -155,13 +157,8 @@ int qc_queuesvc_start(QcQueueSvc *queueSvc, QcErr *err)
 	listenParam->queueSvc = queueSvc;
 
 	queueSvc->listenThread = qc_thread_create(listen_thread_routine, (void*)listenParam);
-	return 0;
-}
 
-
-void qc_queuesvc_stop(QcQueueSvc *queueSvc)
-{
-	int excode = 0;
+	qc_thread_join(queueSvc->listenThread, &excode);
 
 	while (1) {
 		QcThread *thread = qc_list_pophead(queueSvc->workThreadList);
@@ -171,6 +168,11 @@ void qc_queuesvc_stop(QcQueueSvc *queueSvc)
 		qc_thread_join(thread, &excode);
 	}
 
+	return 0;
+}
+
+
+void qc_queuesvc_stop(QcQueueSvc *queueSvc)
+{
 	qc_thread_cancel(queueSvc->listenThread);
-	qc_thread_join(queueSvc->listenThread, &excode);
 }

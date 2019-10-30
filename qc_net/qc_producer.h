@@ -6,6 +6,7 @@
 #include "qc_socket.h"
 #include "qc_queue.h"
 #include "qc_qsystem.h"
+#include "qc_protocol.h"
 
 
 
@@ -17,7 +18,7 @@ typedef struct {
 
 
 
-int qc_proc_producer(QcProducerHdl *producerProc, char *prtcl_buff, QcErr *err);
+int qc_proc_producer(QcProducerHdl *producerProc, QcPrtclHead *prtclHead, char *prtcl_body, QcErr *err);
 
 
 #endif /*QC_HDL_QUEUE_H*/

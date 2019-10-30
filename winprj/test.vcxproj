@@ -21,13 +21,11 @@
   <ItemGroup>
     <ClCompile Include="..\test\main.c" />
     <ClCompile Include="..\test\test_mq.c" />
-    <ClCompile Include="..\test\test_net.c" />
     <ClCompile Include="..\test\test_qdb.c" />
     <ClCompile Include="..\test\test_qsys.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\test\test_mq.h" />
-    <ClInclude Include="..\test\test_net.h" />
     <ClInclude Include="..\test\test_qdb.h" />
     <ClInclude Include="..\test\test_qsys.h" />
   </ItemGroup>

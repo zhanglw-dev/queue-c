@@ -32,7 +32,7 @@ typedef struct __WorkParam WorkParam;
 
 
 
-void* work_thread_routine(void *param)
+void work_thread_routine(void *param)
 {
 	int ret;
 	QcErr err;
@@ -73,33 +73,35 @@ void* work_thread_routine(void *param)
 		switch (prtclHead->type) {
 		case QC_TYPE_PRODUCER:
 			producerHdl.qSystem = workParam->queueSvc->qSystem;
-			ret = qc_proc_producer(&producerHdl, head_buff, &err);
+			producerHdl.socket  = socket;
+			ret = qc_proc_producer(&producerHdl, prtclHead, body_buff, &err);
 			if (ret < 0)
 				goto failed;
 			break;
 		case QC_TYPE_CONSUMER:
-			producerHdl.qSystem = workParam->queueSvc->qSystem;
-			ret = qc_proc_consumer(&consumerHdl, head_buff, &err);
+			consumerHdl.qSystem = workParam->queueSvc->qSystem;
+			consumerHdl.socket  = socket;
+			ret = qc_proc_consumer(&consumerHdl, prtclHead, body_buff, &err);
 			if (ret < 0)
 				goto failed;
 			break;
 		}
 	}
 
-	return NULL;
+	return;
 failed:
 	if (head_buff) qc_free(head_buff);
 	if (body_buff) qc_free(body_buff);
-	return NULL;
+	return;
 }
 
 
-void* listen_thread_routine(void *param)
+void listen_thread_routine(void *param)
 {
 	ListenParam *listenParam = param;
 
 	if (0 != qc_tcp_listen(listenParam->socket))
-		return NULL;
+		return;
 
 	while (1) {
 		QcSocket* socket = qc_tcp_accept(listenParam->socket);

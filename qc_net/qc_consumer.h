@@ -6,6 +6,7 @@
 #include "qc_socket.h"
 #include "qc_queue.h"
 #include "qc_qsystem.h"
+#include "qc_protocol.h"
 
 
 
@@ -16,7 +17,7 @@ typedef struct {
 }QcConsumerHdl;
 
 
-int qc_proc_consumer(QcConsumerHdl *consumerHdl, char *prtcl_buff, QcErr *err);
+int qc_proc_consumer(QcConsumerHdl *consumerHdl, QcPrtclHead *prtclHead, char *prtcl_buff, QcErr *err);
 
 
 

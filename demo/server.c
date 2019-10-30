@@ -41,7 +41,7 @@ int test_net()
 
 
 
-	qc_queuesvc_stop(queueSvc);
+	//qc_queuesvc_stop(queueSvc);
 
 	qc_queuesvc_destory(queueSvc);
 	qc_qsys_destory(qSys);

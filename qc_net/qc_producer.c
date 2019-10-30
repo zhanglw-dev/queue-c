@@ -5,35 +5,31 @@
 
 
 
-int qc_proc_producer(QcProducerHdl *producerHdl, char *prtcl_buff, QcErr *err)
+int qc_proc_producer(QcProducerHdl *producerHdl, QcPrtclHead *prtclHead, char *prtcl_body, QcErr *err)
 {
 	int ret;
 	char *head_buff;
 	char *body_buff;
-	QcSocket *socket = producerHdl->socket;
 
-	QcPrtclReply *prtclReply = (char*)malloc(sizeof(QcPrtclReply));
-	QcPrtclRegister* prtclResiter = prtcl_buff + sizeof(QcPrtclRegister);
-	strcpy(producerHdl->qname, prtclResiter->qname);
-
-
-	QcPrtclHead *prtclHead = prtcl_buff;
-	qc_prtcl_head_ntoh(prtclHead);
-	int body_len = prtclHead->body_len;
+	QcPrtclRegister* prtclRegsiter = (QcPrtclRegister*)prtcl_body;
+	qc_prtcl_register_ntoh(prtclRegsiter);
+	strcpy(producerHdl->qname, prtclRegsiter->qname);
 
 	if (prtclHead->subtype != QC_TYPE_REGISTER) {
 		goto failed;
 	}
 
+	QcSocket *socket = producerHdl->socket;
 	prtclHead->type = QC_TYPE_REPLY;
-	ret = qc_tcp_send(socket, prtclHead, sizeof(QcPrtclHead));
+	ret = qc_tcp_send(socket, (char*)prtclHead, sizeof(QcPrtclHead));
 	if (ret != sizeof(QcPrtclHead))
 		goto failed;
 
+	QcPrtclReply *prtclReply = (QcPrtclReply*)malloc(sizeof(QcPrtclReply));
 	prtclReply->result = 0;
 	prtclReply->msg_len = 0;
 	qc_prtcl_reply_hton(prtclReply);
-	ret = qc_tcp_send(socket, prtclReply, sizeof(QcPrtclReply));
+	ret = qc_tcp_send(socket, (char*)prtclReply, sizeof(QcPrtclReply));
 	if (ret != sizeof(QcPrtclReply))
 		goto failed;
 
@@ -45,7 +41,7 @@ int qc_proc_producer(QcProducerHdl *producerHdl, char *prtcl_buff, QcErr *err)
 		if (ret <= 0)
 			goto failed;
 
-		QcPrtclHead *prtclHead = head_buff;
+		QcPrtclHead *prtclHead = (QcPrtclHead*)head_buff;
 		qc_prtcl_head_ntoh(prtclHead);
 		int body_len = prtclHead->body_len;
 
@@ -59,7 +55,7 @@ int qc_proc_producer(QcProducerHdl *producerHdl, char *prtcl_buff, QcErr *err)
 			goto failed;
 
 		if (prtclHead->subtype != QC_TYPE_MSGPUT) {
-			QcPrtclProduce* prtclProduce = body_buff;
+			QcPrtclProduce* prtclProduce = (QcPrtclProduce*)body_buff;
 			qc_prtcl_produce_ntoh(prtclProduce);
 
 			unsigned short msg_prioriy = prtclProduce->msg_prioriy;
@@ -78,14 +74,14 @@ int qc_proc_producer(QcProducerHdl *producerHdl, char *prtcl_buff, QcErr *err)
 				goto failed;
 
 			prtclHead->type = QC_TYPE_REPLY;
-			ret = qc_tcp_send(socket, prtclHead, sizeof(QcPrtclHead));
+			ret = qc_tcp_send(socket, (char*)prtclHead, sizeof(QcPrtclHead));
 			if (ret != sizeof(QcPrtclHead))
 				goto failed;
 
 			prtclReply->result = 0;
 			prtclReply->msg_len = msg_len;
 			qc_prtcl_reply_hton(prtclReply);
-			ret = qc_tcp_send(socket, prtclReply, sizeof(QcPrtclReply));
+			ret = qc_tcp_send(socket, (char*)prtclReply, sizeof(QcPrtclReply));
 			if (ret != sizeof(QcPrtclReply))
 				goto failed;
 

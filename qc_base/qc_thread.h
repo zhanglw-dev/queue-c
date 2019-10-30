@@ -15,7 +15,7 @@ typedef struct __QcRWLock QcRWLock;
 
 #define QCTHREAD_CANCELED PTHREAD_CANCELED
 
-typedef void *(*qc_thread_routine)(void *);
+typedef void (*qc_thread_routine)(void *);
 typedef void (*qc_destruct_routine)(void *);
 
 

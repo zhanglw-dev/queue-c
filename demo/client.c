@@ -1,66 +1,56 @@
 #include "qc_qsystem.h"
 #include "qc_queue.h"
 #include "qc_service.h"
+#include "qc_client.h"
 
 
 
-int test_net()
+void producer_routine(void *param)
 {
 	QcErr err;
-	int ret;
+	printf("start producer...\n");
 
-	QcQueue *queue = qc_queue_create(1000, 10, &err);
-	if (!queue) {
-		printf("create queue failed.\n");
-		return -1;
+	QcClient *client = qc_producer_connect("127.0.0.1", 5555, "queue1", &err);
+	if (NULL == client) {
+		printf("producer connect failed.\n");
+		return;
 	}
 
-	QcQSystem *qSys = qc_qsys_create();
-	if (!qSys) {
-		printf("create qsystem failed.\n");
-		return -1;
-	}
+	qc_producer_disconnect(client);
 
-	ret = qc_qsys_queue_add(qSys, "queue1", queue, &err);
-	if (0 != ret) {
-		printf("add queue to qsys failed.\n");
-		return -1;
-	}
-	
-	QcQueueSvc* queueSvc = qc_queuesvc_create("127.0.0.1", 5555, qSys, &err);
-	if (!queueSvc) {
-		printf("create queue service failed.\n");
-		return -1;
-	}
-
-	ret = qc_queuesvc_start(queueSvc, &err);
-	if (0 != ret) {
-		printf("queue service start.\n");
-		return -1;
-	}
-
-
-
-	qc_queuesvc_stop(queueSvc);
-
-	qc_queuesvc_destory(queueSvc);
-	qc_qsys_destory(qSys);
-	qc_queue_destroy(queue);
-
-	return 0;
+	qc_thread_exit(0);
 }
 
+
+void consumer_routine(void *param)
+{
+	QcErr err;
+	printf("start consumer...\n");
+
+	QcClient *client = qc_consumer_connect("127.0.0.1", 5555, "queue1", &err);
+	if (NULL == client) {
+		printf("consumer connect failed.\n");
+		return;
+	}
+
+	qc_consumer_disconnect(client);
+
+	qc_thread_exit(0);
+}
 
 
 int main(int argc, char **argv)
 {
-	int ret;
+	int excode;
 
-	ret = test_net();
-	if (0 != ret) {
-		printf("net test failed.");
-		exit(-1);
-	}
+	QcThread *threadProducer;
+	QcThread *threadConsumer;
+
+	//threadProducer = qc_thread_create(producer_routine, NULL);
+	threadConsumer = qc_thread_create(consumer_routine, NULL);
+
+	//qc_thread_join(threadProducer, &excode);
+	qc_thread_join(threadConsumer, &excode);
 
 	exit(0);
 }

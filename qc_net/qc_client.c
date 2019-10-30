@@ -27,31 +27,38 @@ static QcClient* client_connect(const char *ip, int port, const char *qname, uns
 	QcPrtclRegister prtclRegister;
 	memset(&prtclRegister, 0, sizeof(QcPrtclRegister));
 	strcpy(prtclRegister.qname, qname);
+	qc_prtcl_register_hton(&prtclRegister);
 
 	qc_prtcl_head_hton(&prtclHead);
 	ret = qc_tcp_send(socket, &prtclHead, sizeof(QcPrtclHead));
 	if (ret != sizeof(QcPrtclHead))
 		goto failed;
 
-	qc_prtcl_head_hton(&prtclRegister);
+	qc_prtcl_register_hton(&prtclRegister);
 	ret = qc_tcp_send(socket, &prtclRegister, sizeof(QcPrtclRegister));
 	if (ret != sizeof(QcPrtclRegister))
 		goto failed;
+
+	ret = qc_tcp_recvall(socket, &prtclHead, sizeof(QcPrtclHead));
+	if (ret < 0)
+		goto failed;
+	qc_prtcl_head_ntoh(&prtclHead);
 
 	QcPrtclReply prtclReply;
 	ret = qc_tcp_recvall(socket, &prtclReply, sizeof(QcPrtclReply));
 	if (ret <= 0)
 		goto failed;
+	qc_prtcl_reply_ntoh(&prtclReply);
 
 	if (prtclReply.result != 0) {
 		return -1;
 	}
 
 	client->socket = socket;
-	return 0;
+	return client;
 
 failed:
-	return -1;
+	return NULL;
 }
 
 

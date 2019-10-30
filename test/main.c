@@ -2,7 +2,6 @@
 #include "test_mq.h"
 #include "test_qdb.h"
 #include "test_qsys.h"
-#include "test_net.h"
 
 
 
@@ -26,19 +25,13 @@ int main(int argc, char **argv)
 	}
 	*/
 
-	/*
+	
 	ret = mq_test_all();
 	if (0 != ret) {
 		printf("mq test failed.");
 		exit(-1);
 	}
-	*/
 	
-	ret = test_net();
-	if (0 != ret) {
-		printf("net test failed.");
-		exit(-1);
-	}
-
+	
 	exit(0);
 }

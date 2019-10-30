@@ -54,7 +54,7 @@ int qc_proc_producer(QcProducerHdl *producerHdl, QcPrtclHead *prtclHead, char *p
 		if (prtclHead->type != QC_TYPE_PRODUCER)
 			goto failed;
 
-		if (prtclHead->subtype != QC_TYPE_MSGPUT) {
+		if (prtclHead->subtype == QC_TYPE_MSGPUT) {
 			QcPrtclProduce* prtclProduce = (QcPrtclProduce*)body_buff;
 			qc_prtcl_produce_ntoh(prtclProduce);
 
@@ -66,7 +66,7 @@ int qc_proc_producer(QcProducerHdl *producerHdl, QcPrtclHead *prtclHead, char *p
 			if (!queue)
 				goto failed;
 
-			char *buff = head_buff + sizeof(QcPrtclProduce);
+			char *buff = body_buff + sizeof(QcPrtclProduce);
 			QcMessage *message = qc_message_create(buff, msg_len, 1);
 
 			ret = qc_queue_msgput(queue, message, wait_msec, err);

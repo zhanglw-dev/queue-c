@@ -8,6 +8,7 @@
 void producer_routine(void *param)
 {
 	QcErr err;
+	int ret;
 	printf("start producer...\n");
 
 	QcClient *client = qc_producer_connect("127.0.0.1", 5555, "queue1", &err);
@@ -16,9 +17,20 @@ void producer_routine(void *param)
 		return;
 	}
 
+	char buff[20];
+	memset(buff, 0, sizeof(buff));
+	strcpy(buff, "hello queue1");
+
+	QcMessage *message = qc_message_create(buff, (int)strlen(buff), 0);
+	ret = qc_producer_msgput(client, message, 1, &err);
+	if (0 != ret) {
+		printf("producer put msg failed.\n");
+		return;
+	}
+
 	qc_producer_disconnect(client);
 
-	qc_thread_exit(0);
+	////qc_thread_exit(0);
 }
 
 
@@ -33,24 +45,34 @@ void consumer_routine(void *param)
 		return;
 	}
 
+	QcMessage* message = qc_consumer_msgget(client, -1, &err);
+	char *buf = qc_message_buff(message);
+	printf("msg:%s\n", buf);
+
 	qc_consumer_disconnect(client);
 
-	qc_thread_exit(0);
+	////qc_thread_exit(0);
 }
 
 
 int main(int argc, char **argv)
 {
+	producer_routine(NULL);
+	consumer_routine(NULL);
+
+
+	/*
 	int excode;
 
 	QcThread *threadProducer;
 	QcThread *threadConsumer;
 
-	//threadProducer = qc_thread_create(producer_routine, NULL);
+	threadProducer = qc_thread_create(producer_routine, NULL);
 	threadConsumer = qc_thread_create(consumer_routine, NULL);
 
-	//qc_thread_join(threadProducer, &excode);
+	qc_thread_join(threadProducer, &excode);
 	qc_thread_join(threadConsumer, &excode);
+	*/
 
 	exit(0);
 }

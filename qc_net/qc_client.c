@@ -83,6 +83,7 @@ void qc_producer_disconnect(QcClient *client)
 int qc_producer_msgput(QcClient *client, QcMessage *message, int msec, QcErr *err)
 {
 	int ret;
+	QcSocket *socket = client->socket;
 
 	QcPrtclHead prtclHead;
 	memset(&prtclHead, 0, sizeof(QcPrtclHead));
@@ -105,13 +106,17 @@ int qc_producer_msgput(QcClient *client, QcMessage *message, int msec, QcErr *er
 	if (ret != sizeof(QcPrtclHead))
 		goto failed;
 
-	qc_prtcl_head_hton(&prtclProduce);
+	qc_prtcl_produce_hton(&prtclProduce);
 	ret = qc_tcp_send(socket, &prtclProduce, sizeof(QcPrtclProduce));
 	if (ret != sizeof(QcPrtclProduce))
 		goto failed;
 
 	ret = qc_tcp_send(socket, qc_message_buff(message), qc_message_bufflen(message));
 	if (ret != qc_message_bufflen(message))
+		goto failed;
+	
+	ret = qc_tcp_recvall(socket, &prtclHead, sizeof(QcPrtclHead));
+	if (ret <= 0)
 		goto failed;
 
 	QcPrtclReply prtclReply;
@@ -141,13 +146,14 @@ void qc_consumer_disconnect(QcClient *client)
 QcMessage* qc_consumer_msgget(QcClient *client, int msec, QcErr *err)
 {
 	int ret;
+	QcSocket *socket = client->socket;
 
 	QcPrtclHead prtclHead;
 	memset(&prtclHead, 0, sizeof(QcPrtclHead));
 	prtclHead.protocol = QC_PROTOCOL_MQ;
 	prtclHead.version = QC_PROTOCOL_VERSION;
-	prtclHead.type = QC_TYPE_PRODUCER;
-	prtclHead.subtype = QC_TYPE_MSGPUT;
+	prtclHead.type = QC_TYPE_CONSUMER;
+	prtclHead.subtype = QC_TYPE_MSGGET;
 	prtclHead.packsn = 0;
 	////prtclHead.body_len = ;
 
@@ -161,7 +167,7 @@ QcMessage* qc_consumer_msgget(QcClient *client, int msec, QcErr *err)
 	if (ret != sizeof(QcPrtclHead))
 		goto failed;
 
-	qc_prtcl_head_hton(&prtclConsume);
+	qc_prtcl_consume_hton(&prtclConsume);
 	ret = qc_tcp_send(socket, &prtclConsume, sizeof(QcPrtclConsume));
 	if (ret != sizeof(QcPrtclConsume))
 		goto failed;
@@ -175,13 +181,16 @@ QcMessage* qc_consumer_msgget(QcClient *client, int msec, QcErr *err)
 	ret = qc_tcp_recvall(socket, &prtclReply, sizeof(QcPrtclReply));
 	if (ret <= 0)
 		goto failed;
+	qc_prtcl_reply_ntoh(&prtclReply);
 
 	if (prtclReply.result != 0)
 		goto failed;
 
-	char *buff = (char*)malloc(prtclReply.msg_len);
+	char *buff;
+	qc_malloc(buff, prtclReply.msg_len+1);
+
 	int buff_len = prtclReply.msg_len;
-	ret = qc_tcp_recvall(socket, &buff, buff_len);
+	ret = qc_tcp_recvall(socket, buff, buff_len);
 	if (ret <= 0)
 		goto failed;
 

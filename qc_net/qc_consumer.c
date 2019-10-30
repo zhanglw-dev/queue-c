@@ -51,10 +51,10 @@ int qc_proc_consumer(QcConsumerHdl *consumerHdl, QcPrtclHead *prtclHead, char *p
 		if (ret <= 0)
 			goto failed;
 
-		if (prtclHead->type != QC_TYPE_PRODUCER)
+		if (prtclHead->type != QC_TYPE_CONSUMER)
 			goto failed;
 
-		if (prtclHead->subtype != QC_TYPE_MSGGET) {
+		if (prtclHead->subtype == QC_TYPE_MSGGET) {
 			QcPrtclConsume* prtclConsume = (QcPrtclConsume*)body_buff;
 			qc_prtcl_consume_ntoh(prtclConsume);
 
@@ -64,7 +64,7 @@ int qc_proc_consumer(QcConsumerHdl *consumerHdl, QcPrtclHead *prtclHead, char *p
 			if (!queue)
 				goto failed;
 
-			char *buff = head_buff + sizeof(QcPrtclProduce);
+			char *buff = body_buff + sizeof(QcPrtclConsume);
 
 			QcMessage* message = qc_queue_msgget(queue, prtclConsume->wait_msec, err);
 			if (!message)
@@ -83,7 +83,7 @@ int qc_proc_consumer(QcConsumerHdl *consumerHdl, QcPrtclHead *prtclHead, char *p
 			if (ret != sizeof(QcPrtclReply))
 				goto failed;
 
-			ret = qc_tcp_send(socket, (char*)qc_message_buff(message), prtclReply->msg_len);
+			ret = qc_tcp_send(socket, (char*)qc_message_buff(message), msg_len);
 			if (ret != msg_len)
 				goto failed;
 		}

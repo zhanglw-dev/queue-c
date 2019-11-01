@@ -70,3 +70,4 @@ void qc_prtcl_reply_ntoh(QcPrtclReply *reply);
 
 
 #endif /*QC_PROTOCOL_H*/
+ 

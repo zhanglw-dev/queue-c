@@ -56,13 +56,13 @@ int qc_socket_nagle_onoff(QcSocket *socket, int onoff);
 
 int qc_socket_getfd(QcSocket *socket);
 
-int qc_tcp_bind(QcSocket *socket, char* ip, int port);
+int qc_tcp_bind(QcSocket *socket, const char* ip, int port);
 
 int qc_tcp_listen(QcSocket *socket);
 
 QcSocket* qc_tcp_accept(QcSocket *socket);
 
-int qc_tcp_connect(QcSocket *socket, char* ip, int port);
+int qc_tcp_connect(QcSocket *socket, const char* ip, int port);
 
 int qc_tcp_send(QcSocket *socket, char *sendbuf, int len);
 

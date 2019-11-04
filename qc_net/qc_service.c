@@ -5,16 +5,15 @@
 #include "qc_queue.h"
 #include "qc_qsystem.h"
 #include "qc_protocol.h"
+#include "qc_netconf.h"
 
 
 struct __QcQueueSvc {
-	char svc_ip[256];
-	int svc_port;
+	QcNetConfig *netConf;
+	QcQSystem *qSystem;
 
 	QcThread *listenThread;
 	QcList *workThreadList;
-
-	QcQSystem *qSystem;
 };
 
 
@@ -102,14 +101,10 @@ int qc_proc_producer(QcProducerHdl *producerHdl, QcPrtclHead *prtclHead, char *p
 			int wait_msec = prtclProduce->wait_msec;
 			unsigned int msg_len = prtclProduce->msg_len;
 
-			QcQueue *queue = qc_qsys_queue_get(producerHdl->qSystem, producerHdl->qname, err);
-			if (!queue)
-				goto failed;
-
 			char *buff = body_buff + sizeof(QcPrtclProduce);
 			QcMessage *message = qc_message_create(buff, msg_len, 1);
 
-			ret = qc_queue_msgput(queue, message, wait_msec, err);
+			ret = qc_qsys_putmsg(producerHdl->qSystem, producerHdl->qname, message, wait_msec, err);
 			if (0 != ret)
 				goto failed;
 
@@ -124,10 +119,6 @@ int qc_proc_producer(QcProducerHdl *producerHdl, QcPrtclHead *prtclHead, char *p
 			ret = qc_tcp_send(socket, (char*)prtclReply, sizeof(QcPrtclReply));
 			if (ret != sizeof(QcPrtclReply))
 				goto failed;
-
-			//ret = qc_tcp_send(socket, msg_buff, msg_len);
-			//if (ret != msg_len)
-			//	goto failed;
 		}
 	}
 
@@ -193,15 +184,10 @@ int qc_proc_consumer(QcConsumerHdl *consumerHdl, QcPrtclHead *prtclHead, char *p
 
 			int wait_msec = prtclConsume->wait_msec;
 
-			QcQueue *queue = qc_qsys_queue_get(consumerHdl->qSystem, consumerHdl->qname, err);
-			if (!queue)
-				goto failed;
-
-			char *buff = body_buff + sizeof(QcPrtclConsume);
-
-			QcMessage* message = qc_queue_msgget(queue, prtclConsume->wait_msec, err);
-			if (!message)
+			QcMessage* message = qc_qsys_getmsg(consumerHdl->qSystem, consumerHdl->qname, prtclConsume->wait_msec, err);
+			if (NULL == message)
 				return -1;
+
 			int msg_len = qc_message_bufflen(message);
 
 			prtclHead->type = QC_TYPE_REPLY;
@@ -318,16 +304,19 @@ void listen_thread_routine(void *param)
 
 //-----------------------------------------------------------------------------------------------------------------
 
+QcQueueSvc* qc_queuesvc_create(QcErr *err)
+{
+	return NULL;
+}
 
-QcQueueSvc* qc_queuesvc_create(const char* ip, int port, QcQSystem *qSystem, QcErr *err)
+
+QcQueueSvc* qc_queuesvc_create_ex(QcNetConfig *netConf, QcQSystem *qSystem, QcErr *err)
 {
 	QcQueueSvc *queueSvc;
 	qc_malloc(queueSvc, sizeof(QcQueueSvc));
 
 	QcList *procList = qc_list_create(1);
-
-	strcpy(queueSvc->svc_ip, ip);
-	queueSvc->svc_port = port;
+	queueSvc->netConf = netConf;
 	queueSvc->workThreadList = procList;
 	queueSvc->listenThread = NULL;
 	queueSvc->qSystem = qSystem;
@@ -345,13 +334,16 @@ void qc_queuesvc_destory(QcQueueSvc *queueSvc)
 
 int qc_queuesvc_start(QcQueueSvc *queueSvc, QcErr *err)
 {
-	int ret, excode=0;
+	int excode=0;
 	QcSocket* socket = qc_socket_create(AF_INET, SOCK_STREAM, 0);
 
 	ListenParam *listenParam;
 	qc_malloc(listenParam, sizeof(ListenParam));
 
-	ret = qc_tcp_bind(socket, queueSvc->svc_ip, queueSvc->svc_port);
+	char *ip = qc_netconf_getip(queueSvc->netConf);
+	int port = qc_netconf_getport(queueSvc->netConf);
+
+	int ret = qc_tcp_bind(socket, ip, port);
 	if (0 != ret) {
 		qc_seterr(err, QC_ERR_SOCKET, "socket bind failed.");
 		return -1;

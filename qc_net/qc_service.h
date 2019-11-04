@@ -5,12 +5,15 @@
 #include "qc_thread.h"
 #include "qc_error.h"
 #include "qc_qsystem.h"
+#include "qc_netconf.h"
 
 
 typedef struct __QcQueueSvc QcQueueSvc;
 
 
-QcQueueSvc* qc_queuesvc_create(const char* ip, int port, QcQSystem *qSystem, QcErr *err);
+QcQueueSvc* qc_queuesvc_create(QcErr *err);
+
+QcQueueSvc* qc_queuesvc_create_ex(QcNetConfig *netConf, QcQSystem *qSystem, QcErr *err);
 
 void qc_queuesvc_destory(QcQueueSvc *queueSvc);
 

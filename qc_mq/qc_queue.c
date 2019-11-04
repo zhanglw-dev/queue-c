@@ -175,7 +175,7 @@ put_loop:
 }
 
 
-QcMessage* qc_queue_msgget(QcQueue *queue, int sec, QcErr *err){
+QcMessage* qc_queue_msgget(QcQueue *queue, int msec, QcErr *err){
 
 	if(NULL == queue){
 		qc_seterr(err, QC_ERR_BADPARAM, "invalid input params, QcQueue* is NULL.");
@@ -200,7 +200,7 @@ QcMessage* qc_queue_msgget(QcQueue *queue, int sec, QcErr *err){
 		
 		QcMessage *message = NULL;
 
-		int ret = qc_thread_cond_timedwait(getter->cond, getter->condlock, sec);
+		int ret = qc_thread_cond_timedwait(getter->cond, getter->condlock, msec);
 		if(QC_TIMEOUT == ret){
 			getter->is_timedout = 1;
 		}

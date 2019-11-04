@@ -17,7 +17,7 @@ QcMessage* qc_message_create(const char *buff, int len, int flag_dupbuff);
 
 void qc_message_release(QcMessage *message, int flag_freebuff);
 
-const char* qc_message_buff(QcMessage *message);
+char* qc_message_buff(QcMessage *message);
 
 int qc_message_bufflen(QcMessage *message);
 

@@ -20,11 +20,13 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\qc_net\qc_client.c" />
+    <ClCompile Include="..\qc_net\qc_netconf.c" />
     <ClCompile Include="..\qc_net\qc_protocol.c" />
     <ClCompile Include="..\qc_net\qc_service.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\qc_net\qc_client.h" />
+    <ClInclude Include="..\qc_net\qc_netconf.h" />
     <ClInclude Include="..\qc_net\qc_protocol.h" />
     <ClInclude Include="..\qc_net\qc_service.h" />
   </ItemGroup>

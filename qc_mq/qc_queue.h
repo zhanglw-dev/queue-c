@@ -22,7 +22,7 @@ unsigned int qc_queue_msgcount(QcQueue *queue);
 
 int qc_queue_msgput(QcQueue *queue, QcMessage *message, int msec, QcErr *err);
 
-QcMessage* qc_queue_msgget(QcQueue *queue, int sec, QcErr *err);
+QcMessage* qc_queue_msgget(QcQueue *queue, int msec, QcErr *err);
 
 
 #ifdef __cplusplus

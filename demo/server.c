@@ -21,13 +21,17 @@ int test_net()
 		return -1;
 	}
 
-	ret = qc_qsys_queue_add(qSys, "queue1", queue, &err);
+	ret = qc_qsys_addqueue(qSys, "queue1", queue, &err);
 	if (0 != ret) {
 		printf("add queue to qsys failed.\n");
 		return -1;
 	}
 	
-	QcQueueSvc* queueSvc = qc_queuesvc_create("127.0.0.1", 5555, qSys, &err);
+	QcNetConfig *netConf = qc_netconf_create();
+	qc_netconf_setip(netConf, "127.0.0.1");
+	qc_netconf_setport(netConf, 5555);
+
+	QcQueueSvc* queueSvc = qc_queuesvc_create_ex(netConf, qSys, &err);
 	if (!queueSvc) {
 		printf("create queue service failed.\n");
 		return -1;

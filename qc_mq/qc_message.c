@@ -57,7 +57,7 @@ void qc_message_release(QcMessage *message, int flag_freebuff){
 }
 
 
-const char* qc_message_buff(QcMessage *message){
+char* qc_message_buff(QcMessage *message){
     qc_assert(message);
     return message->buff;
 }

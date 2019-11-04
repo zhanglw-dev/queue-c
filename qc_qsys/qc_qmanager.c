@@ -36,7 +36,7 @@ void qc_qmng_destory(QcQueManager *qManager)
 }
 
 
-int qc_qmng_addque(QcQueManager *qManager, const char* qname, QcQueue* queue, QcErr *err)
+int qc_qmng_addqueue(QcQueManager *qManager, const char* qname, QcQueue* queue, QcErr *err)
 {
 	int ret;
 	ret = qc_hashtbl_insert(qManager->queueTable, (void*)qname, queue);
@@ -47,7 +47,7 @@ int qc_qmng_addque(QcQueManager *qManager, const char* qname, QcQueue* queue, Qc
 }
 
 
-int qc_qmng_removeque(QcQueManager *qManager, const char *qname, QcErr *err)
+int qc_qmng_delqueue(QcQueManager *qManager, const char *qname, QcErr *err)
 {
 	int ret;
 	ret = qc_hashtbl_delete(qManager->queueTable, (void*)qname);
@@ -57,7 +57,7 @@ int qc_qmng_removeque(QcQueManager *qManager, const char *qname, QcErr *err)
 }
 
 
-QcQueue* qc_qmng_getque(QcQueManager *qManager, const char *qname, QcErr *err)
+QcQueue* qc_qmng_getqueue(QcQueManager *qManager, const char *qname, QcErr *err)
 {
 	QcQueue *queue = qc_hashtbl_find(qManager->queueTable, (void*)qname);
 	return queue;

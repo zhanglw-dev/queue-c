@@ -1,10 +1,14 @@
 #include "qc_client.h"
 #include "qc_protocol.h"
+#include "qc_socket.h"
 
 
+struct __QcClient {
+	QcSocket *socket;
+};
 
-//type: 1 producer, 2 consumer
-static QcClient* client_connect(const char *ip, int port, const char *qname, unsigned short type, QcErr *err)
+
+QcClient* qc_client_connect(const char *ip, int port, const char *qname, QcErr *err)
 {
 	int ret;
 
@@ -15,72 +19,21 @@ static QcClient* client_connect(const char *ip, int port, const char *qname, uns
 	if (0 != ret)
 		goto failed;
 
-	QcPrtclHead prtclHead;
-	memset(&prtclHead, 0, sizeof(QcPrtclHead));
-	prtclHead.protocol = QC_PROTOCOL_MQ;
-	prtclHead.version = QC_PROTOCOL_VERSION;
-	prtclHead.type = type;
-	prtclHead.subtype = QC_TYPE_REGISTER;
-	prtclHead.packsn = 0;
-	prtclHead.body_len = sizeof(QcPrtclRegister);
-
-	QcPrtclRegister prtclRegister;
-	memset(&prtclRegister, 0, sizeof(QcPrtclRegister));
-	strcpy(prtclRegister.qname, qname);
-	qc_prtcl_register_hton(&prtclRegister);
-
-	qc_prtcl_head_hton(&prtclHead);
-	ret = qc_tcp_send(socket, (char*)&prtclHead, sizeof(QcPrtclHead));
-	if (ret != sizeof(QcPrtclHead))
-		goto failed;
-
-	qc_prtcl_register_hton(&prtclRegister);
-	ret = qc_tcp_send(socket, (char*)&prtclRegister, sizeof(QcPrtclRegister));
-	if (ret != sizeof(QcPrtclRegister))
-		goto failed;
-
-	ret = qc_tcp_recvall(socket, (char*)&prtclHead, sizeof(QcPrtclHead));
-	if (ret < 0)
-		goto failed;
-	qc_prtcl_head_ntoh(&prtclHead);
-
-	QcPrtclReply prtclReply;
-	ret = qc_tcp_recvall(socket, (char*)&prtclReply, sizeof(QcPrtclReply));
-	if (ret <= 0)
-		goto failed;
-	qc_prtcl_reply_ntoh(&prtclReply);
-
-	if (prtclReply.result != 0) {
-		return NULL;
-	}
-
 	client->socket = socket;
-	return client;
 
+	return client;
 failed:
 	return NULL;
 }
 
 
-static void client_disconnect(QcClient *client)
+void qc_client_disconnect(QcClient *client)
 {
 	qc_socket_close(client->socket);
 }
 
 
-QcClient* qc_producer_connect(const char *ip, int port, const char* qname, QcErr *err)
-{
-	return client_connect(ip, port, qname, QC_TYPE_PRODUCER, err);
-}
-
-
-void qc_producer_disconnect(QcClient *client)
-{
-	client_disconnect(client);
-}
-
-
-int qc_producer_msgput(QcClient *client, QcMessage *message, int msec, QcErr *err)
+int qc_producer_msgput(QcClient *client, const char *qname, QcMessage *message, int msec, QcErr *err)
 {
 	int ret;
 	QcSocket *socket = client->socket;
@@ -89,26 +42,24 @@ int qc_producer_msgput(QcClient *client, QcMessage *message, int msec, QcErr *er
 	memset(&prtclHead, 0, sizeof(QcPrtclHead));
 	prtclHead.protocol = QC_PROTOCOL_MQ;
 	prtclHead.version = QC_PROTOCOL_VERSION;
-	prtclHead.type = QC_TYPE_PRODUCER;
-	prtclHead.subtype = QC_TYPE_MSGPUT;
+	prtclHead.type = QC_TYPE_MSGPUT;
 	prtclHead.packsn = 0;
-	////prtclHead.body_len = ;
 
-	QcPrtclProduce prtclProduce;
-	prtclProduce.wait_msec = msec;
-	prtclProduce.msg_prioriy = qc_message_priority(message);
-	prtclProduce.msg_len = qc_message_bufflen(message);
+	QcPrtclMsgPut prtclMsgPut;
+	prtclMsgPut.wait_msec = msec;
+	prtclMsgPut.msg_prioriy = qc_message_priority(message);
+	prtclMsgPut.msg_len = qc_message_bufflen(message);
 
-	prtclHead.body_len = sizeof(QcPrtclProduce) + prtclProduce.msg_len;
+	prtclHead.body_len = sizeof(QcPrtclMsgPut) + prtclMsgPut.msg_len;
 
 	qc_prtcl_head_hton(&prtclHead);
 	ret = qc_tcp_send(socket, (char*)&prtclHead, sizeof(QcPrtclHead));
 	if (ret != sizeof(QcPrtclHead))
 		goto failed;
 
-	qc_prtcl_produce_hton(&prtclProduce);
-	ret = qc_tcp_send(socket, (char*)&prtclProduce, sizeof(QcPrtclProduce));
-	if (ret != sizeof(QcPrtclProduce))
+	qc_prtcl_msgput_hton(&prtclMsgPut);
+	ret = qc_tcp_send(socket, (char*)&prtclMsgPut, sizeof(QcPrtclMsgPut));
+	if (ret != sizeof(QcPrtclMsgPut))
 		goto failed;
 
 	ret = qc_tcp_send(socket, (char*)qc_message_buff(message), qc_message_bufflen(message));
@@ -124,6 +75,9 @@ int qc_producer_msgput(QcClient *client, QcMessage *message, int msec, QcErr *er
 	if (ret <= 0)
 		goto failed;
 
+	if (prtclReply.result != 0)
+		goto failed;
+
 	return 0;
 
 failed:
@@ -131,19 +85,7 @@ failed:
 }
 
 
-QcClient* qc_consumer_connect(const char *ip, int port, const char* qname, QcErr *err)
-{
-	return client_connect(ip, port, qname, QC_TYPE_CONSUMER, err);
-}
-
-
-void qc_consumer_disconnect(QcClient *client)
-{
-	client_disconnect(client);
-}
-
-
-QcMessage* qc_consumer_msgget(QcClient *client, int msec, QcErr *err)
+QcMessage* qc_consumer_msgget(QcClient *client, const char *qname, int msec, QcErr *err)
 {
 	int ret;
 	QcSocket *socket = client->socket;
@@ -152,24 +94,22 @@ QcMessage* qc_consumer_msgget(QcClient *client, int msec, QcErr *err)
 	memset(&prtclHead, 0, sizeof(QcPrtclHead));
 	prtclHead.protocol = QC_PROTOCOL_MQ;
 	prtclHead.version = QC_PROTOCOL_VERSION;
-	prtclHead.type = QC_TYPE_CONSUMER;
-	prtclHead.subtype = QC_TYPE_MSGGET;
+	prtclHead.type = QC_TYPE_MSGGET;
 	prtclHead.packsn = 0;
-	////prtclHead.body_len = ;
 
-	QcPrtclConsume prtclConsume;
-	prtclConsume.wait_msec = msec;
+	QcPrtclMsgGet prtclMsgGet;
+	prtclMsgGet.wait_msec = msec;
 
-	prtclHead.body_len = sizeof(QcPrtclConsume);
+	prtclHead.body_len = sizeof(QcPrtclMsgGet);
 
 	qc_prtcl_head_hton(&prtclHead);
 	ret = qc_tcp_send(socket, (char*)&prtclHead, sizeof(QcPrtclHead));
 	if (ret != sizeof(QcPrtclHead))
 		goto failed;
 
-	qc_prtcl_consume_hton(&prtclConsume);
-	ret = qc_tcp_send(socket, (char*)&prtclConsume, sizeof(QcPrtclConsume));
-	if (ret != sizeof(QcPrtclConsume))
+	qc_prtcl_msgget_hton(&prtclMsgGet);
+	ret = qc_tcp_send(socket, (char*)&prtclMsgGet, sizeof(prtclMsgGet));
+	if (ret != sizeof(QcPrtclMsgGet))
 		goto failed;
 
 	//receive

@@ -1,5 +1,5 @@
-#include "test_qdb.h"
-#include "qc_qtbl.h"
+#include "test_psist.h"
+#include "qc_psist.h"
 #include "qc_file.h"
 
 #define MSG_BUFF_SIZE 1024
@@ -9,7 +9,7 @@ static const char* filename = "mq_test01.tbl";
 static const char *buff = "hello table file!";
 
 
-int test_qtbl_file()
+int test_psist_file()
 {
 	QcErr err;
 	int ret;
@@ -24,24 +24,24 @@ int test_qtbl_file()
 	sprintf(filepath, "%s/../db/%s", cwd, filename);
 
 
-	QcQTbl *qTbl = qc_qtbl_open(MSG_BUFF_SIZE, MSG_COUNT_LIMIT, filepath, &err);
-	if (!qTbl) {
-		printf("open qtbl failed.\n");
+	QcPsist *qPsist = qc_psist_open(MSG_BUFF_SIZE, MSG_COUNT_LIMIT, filepath, &err);
+	if (!qPsist) {
+		printf("open psist failed.\n");
 		return -1;
 	}
 
 	for (int i = 0; i < 1000; i++) {
 		QcMessage *message = qc_message_create(buff, (int)strlen(buff), 0);
-		ret = qc_qtbl_append(qTbl, message, &err);
+		ret = qc_psist_append(qPsist, message, &err);
 		if (0 != ret) {
-			printf("qtbl append failed.\n");
+			printf("psist append failed.\n");
 			return -1;
 		}
 		qc_message_release(message, 0);
 	}
 
 	QcQueue* queue = qc_queue_create(MSG_COUNT_LIMIT, 10, NULL);
-	ret = qc_qtbl_loadqueue(qTbl, queue, &err);
+	ret = qc_psist_loadqueue(qPsist, queue, &err);
 	if (0 != ret) {
 		printf("load queue failed.\n");
 		return -1;
@@ -58,7 +58,7 @@ int test_qtbl_file()
 		qc_message_release(message1, 0);
 	}
 
-	qc_qtbl_close(qTbl);
+	qc_psist_close(qPsist);
 
 	return 0;
 }

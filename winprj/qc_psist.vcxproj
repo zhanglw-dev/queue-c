@@ -19,12 +19,12 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\qc_qdb\qc_qtbl.c" />
-    <ClCompile Include="..\qc_qdb\qc_qtbl_file.c" />
+    <ClCompile Include="..\qc_psist\qc_psist.c" />
+    <ClCompile Include="..\qc_psist\qc_psist_file.c" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\qc_qdb\qc_qtbl.h" />
-    <ClInclude Include="..\qc_qdb\qc_qtbl_file.h" />
+    <ClInclude Include="..\qc_psist\qc_psist.h" />
+    <ClInclude Include="..\qc_psist\qc_psist_file.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>

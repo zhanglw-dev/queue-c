@@ -2,7 +2,7 @@
 #define TEST_QDB_H
 
 
-int test_qtbl_file();
+int test_psist_file();
 
 
 #endif

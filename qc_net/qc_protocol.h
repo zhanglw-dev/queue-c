@@ -1,15 +1,11 @@
 #ifndef QC_PROTOCOL_H
 #define QC_PROTOCOL_H
 
-
 #define QC_PROTOCOL_MQ    55555
 #define QC_PROTOCOL_VERSION 1
 
-#define QC_TYPE_REGISTER  100
-#define QC_TYPE_PRODUCER  110
-#define QC_TYPE_CONSUMER  111
-#define QC_TYPE_MSGGET    120
-#define QC_TYPE_MSGPUT    121
+#define QC_TYPE_MSGPUT    120
+#define QC_TYPE_MSGGET    121
 #define QC_TYPE_REPLY     130
 
 #pragma pack(push)
@@ -20,7 +16,6 @@ typedef struct {
 	unsigned short protocol;
 	unsigned short version;
 	unsigned short type;
-	unsigned short subtype;
 	unsigned int packsn;
 	unsigned int body_len;
 	char reserve[16];
@@ -29,19 +24,16 @@ typedef struct {
 
 typedef struct {
 	char qname[32];
-}QcPrtclRegister;
-
-
-typedef struct {
 	int wait_msec;
 	unsigned short msg_prioriy;
 	unsigned int msg_len;
-}QcPrtclProduce;
+}QcPrtclMsgPut;
 
 
 typedef struct {
+	char qname[32];
 	int wait_msec;
-}QcPrtclConsume;
+}QcPrtclMsgGet;
 
 
 typedef struct {
@@ -56,18 +48,14 @@ typedef struct {
 void qc_prtcl_head_hton(QcPrtclHead *head);
 void qc_prtcl_head_ntoh(QcPrtclHead *head);
 
-void qc_prtcl_register_hton(QcPrtclRegister *regist);
-void qc_prtcl_register_ntoh(QcPrtclRegister *regist);
+void qc_prtcl_msgget_hton(QcPrtclMsgGet *msgget);
+void qc_prtcl_msgget_ntoh(QcPrtclMsgGet *msgget);
 
-void qc_prtcl_produce_hton(QcPrtclProduce *produce);
-void qc_prtcl_produce_ntoh(QcPrtclProduce *produce);
-
-void qc_prtcl_consume_hton(QcPrtclConsume *consume);
-void qc_prtcl_consume_ntoh(QcPrtclConsume *consume);
+void qc_prtcl_msgput_hton(QcPrtclMsgPut *msgput);
+void qc_prtcl_msgput_ntoh(QcPrtclMsgPut *msgput);
 
 void qc_prtcl_reply_hton(QcPrtclReply *reply);
 void qc_prtcl_reply_ntoh(QcPrtclReply *reply);
 
 
 #endif /*QC_PROTOCOL_H*/
- 

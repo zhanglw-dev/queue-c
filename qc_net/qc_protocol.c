@@ -8,7 +8,6 @@ void qc_prtcl_head_hton(QcPrtclHead *head)
 	head->protocol = htons(head->protocol);
 	head->version = htons(head->version);
 	head->type = htons(head->type);
-	head->subtype = htons(head->subtype);
 	head->packsn = htonl(head->packsn);
 	head->body_len = htonl(head->body_len);
 }
@@ -19,49 +18,36 @@ void qc_prtcl_head_ntoh(QcPrtclHead *head)
 	head->protocol = ntohs(head->protocol);
 	head->version = ntohs(head->version);
 	head->type = ntohs(head->type);
-	head->subtype = ntohs(head->subtype);
 	head->packsn = ntohl(head->packsn);
 	head->body_len = ntohl(head->body_len);
 }
 
 
-void qc_prtcl_register_hton(QcPrtclRegister *regist)
+void qc_prtcl_msgput_hton(QcPrtclMsgPut *msgput)
 {
-	//
+	msgput->msg_prioriy = htons(msgput->msg_prioriy);
+	msgput->wait_msec = htonl(msgput->wait_msec);
+	msgput->msg_len = htonl(msgput->msg_len);
 }
 
 
-void qc_prtcl_register_ntoh(QcPrtclRegister *regist)
+void qc_prtcl_msgput_ntoh(QcPrtclMsgPut *msgput)
 {
-	//
+	msgput->msg_prioriy = ntohs(msgput->msg_prioriy);
+	msgput->wait_msec = ntohl(msgput->wait_msec);
+	msgput->msg_len = ntohl(msgput->msg_len);
 }
 
 
-void qc_prtcl_produce_hton(QcPrtclProduce *produce)
+void qc_prtcl_msgget_hton(QcPrtclMsgGet *msgget)
 {
-	produce->msg_prioriy = htons(produce->msg_prioriy);
-	produce->wait_msec = htonl(produce->wait_msec);
-	produce->msg_len = htonl(produce->msg_len);
+	msgget->wait_msec = htonl(msgget->wait_msec);
 }
 
 
-void qc_prtcl_produce_ntoh(QcPrtclProduce *produce)
+void qc_prtcl_msgget_ntoh(QcPrtclMsgGet *msgget)
 {
-	produce->msg_prioriy = ntohs(produce->msg_prioriy);
-	produce->wait_msec = ntohl(produce->wait_msec);
-	produce->msg_len = ntohl(produce->msg_len);
-}
-
-
-void qc_prtcl_consume_hton(QcPrtclConsume *consume)
-{
-	consume->wait_msec = htonl(consume->wait_msec);
-}
-
-
-void qc_prtcl_consume_ntoh(QcPrtclConsume *consume)
-{
-	consume->wait_msec = ntohl(consume->wait_msec);
+	msgget->wait_msec = ntohl(msgget->wait_msec);
 }
 
 

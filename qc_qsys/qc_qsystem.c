@@ -24,13 +24,6 @@ QcQSystem* qc_qsys_create()
 	return qSystem;
 }
 
-/*
-QcQSystem* qc_qsys_create_ex(const char* config_file, QcErr *err)
-{
-	//
-	return NULL;
-}
-*/
 
 void qc_qsys_destory(QcQSystem *qSys)
 {
@@ -59,14 +52,12 @@ int qc_qsys_delqueue(QcQSystem *qSys, const char *qname, QcErr *err)
 }
 
 
-/*
 QcQueue* qc_qsys_queue_get(QcQSystem *qSys, const char *qname, QcErr *err)
 {
 	QcQueue *queue;
 	queue = qc_qmng_getqueue(qSys->qManager, qname, err);
 	return queue;
 }
-*/
 
 
 int qc_qsys_putmsg(QcQSystem *qSys, const char *qname, QcMessage *message, int msec, QcErr *err)

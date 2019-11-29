@@ -21,12 +21,12 @@
   <ItemGroup>
     <ClCompile Include="..\test\main.c" />
     <ClCompile Include="..\test\test_mq.c" />
-    <ClCompile Include="..\test\test_qdb.c" />
+    <ClCompile Include="..\test\test_psist.c" />
     <ClCompile Include="..\test\test_qsys.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\test\test_mq.h" />
-    <ClInclude Include="..\test\test_qdb.h" />
+    <ClInclude Include="..\test\test_psist.h" />
     <ClInclude Include="..\test\test_qsys.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
@@ -116,13 +116,13 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>IS_WINDOWS;_DEBUG;_CONSOLE;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>../qc_base;../qc_mq;../qc_qdb;../qc_qsys;../qc_net</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../qc_base;../qc_mq;../qc_psist;../qc_qsys;../qc_net</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>../lib</AdditionalLibraryDirectories>
-      <AdditionalDependencies>qc_base.lib;qc_mq.lib;qc_qdb.lib;qc_qsys.lib;qc_net.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>qc_base.lib;qc_mq.lib;qc_psist.lib;qc_qsys.lib;qc_net.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">

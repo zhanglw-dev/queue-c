@@ -1,2 +1,2 @@
 # qc
-Queue Communication
+Queue-C

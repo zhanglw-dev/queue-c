@@ -12,8 +12,9 @@
 struct __QcQueueSvc {
 	char ip[128+1];
 	int port;
+	int is_running;
 	QcQSystem *qSystem;
-	QcThread *listenThread;
+	QcThread *acceptThread;
 	QcList *workThreadList;
 };
 
@@ -21,12 +22,14 @@ struct __QcQueueSvc {
 typedef struct {
 	QcQueueSvc *queueSvc;
 	QcSocket* socket;
+	QcErr *err;
 }AcceptParam;
 
 
 typedef struct {
 	QcQueueSvc *queueSvc;
 	QcSocket* socket;
+	QcErr *err;
 }WorkParam;
 
 
@@ -34,6 +37,7 @@ typedef struct {
 	QcSocket *socket;
 	char qname[32];
 	QcQSystem *qSystem;
+	QcErr *err;
 }ProcParam;
 
 
@@ -125,7 +129,6 @@ failed:
 void* work_thread_routine(void *param)
 {
 	int ret;
-	QcErr err;
 	int msg_len = 0;
 	WorkParam *workParam = param;
 	QcSocket *socket = workParam->socket;
@@ -144,9 +147,8 @@ void* work_thread_routine(void *param)
 		QcPrtclHead *prtclHead = (QcPrtclHead*)head_buff;
 		qc_prtcl_head_ntoh(prtclHead);
 		int body_len = prtclHead->body_len;
-
 		body_buff = (char*)malloc(body_len);
-		body_len = prtclHead->body_len;
+
 		ret = qc_tcp_recvall(socket, body_buff, body_len);
 		if (ret <= 0)
 			goto failed;
@@ -157,14 +159,14 @@ void* work_thread_routine(void *param)
 		case QC_TYPE_MSGGET:
 			procParam.qSystem = workParam->queueSvc->qSystem;
 			procParam.socket  = socket;
-			ret = qc_proc_msgput(&procParam, prtclHead, body_buff, &err);
+			ret = qc_proc_msgget(&procParam, prtclHead, body_buff, workParam->err);
 			if (ret < 0)
 				goto failed;
 			break;
 		case QC_TYPE_MSGPUT:
 			procParam.qSystem = workParam->queueSvc->qSystem;
 			procParam.socket  = socket;
-			ret = qc_proc_msgput(&procParam, prtclHead, body_buff, &err);
+			ret = qc_proc_msgput(&procParam, prtclHead, body_buff, workParam->err);
 			if (ret < 0)
 				goto failed;
 			break;
@@ -188,15 +190,23 @@ void* accept_thread_routine(void *param)
 
 	while (1) {
 		QcSocket* socket = qc_tcp_accept(acceptParam->socket);
-		qc_assert(socket);
+		if (!socket) {
+			if (acceptParam->err)
+				qc_seterr(acceptParam->err, QC_ERR_SOCKET, "tcp accept failed");
+			break;
+		}
 
 		WorkParam *workParam = (WorkParam*)malloc(sizeof(WorkParam));
 		workParam->queueSvc = acceptParam->queueSvc;
+		workParam->err = acceptParam->err;
 		workParam->socket = socket;
+
 		QcThread* thread = qc_thread_create(work_thread_routine, (void*)workParam);
 
 		qc_list_inserttail(acceptParam->queueSvc->workThreadList, thread);
 	}
+
+	qc_free(acceptParam);
 }
 
 //-----------------------------------------------------------------------------------------------------------------
@@ -209,8 +219,9 @@ QcQueueSvc* qc_queuesvc_create(const char *ip, int port, QcQSystem *qSystem, QcE
 	QcList *procList = qc_list_create(1);
 	strcpy(queueSvc->ip, ip);
 	queueSvc->port = port;
+	queueSvc->is_running = 0;
 	queueSvc->workThreadList = procList;
-	queueSvc->listenThread = NULL;
+	queueSvc->acceptThread = NULL;
 	queueSvc->qSystem = qSystem;
 
 	return queueSvc;
@@ -224,10 +235,13 @@ void qc_queuesvc_destory(QcQueueSvc *queueSvc)
 }
 
 
-int qc_queuesvc_start(QcQueueSvc *queueSvc, QcErr *err)
+int qc_queuesvc_start(QcQueueSvc *queueSvc, int is_async, QcErr *err)
 {
-	int excode=0;
 	QcSocket* socket = qc_socket_create(AF_INET, SOCK_STREAM, 0);
+	if (!socket) {
+		qc_seterr(err, QC_ERR_SOCKET, "create socket failed.");
+		return -1;
+	}
 
 	AcceptParam *acceptParam;
 	qc_malloc(acceptParam, sizeof(AcceptParam));
@@ -241,9 +255,26 @@ int qc_queuesvc_start(QcQueueSvc *queueSvc, QcErr *err)
 	acceptParam->socket = socket;
 	acceptParam->queueSvc = queueSvc;
 
-	queueSvc->listenThread = qc_thread_create(accept_thread_routine, (void*)acceptParam);
+	queueSvc->acceptThread = qc_thread_create(accept_thread_routine, (void*)acceptParam);
+	queueSvc->is_running = 1;
 
-	qc_thread_join(queueSvc->listenThread, &excode);
+	if (!is_async) {
+		qc_queuesvc_stop(queueSvc);
+	}
+
+	return 0;
+}
+
+
+void qc_queuesvc_stop(QcQueueSvc *queueSvc)
+{
+	int excode;
+
+	if (queueSvc->is_running)
+		return;
+
+	qc_thread_cancel(queueSvc->acceptThread);
+	qc_thread_join(queueSvc->acceptThread, &excode);
 
 	while (1) {
 		QcThread *thread = qc_list_pophead(queueSvc->workThreadList);
@@ -253,11 +284,5 @@ int qc_queuesvc_start(QcQueueSvc *queueSvc, QcErr *err)
 		qc_thread_join(thread, &excode);
 	}
 
-	return 0;
-}
-
-
-void qc_queuesvc_stop(QcQueueSvc *queueSvc)
-{
-	qc_thread_cancel(queueSvc->listenThread);
+	queueSvc->is_running = 0;
 }

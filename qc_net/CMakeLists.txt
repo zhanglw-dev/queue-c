@@ -3,8 +3,6 @@ project(qc_base LANGUAGES C)
 
 add_library(qc_net-objs
             OBJECT
-            qc_netconf.h
-            qc_netconf.c 
             qc_protocol.h
             qc_protocol.c
             qc_service.h

@@ -15,7 +15,7 @@ static const char *buff = "hello queue!";
 
 
 
-void putroutine(void *arg) {
+void* putroutine(void *arg) {
 	QcQueue *queue = arg;
 	int ret;
 
@@ -26,36 +26,36 @@ void putroutine(void *arg) {
 		ret = qc_queue_msgput(queue, message, -1, NULL);
 		if (ret != 0) {
 			qc_perror("qc_queue_msgput failed, ret=%d", ret);
-			return;
+			return NULL;
 		}
 
 		////qc_message_release(message, 0);
 	}
 
-	return;
+	return NULL;
 }
 
 
-void getroutine(void *arg) {
+void* getroutine(void *arg) {
 	QcQueue *queue = arg;
 
 	for (int i = 0; i < message_num; i++) {
 		QcMessage *message = qc_queue_msgget(queue, -1, NULL);
 		if (NULL == message) {
 			qc_error("qc_queue_msgget failed.");
-			return;
+			return NULL;
 		}
 
 		if (strcmp(qc_message_buff(message), buff) != 0)
 		{
 			qc_error("message data verify failed.");
-			return;
+			return NULL;
 		}
 
 		qc_message_release(message, 0);
 	}
 
-	return;
+	return NULL;
 }
 
 

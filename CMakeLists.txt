@@ -8,6 +8,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/Bin)
 
 add_subdirectory(qc_base)
 add_subdirectory(qc_mq)
-add_subdirectory(qc_qdb)
+add_subdirectory(qc_psist)
 add_subdirectory(qc_qsys)
 add_subdirectory(qc_net)
+add_subdirectory(test)

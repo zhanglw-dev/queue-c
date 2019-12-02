@@ -8,7 +8,7 @@ struct __QcClient {
 };
 
 
-QcClient* qc_client_connect(const char *ip, int port, const char *qname, QcErr *err)
+QcClient* qc_client_connect(const char *ip, int port, QcErr *err)
 {
 	int ret;
 
@@ -33,7 +33,7 @@ void qc_client_disconnect(QcClient *client)
 }
 
 
-int qc_producer_msgput(QcClient *client, const char *qname, QcMessage *message, int msec, QcErr *err)
+int qc_client_msgput(QcClient *client, const char *qname, QcMessage *message, int msec, QcErr *err)
 {
 	int ret;
 	QcSocket *socket = client->socket;
@@ -49,6 +49,7 @@ int qc_producer_msgput(QcClient *client, const char *qname, QcMessage *message, 
 	prtclMsgPut.wait_msec = msec;
 	prtclMsgPut.msg_prioriy = qc_message_priority(message);
 	prtclMsgPut.msg_len = qc_message_bufflen(message);
+	strcpy(prtclMsgPut.qname, qname);
 
 	prtclHead.body_len = sizeof(QcPrtclMsgPut) + prtclMsgPut.msg_len;
 
@@ -85,7 +86,7 @@ failed:
 }
 
 
-QcMessage* qc_consumer_msgget(QcClient *client, const char *qname, int msec, QcErr *err)
+QcMessage* qc_client_msgget(QcClient *client, const char *qname, int msec, QcErr *err)
 {
 	int ret;
 	QcSocket *socket = client->socket;
@@ -99,6 +100,7 @@ QcMessage* qc_consumer_msgget(QcClient *client, const char *qname, int msec, QcE
 
 	QcPrtclMsgGet prtclMsgGet;
 	prtclMsgGet.wait_msec = msec;
+	strcpy(prtclMsgGet.qname, qname);
 
 	prtclHead.body_len = sizeof(QcPrtclMsgGet);
 

@@ -166,7 +166,6 @@ size_t qc_file_size(const char *pathname)
 }
 
 
-
 int qc_file_remove(const char *pathname)
 {
     qc_assert(pathname);
@@ -195,6 +194,17 @@ int qc_file_rename(const char *oldname, const char *newname)
     return 0;
 }
 
+
+int qc_file_truncate(const char *pathname, off_t length)
+{
+    if(0 != truncate(pathname, length))
+    {
+        qc_perror("file (%s) truncate failed", pathname);
+        return -1;
+    }
+
+    return 0;
+}
 
 /*-------------------------------------------------------------------*/
 

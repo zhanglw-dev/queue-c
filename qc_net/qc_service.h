@@ -12,7 +12,7 @@ QcQueueSvc* qc_queuesvc_create(const char *ip, int port, QcQSystem *qSystem, QcE
 
 void qc_queuesvc_destory(QcQueueSvc *queueSvc);
 
-int qc_queuesvc_start(QcQueueSvc *queueSvc, QcErr *err);
+int qc_queuesvc_start(QcQueueSvc *queueSvc, int is_async, QcErr *err);
 
 void qc_queuesvc_stop(QcQueueSvc *queueSvc);
 

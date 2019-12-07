@@ -144,7 +144,7 @@ int qc_file_exist(const char *pathname)
 
     if(0 != access(pathname, 0))
     {
-        qc_perror("file(%s) access failed", pathname);
+        //qc_perror("file(%s) access failed", pathname);
         return -1;
     }
 
@@ -197,11 +197,19 @@ int qc_file_rename(const char *oldname, const char *newname)
 
 int qc_file_truncate(const char *pathname, off_t length)
 {
-    if(0 != truncate(pathname, length))
+    int fd = open(pathname, O_CREAT|O_WRONLY, S_IRUSR|S_IWUSR);
+    if(fd <= 0){
+        qc_perror("file (%s) create/open failed", pathname);
+        return -1;
+    }
+
+    if(0 != ftruncate(fd, length))
     {
         qc_perror("file (%s) truncate failed", pathname);
         return -1;
     }
+
+    close(fd);
 
     return 0;
 }

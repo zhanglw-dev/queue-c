@@ -18,13 +18,13 @@ int main(int argc, char **argv)
 	}
 	*/
 
-	/*
-	ret = test_qtbl_file();
+	
+	ret = test_psist_file();
 	if (0 != ret) {
-		printf("qdb test failed.");
+		printf("psist test failed.");
 		exit(-1);
 	}
-	*/
+	
 
 	/*
 	ret = mq_test_all();

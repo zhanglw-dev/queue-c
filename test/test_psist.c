@@ -6,7 +6,7 @@
 #define MSG_COUNT_LIMIT 10000
 
 static const char* filename = "mq_test01.tbl";
-static const char *buff = "hello table file!";
+static const char *buff = "hello psist file!";
 
 
 int test_psist_file()
@@ -21,7 +21,7 @@ int test_psist_file()
 
 	char filepath[512];
 	memset(filepath, 0, sizeof(filepath));
-	sprintf(filepath, "%s/../db/%s", cwd, filename);
+	sprintf(filepath, "%s/%s", cwd, filename);
 
 
 	QcPsist *qPsist = qc_psist_open(MSG_BUFF_SIZE, MSG_COUNT_LIMIT, filepath, &err);

@@ -175,6 +175,7 @@ void* work_thread_routine(void *param)
 
 	return NULL;
 failed:
+	qc_free(param);
 	if (head_buff) qc_free(head_buff);
 	if (body_buff) qc_free(body_buff);
 	return NULL;
@@ -205,8 +206,11 @@ void* accept_thread_routine(void *param)
 
 		qc_list_inserttail(acceptParam->queueSvc->workThreadList, thread);
 	}
+	return NULL;
 
-	qc_free(acceptParam);
+failed:
+	qc_free(param);
+	return NULL;
 }
 
 //-----------------------------------------------------------------------------------------------------------------

@@ -2,14 +2,14 @@
 #include "qc_file.h"
 #include "qc_prelude.h"
 
-#define QC_QTBL_PATHLEN  512
+#define QC_PSIST_PATHLEN  512
 
 
 #pragma pack(push)
 #pragma pack(1)
 
 typedef struct{
-	int ident;
+	int identity;
 	int version;
 	int msgbuff_size;
 	int msgcount_limit;
@@ -27,19 +27,15 @@ typedef struct {
 
 
 struct __QcPsistFile {
-	char filename[QC_QTBL_PATHLEN + 1];
+	char filename[QC_PSIST_PATHLEN + 1];
 	Qc_PsistFileInfo *fileInfo;
-
-	off_t head_offset;
-	off_t body_offset;
-
 	QcFile *file;
 };
 
 
 static void qc_psistfile_info_hton(Qc_PsistFileInfo *tblfileInfo)
 {
-	tblfileInfo->ident = htonl(tblfileInfo->ident);
+	tblfileInfo->identity = htonl(tblfileInfo->identity);
 	tblfileInfo->version = htonl(tblfileInfo->version);
 	tblfileInfo->msgbuff_size = htonl(tblfileInfo->msgbuff_size);
 	tblfileInfo->msgcount_limit = htonl(tblfileInfo->msgcount_limit);
@@ -48,7 +44,7 @@ static void qc_psistfile_info_hton(Qc_PsistFileInfo *tblfileInfo)
 
 static void qc_psistfile_info_ntoh(Qc_PsistFileInfo *tblfileInfo)
 {
-	tblfileInfo->ident = ntohl(tblfileInfo->ident);
+	tblfileInfo->identity = ntohl(tblfileInfo->identity);
 	tblfileInfo->version = ntohl(tblfileInfo->version);
 	tblfileInfo->msgbuff_size = ntohl(tblfileInfo->msgbuff_size);
 	tblfileInfo->msgcount_limit = ntohl(tblfileInfo->msgcount_limit);
@@ -73,7 +69,7 @@ static void qc_msginfo_ntoh(Qc_MsgInfo *msgInfo)
 
 static int qc_tblfileinfo_compare(Qc_PsistFileInfo *tblfileInfo1, Qc_PsistFileInfo *tblfileInfo2)
 {
-	if (tblfileInfo1->ident != tblfileInfo2->ident)
+	if (tblfileInfo1->identity != tblfileInfo2->identity)
 		return -1;
 	if (tblfileInfo1->version != tblfileInfo2->version)
 		return -1;
@@ -89,7 +85,7 @@ static int qc_tblfileinfo_compare(Qc_PsistFileInfo *tblfileInfo1, Qc_PsistFileIn
 QcPsistFile* qc_psist_file_open(int msgbuff_size, int msgcount_limit, const char* table_filename, QcErr *err)
 {
 	qc_assert(msgbuff_size > 0 && msgcount_limit > 0 && table_filename);
-	if (strlen(table_filename) > QC_QTBL_PATHLEN) {
+	if (strlen(table_filename) > QC_PSIST_PATHLEN) {
 		err->code = QC_ERR_BADLENGTH;
 		strcpy(err->desc, "table name is too long.");
 		return NULL;
@@ -102,15 +98,12 @@ QcPsistFile* qc_psist_file_open(int msgbuff_size, int msgcount_limit, const char
 	qtbl->file = NULL;
 	qc_malloc(qtbl->fileInfo, sizeof(Qc_PsistFileInfo));
 
-	qtbl->fileInfo->ident = 0;
+	qtbl->fileInfo->identity = 0;
 	qtbl->fileInfo->version = 1;
 	qtbl->fileInfo->msgbuff_size = msgbuff_size;
 	qtbl->fileInfo->msgcount_limit = msgcount_limit;
 
-	qtbl->head_offset = sizeof(Qc_PsistFileInfo);
-	qtbl->body_offset = qtbl->head_offset + sizeof(Qc_MsgInfo)*msgcount_limit;
-
-	off_t filesize = qtbl->body_offset + msgbuff_size*msgcount_limit;
+	off_t filesize = sizeof(Qc_PsistFileInfo) + (sizeof(Qc_MsgInfo)+msgbuff_size)*msgcount_limit;
 
 	if (0 != qc_file_exist(table_filename)) {
 		//truncate file
@@ -181,8 +174,8 @@ int qc_psist_file_append(QcPsistFile *qtbl, Qc_MsgRecord *msgRecord, QcErr *err)
 	size_t sz;
 	int persist_id = msgRecord->persist_id;
 
-	off_t offset_msghead = qtbl->head_offset + persist_id*sizeof(Qc_MsgInfo);
-	off_t offset_msgbody = qtbl->body_offset + persist_id*(qtbl->fileInfo->msgbuff_size);
+	off_t offset_msghead = sizeof(Qc_PsistFileInfo) + persist_id*(sizeof(Qc_MsgInfo) + qtbl->fileInfo->msgbuff_size);
+	off_t offset_msgbody = offset_msghead + sizeof(Qc_MsgInfo);
 
 	QcFile *file = qtbl->file;
 	qc_file_seek(file, offset_msgbody, 0);
@@ -210,7 +203,7 @@ int qc_psist_file_append(QcPsistFile *qtbl, Qc_MsgRecord *msgRecord, QcErr *err)
 int qc_psist_file_remove(QcPsistFile *qtbl, Qc_MsgRecord *msgRecord, QcErr *err)
 {
 	int persist_id = msgRecord->persist_id;
-	off_t offset_msghead = qtbl->head_offset + persist_id * sizeof(Qc_MsgInfo);
+	off_t offset_msghead = sizeof(Qc_PsistFileInfo) + persist_id * (sizeof(Qc_MsgInfo) + qtbl->fileInfo->msgbuff_size);
 
 	Qc_MsgInfo msgInfo;
 	msgInfo.flag = 0;
@@ -231,7 +224,7 @@ int qc_psist_file_remove(QcPsistFile *qtbl, Qc_MsgRecord *msgRecord, QcErr *err)
 int qc_psist_file_fetch_ready(QcPsistFile *qtbl, QcErr *err)
 {
 	QcFile *file = qtbl->file;
-	qc_file_seek(file, qtbl->head_offset, 0);
+	qc_file_seek(file, sizeof(Qc_PsistFileInfo), 0);
 	return 0;
 }
 
@@ -245,25 +238,25 @@ int qc_psist_file_do_fetch(QcPsistFile *qtbl, Qc_MsgRecord *msgRecord, QcErr *er
 	Qc_MsgInfo msgInfo;
 
 	while (1) {
-		if (offset == qtbl->body_offset)
+		if (offset == sizeof(Qc_PsistFileInfo) + (qtbl->fileInfo->msgcount_limit-1)*(sizeof(Qc_MsgInfo) + qtbl->fileInfo->msgbuff_size))
 			return 1;   //the end
 
-		int persist_id = (offset - sizeof(Qc_PsistFileInfo))/ sizeof(Qc_MsgInfo);
+		int persist_id = (offset - sizeof(Qc_PsistFileInfo)) / (sizeof(Qc_MsgInfo) + qtbl->fileInfo->msgbuff_size);
 
 		size_t hsz = qc_file_read(file, &msgInfo, sizeof(Qc_MsgInfo));
 		qc_msginfo_ntoh(&msgInfo);
 		if (hsz != sizeof(Qc_MsgInfo))
 			return -1;
 
-		offset += (off_t)hsz;
+		offset += sizeof(Qc_MsgInfo) + qtbl->fileInfo->msgbuff_size;
 
 		if (0 == msgInfo.flag){
+			int bsz = qc_file_seek(file, qtbl->fileInfo->msgbuff_size, 1);
+			if(bsz < 0)
+				return -1;
 			continue;  //not in use, next..
 		}
 		else{
-			int offset_buff = qtbl->body_offset + persist_id * (qtbl->fileInfo->msgbuff_size);
-			qc_file_seek(file, offset_buff, 0);
-
 			char *buff;
 			qc_malloc(buff, msgInfo.bufflen);
 			size_t bsz = qc_file_read(file, buff, msgInfo.bufflen);
@@ -276,6 +269,8 @@ int qc_psist_file_do_fetch(QcPsistFile *qtbl, Qc_MsgRecord *msgRecord, QcErr *er
 			msgRecord->buff = buff;
 			break;
 		}
+
+
 	}
 
 	qc_file_seek(file, offset, 0);

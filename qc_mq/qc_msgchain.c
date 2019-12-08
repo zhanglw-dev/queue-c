@@ -185,7 +185,18 @@ try_loop:
 }
 
 
-//for getter
+int qc_msgchain_forcepush(QcMsgChain *msgChain, QcMessage *message, QcMessage **msg_popped)
+{
+    qc_assert(msgChain!=NULL && message!=NULL);
+	qc_assert(msgChain->msg_count < msgChain->count_limit);
+
+    int bucket_sn = msgChain->cursor_bucketsn;
+    
+
+}
+
+
+//for putter
 int qc_msgchain_puttemp(QcMsgChain *msgChain, QcMessage *message)
 {
 	qc_list_w_lock(msgChain->tempList);

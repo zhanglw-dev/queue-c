@@ -49,7 +49,9 @@ int qc_msgchain_pushmsg(QcMsgChain *msgChain, QcMessage *message);
 
 QcMessage* qc_msgchain_popmsg(QcMsgChain *msgChain);
 
-int qc_msgchain_puttemp(QcMsgChain *msgChain, QcMessage *message);  //for getter
+int qc_msgchain_forcepush(QcMsgChain *msgChain, QcMessage *message, QcMessage **msg_popped);
+
+int qc_msgchain_puttemp(QcMsgChain *msgChain, QcMessage *message);  //for putter
 
 QcMessage* qc_msgchain_gettemp(QcMsgChain *msgChain);  //for getter
 

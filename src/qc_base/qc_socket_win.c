@@ -49,7 +49,7 @@ QcSocket* qc_socket_create(int family, int type, int protocol)
         return NULL;
 	}
 
-    socket->sockid = WSASocket(family, type, IPPROTO_TCP, NULL, 0, WSA_FLAG_OVERLAPPED);
+    socket->sockid = WSASocketW(family, type, IPPROTO_TCP, NULL, 0, WSA_FLAG_OVERLAPPED);
     if(INVALID_SOCKET == socket->sockid)
     {
 	    qc_error("socket create failed");

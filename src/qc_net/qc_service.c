@@ -194,7 +194,7 @@ void* accept_thread_routine(void *param)
 		if (!socket) {
 			if (acceptParam->err)
 				qc_seterr(acceptParam->err, QC_ERR_SOCKET, "tcp accept failed");
-			break;
+			goto failed;
 		}
 
 		WorkParam *workParam = (WorkParam*)malloc(sizeof(WorkParam));

@@ -11,3 +11,5 @@ add_library(qc_qsys
             qc_qsystem.h
             qc_qsystem.c 
             )
+
+target_compile_definitions(qc_qsys PUBLIC "_CRT_SECURE_NO_WARNINGS")

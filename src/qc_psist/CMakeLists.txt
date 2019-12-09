@@ -12,3 +12,5 @@ add_library(qc_psist
             qc_psist.h
             qc_psist.c 
             )
+
+target_compile_definitions(qc_psist PUBLIC "_CRT_SECURE_NO_WARNINGS")

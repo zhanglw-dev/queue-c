@@ -14,3 +14,5 @@ add_library(qc_net
             qc_client.h
             qc_client.c  
             )
+
+target_compile_definitions(qc_net PUBLIC "_CRT_SECURE_NO_WARNINGS")

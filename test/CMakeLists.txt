@@ -13,11 +13,11 @@ add_executable(test
                main.c 
               )
 
-include_directories("../qc_base")
-include_directories("../qc_mq")
-include_directories("../qc_psist")
-include_directories("../qc_qsys")
-include_directories("../qc_net")
+include_directories("../src/qc_base")
+include_directories("../src/qc_mq")
+include_directories("../src/qc_psist")
+include_directories("../src/qc_qsys")
+include_directories("../src/qc_net")
 
 #message(STATUS ${CMAKE_BINARY_DIR}/Lib)
 link_directories(${CMAKE_BINARY_DIR}/Lib)
@@ -29,3 +29,5 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
 else()
     target_link_libraries(test pthread)
 endif()
+
+target_compile_definitions(test PUBLIC "_CRT_SECURE_NO_WARNINGS")

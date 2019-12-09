@@ -17,3 +17,4 @@ add_library(qc_mq
             qc_queue.c 
             )
 
+target_compile_definitions(qc_mq PUBLIC "_CRT_SECURE_NO_WARNINGS")

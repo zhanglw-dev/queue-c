@@ -8,7 +8,6 @@
 #include "qc_thread.h"
 
 
-
 typedef struct {
 	QcList *msgList;
 	int pop_counter;

@@ -187,12 +187,32 @@ try_loop:
 
 int qc_msgchain_forcepush(QcMsgChain *msgChain, QcMessage *message, QcMessage **msg_popped)
 {
+	int ret;
     qc_assert(msgChain!=NULL && message!=NULL);
-	qc_assert(msgChain->msg_count < msgChain->count_limit);
 
-    int bucket_sn = msgChain->cursor_bucketsn;
-    
+	if (msgChain->msg_count < msgChain->count_limit) {
+		ret = qc_msgchain_pushmsg(msgChain, message);
+		if(msg_popped) *msg_popped = NULL;
+		return ret;
+	}
 
+	for (int bucket_sn = 0; bucket_sn < msgChain->bucket_count; bucket_sn++) {
+		QcMsgBucket *bucket = msgChain->msgBuckets[bucket_sn];
+        if(qc_list_count(bucket->msgList) > 0){
+            QcMessage *popmsg = qc_list_pophead(bucket->msgList);
+            if(msg_popped){
+                *msg_popped = popmsg;
+            }
+            else{
+                qc_message_release(popmsg, 1);
+            }
+			msgChain->msg_count--;
+            ret = qc_msgchain_pushmsg(msgChain, message);
+            return ret;
+        }
+	}
+
+    return -1;
 }
 
 

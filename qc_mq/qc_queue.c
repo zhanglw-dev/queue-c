@@ -252,3 +252,24 @@ pop_loop:
 
 	return NULL;
 }
+
+
+int qc_queue_forceput(QcQueue *queue, QcMessage *message, QcMessage **msg_popped, QcErr *err)
+{
+	int ret;
+	if(NULL == queue){
+		qc_seterr(err, QC_ERR_BADPARAM, "invalid input params, QcQueue* is NULL.");
+		return -1;
+	}
+
+	qc_thread_mutex_lock(queue->quelock);
+	ret = qc_msgchain_forcepush(queue->mesgesChain, message, msg_popped);
+	qc_thread_mutex_unlock(queue->quelock);
+
+	if(ret < 0){
+		qc_seterr(err, QC_ERR_INTERNAL, "internal error");
+		return -1;
+	}
+
+	return ret;
+}

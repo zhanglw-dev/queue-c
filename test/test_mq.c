@@ -177,15 +177,42 @@ int mq_test_all()
 	qc_pinfo("%s", asctime(localtime(&rawtime)));
 
 	qc_info("test concurrent put/get succeed.");
-	//---------------------------------------------------------------------
-
+	//----------------------------------------------------------------------
 
 	count = qc_queue_msgcount(queue);
 	qc_assert(count == 0);
 
+	//----------------------------------------------------------------------
+
+	QcErr forceErr;
+	for(int i=0; i<queue_limit; i++){
+		QcMessage *message = qc_message_create(buff, (int)strlen(buff), 0);
+		ret = qc_queue_forceput(queue, message, NULL, &forceErr);
+		qc_assert(ret == 0);
+	}
+
+	for(int i=0; i<queue_limit; i++){
+		QcMessage *message = qc_message_create(buff, (int)strlen(buff), 0);
+		QcMessage *msg_popped;
+		ret = qc_queue_forceput(queue, message, &msg_popped, &forceErr);
+		qc_assert(ret == 0);
+		qc_assert(strcmp(buff, qc_message_buff(msg_popped)) == 0);
+		qc_message_release(msg_popped, 0);
+	}
+
+	for(int i=0; i<queue_limit; i++){
+		QcMessage *message = qc_queue_msgget(queue, 0, &forceErr);
+		qc_assert(strcmp(buff, qc_message_buff(message)) == 0);
+		qc_message_release(message, 0);
+	}
+
+	count = qc_queue_msgcount(queue);
+	qc_assert(count == 0);
+
+	//----------------------------------------------------------------------
+
 	ret = qc_queue_destroy(queue);
 	qc_assert(ret == 0);
-
 
 	printf("test queue finished.\n");
 	return 0;

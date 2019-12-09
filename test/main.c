@@ -10,11 +10,13 @@ int main(int argc, char **argv)
 {
 	int ret;
 
+	/*
 	ret = mq_test_all();
 	if (0 != ret) {
 		printf("mq test failed.");
 		exit(-1);
 	}
+	*/
 
 	/*
 	ret = test_qsys();
@@ -24,21 +26,21 @@ int main(int argc, char **argv)
 	}
 	*/
 
-	/*
+	
 	ret = test_psist_file();
 	if (0 != ret) {
 		printf("psist test failed.");
 		exit(-1);
 	}
-	*/
+	
 
-	/*
+	
 	ret = test_net();
 	if (0 != ret){
 		printf("net test failed.");
 		exit(-1);
 	}
-	*/
 	
+	printf("all test succeed!\n");
 	exit(0);
 }

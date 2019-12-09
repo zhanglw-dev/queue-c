@@ -38,3 +38,13 @@ add_library(qc_base
             ${qc_base_source}
             )
 
+
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+target_compile_definitions(qc_base PUBLIC "IS_LINUX")
+endif()
+if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+target_compile_definitions(qc_base PUBLIC "IS_MACOS")
+endif()
+if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+target_compile_definitions(qc_base PUBLIC "IS_WINDOWS")
+endif()

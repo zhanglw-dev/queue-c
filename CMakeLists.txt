@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.5 FATAL_ERROR)
-project(qc_base LANGUAGES C)
+project(queue-c LANGUAGES C)
+
 
 #message(STATUS ${CMAKE_BINARY_DIR})
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/Lib)

@@ -1,8 +1,10 @@
 cmake_minimum_required(VERSION 3.5 FATAL_ERROR)
-project(qc_base LANGUAGES C)
+project(qc_mq LANGUAGES C)
 
-add_library(qc_mq-objs
-            OBJECT
+include_directories("../qc_base")
+
+add_library(qc_mq
+            STATIC
             qc_message.h
             qc_message.c 
             qc_getters.h
@@ -15,9 +17,3 @@ add_library(qc_mq-objs
             qc_queue.c 
             )
 
-include_directories("../qc_base")
-
-add_library(qc_mq
-            STATIC
-            $<TARGET_OBJECTS:qc_mq-objs>
-           )

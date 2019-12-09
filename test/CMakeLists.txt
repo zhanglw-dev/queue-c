@@ -22,4 +22,10 @@ include_directories("../qc_net")
 #message(STATUS ${CMAKE_BINARY_DIR}/Lib)
 link_directories(${CMAKE_BINARY_DIR}/Lib)
 target_link_libraries(test qc_base qc_mq qc_psist qc_qsys qc_net)
-target_link_libraries(test pthread)
+
+
+if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+    target_link_libraries(test ws2_32)
+else()
+    target_link_libraries(test pthread)
+endif()

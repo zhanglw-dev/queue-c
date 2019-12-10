@@ -12,7 +12,7 @@
 
 typedef struct {
 	QcCondLock *condlock;
-	QcCond *cond;
+	QcCondition *cond;
 	//QcMessage *message;
 	int is_timedout;
 

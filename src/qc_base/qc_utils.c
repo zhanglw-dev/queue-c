@@ -366,7 +366,7 @@ struct __QcBlockQue {
 	int  limit;
 	QcStaticList lst_free;
 	QcStaticList lst_used;
-	QcCond *cond;
+	QcCondition *cond;
 	QcCondLock *cond_lock;
 	QcMutex *threads_mutex;
 };
@@ -418,7 +418,7 @@ QcBlockQue* qc_blockque_create(int limit)
 		goto failed;
 	}
 
-	queue->cond = qc_thread_cond_create();
+	queue->cond = qc_thread_condition_create();
 	if (NULL == queue->cond)
 	{
 		qc_error("QcBlockQue->cond create failed.");
@@ -446,7 +446,7 @@ void qc_blockque_destroy(QcBlockQue *queue)
 	if (NULL != queue)
 	{
 		if (NULL != queue->cond_lock) qc_thread_condlock_destroy(queue->cond_lock);
-		if (NULL != queue->cond) qc_thread_cond_destroy(queue->cond);
+		if (NULL != queue->cond) qc_thread_condition_destroy(queue->cond);
 		if (NULL != queue->threads_mutex) qc_thread_mutex_destroy(queue->threads_mutex);
 		qc_staticlist_release(&queue->lst_used);
 		qc_staticlist_release(&queue->lst_free);
@@ -486,7 +486,7 @@ int qc_blockque_put(QcBlockQue *queue, void *ptr)
 		return -1;
 	}
 
-	qc_thread_cond_signal(queue->cond);
+	qc_thread_condition_signal(queue->cond);
 	qc_thread_condlock_unlock(queue->cond_lock);
 
 	return 0;
@@ -504,7 +504,7 @@ void* qc_blockque_get(QcBlockQue *queue)
 
 	if (0 == qc_staticlist_count(&queue->lst_used))
 	{
-		qc_thread_cond_wait(queue->cond, queue->cond_lock);
+		qc_thread_condition_wait(queue->cond, queue->cond_lock);
 	}
 
 	qc_thread_mutex_unlock(queue->threads_mutex);

@@ -2,14 +2,11 @@
 #define QCLIB_THREAD_H
 
 
-#include "qc_prelude.h"
-
-
 typedef struct __QcThread QcThread;
 typedef struct __QcThreadKey QcThreadKey;
 typedef struct __QcMutex QcMutex;
 typedef struct __QcCondLock QcCondLock;
-typedef struct __QcCond  QcCond;
+typedef struct __QcCondition  QcCondition;
 typedef struct __QcRWLock QcRWLock;
 
 
@@ -66,15 +63,15 @@ int qc_thread_condlock_unlock(QcCondLock *condlock);
 
 /*------------------------------------------------------------------------------*/
 
-QcCond* qc_thread_cond_create();
+QcCondition* qc_thread_condition_create();
 
-int qc_thread_cond_destroy(QcCond *cond);
+int qc_thread_condition_destroy(QcCondition *cond);
 
-int qc_thread_cond_wait(QcCond *cond, QcCondLock *condlock);
+int qc_thread_condition_wait(QcCondition *cond, QcCondLock *condlock);
 
-int qc_thread_cond_timedwait(QcCond *cond, QcCondLock *condlock, int msec);
+int qc_thread_condition_timedwait(QcCondition *cond, QcCondLock *condlock, int msec);
 
-int qc_thread_cond_signal(QcCond *cond);
+int qc_thread_condition_signal(QcCondition *cond);
 
 /*------------------------------------------------------------------------------*/
 

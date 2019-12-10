@@ -1,2 +1,0 @@
-# qc
-Queue-C

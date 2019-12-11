@@ -123,7 +123,7 @@ put_loop:
 		//getter->message = message;
 		qc_msgchain_puttemp(queue->mesgesChain, message);
 
-		qc_thread_cond_signal(getter->cond);
+		qc_thread_condition_signal(getter->cond);
 		qc_thread_condlock_unlock(getter->condlock);
 
 		return 0;
@@ -144,7 +144,7 @@ put_loop:
 			qc_putterschain_push(queue->puttersChain, putter);
 
 			qc_thread_mutex_unlock(queue->quelock);
-			int ret = qc_thread_cond_timedwait(putter->cond, putter->condlock, msec);
+			int ret = qc_thread_condition_timedwait(putter->cond, putter->condlock, msec);
 			
 			if(QC_TIMEOUT == ret){
 				putter->is_timedout = 1;
@@ -200,7 +200,7 @@ QcMessage* qc_queue_msgget(QcQueue *queue, int msec, QcErr *err){
 		
 		QcMessage *message = NULL;
 
-		int ret = qc_thread_cond_timedwait(getter->cond, getter->condlock, msec);
+		int ret = qc_thread_condition_timedwait(getter->cond, getter->condlock, msec);
 		if(QC_TIMEOUT == ret){
 			getter->is_timedout = 1;
 		}
@@ -240,7 +240,7 @@ pop_loop:
 			else{
 				QcMessage *putmsg = putter->message;
 				qc_msgchain_pushmsg(queue->mesgesChain, putmsg);
-				qc_thread_cond_signal(putter->cond);
+				qc_thread_condition_signal(putter->cond);
 			}
 
 			qc_thread_condlock_unlock(putter->condlock);

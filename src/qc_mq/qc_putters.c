@@ -11,7 +11,7 @@ QcPutter* qc_putter_create() {
 		return NULL;
 	}
 
-	putter->cond = qc_thread_cond_create();
+	putter->cond = qc_thread_condition_create();
 	if (NULL == putter->cond) {
 		qc_error("create putter->cond failed.");
 		qc_free(putter);
@@ -39,7 +39,7 @@ int qc_putter_destroy(QcPutter *putter) {
 		return -1;
 	}
 
-	qc_thread_cond_destroy(putter->cond);
+	qc_thread_condition_destroy(putter->cond);
 	qc_thread_condlock_destroy(putter->condlock);
 
 	qc_free(putter);

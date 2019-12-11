@@ -13,9 +13,9 @@ extern "C" {
 #endif
 
 
-QcMessage* qc_message_create(const char *buff, int len, int flag_dupbuff);
+QcMessage* qc_message_create(const char *buff, int len, int do_dupbuff);
 
-void qc_message_release(QcMessage *message, int flag_freebuff);
+void qc_message_release(QcMessage *message, int do_freebuff);
 
 char* qc_message_buff(QcMessage *message);
 

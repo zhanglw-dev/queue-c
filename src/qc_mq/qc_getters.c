@@ -11,7 +11,7 @@ QcGetter* qc_getter_create() {
 		return NULL;
 	}
 
-	getter->cond = qc_thread_cond_create();
+	getter->cond = qc_thread_condition_create();
 	if (NULL == getter->cond) {
 		qc_error("create getter->cond failed.");
 		qc_free(getter);
@@ -38,7 +38,7 @@ int qc_getter_destroy(QcGetter *getter) {
 		return -1;
 	}
 
-	qc_thread_cond_destroy(getter->cond);
+	qc_thread_condition_destroy(getter->cond);
 	qc_thread_condlock_destroy(getter->condlock);
 
 	qc_free(getter);

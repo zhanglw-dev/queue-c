@@ -8,7 +8,7 @@
 
 typedef struct __QcPutter {
 	QcCondLock *condlock;
-	QcCond *cond;
+	QcCondition *cond;
 	QcMessage *message;
 	int is_timedout;
 	int priority;

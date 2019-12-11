@@ -1,4 +1,4 @@
-
+#include "qc_prelude.h"
 #include "qc_thread.h"
 #include "qc_log.h"
 
@@ -23,7 +23,7 @@ struct __QcCondLock{
 };
 
 
-struct __QcCond{
+struct __QcCondition{
     pthread_cond_t cond_t;
 };
 
@@ -278,11 +278,11 @@ int qc_thread_condlock_unlock(QcCondLock *condlock)
 
 /*------------------------------------------------------------------------------------------*/
 
-QcCond* qc_thread_cond_create()
+QcCondition* qc_thread_condition_create()
 {
-    QcCond *cond;
+    QcCondition *cond;
 
-    qc_malloc(cond, sizeof(QcCond));
+    qc_malloc(cond, sizeof(QcCondition));
     if(NULL == cond)
     {
         return NULL;
@@ -299,7 +299,7 @@ QcCond* qc_thread_cond_create()
 }
 
 
-int qc_thread_cond_destroy(QcCond *cond)
+int qc_thread_condition_destroy(QcCondition *cond)
 {
     if(0 != pthread_cond_destroy(&cond->cond_t))
     {
@@ -312,7 +312,7 @@ int qc_thread_cond_destroy(QcCond *cond)
 }
 
 
-int qc_thread_cond_wait(QcCond *cond, QcCondLock *condlock)
+int qc_thread_condition_wait(QcCondition *cond, QcCondLock *condlock)
 {
     if(0 != pthread_cond_wait(&cond->cond_t, &condlock->mutex_t))
     {
@@ -324,7 +324,7 @@ int qc_thread_cond_wait(QcCond *cond, QcCondLock *condlock)
 }
 
 
-int qc_thread_cond_timedwait(QcCond *cond, QcCondLock *condlock, int sec)
+int qc_thread_condition_timedwait(QcCondition *cond, QcCondLock *condlock, int sec)
 {
     struct timespec timeout;
     timeout.tv_sec = sec;
@@ -357,7 +357,7 @@ int qc_thread_cond_timedwait(QcCond *cond, QcCondLock *condlock, int sec)
 }
 
 
-int qc_thread_cond_signal(QcCond *cond)
+int qc_thread_condition_signal(QcCondition *cond)
 {
     if(0 != pthread_cond_signal(&cond->cond_t))
     {

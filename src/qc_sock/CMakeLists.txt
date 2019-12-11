@@ -1,11 +1,11 @@
 cmake_minimum_required(VERSION 3.5 FATAL_ERROR)
-project(qc_net LANGUAGES C)
+project(qc_sock LANGUAGES C)
 
 include_directories("../qc_base")
 include_directories("../qc_mq")
 include_directories("../qc_qsys")
 
-add_library(qc_net
+add_library(qc_sock
             STATIC
             qc_protocol.h
             qc_protocol.c
@@ -15,4 +15,4 @@ add_library(qc_net
             qc_client.c  
             )
 
-target_compile_definitions(qc_net PUBLIC "_CRT_SECURE_NO_WARNINGS")
+target_compile_definitions(qc_sock PUBLIC "_CRT_SECURE_NO_WARNINGS")

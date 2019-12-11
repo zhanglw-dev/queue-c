@@ -8,8 +8,8 @@ add_executable(test
                test_psist.c 
                test_qsys.h 
                test_qsys.c 
-               test_net.h 
-               test_net.c 
+               test_sock.h 
+               test_sock.c 
                main.c 
               )
 
@@ -17,11 +17,11 @@ include_directories("../src/qc_base")
 include_directories("../src/qc_mq")
 include_directories("../src/qc_psist")
 include_directories("../src/qc_qsys")
-include_directories("../src/qc_net")
+include_directories("../src/qc_sock")
 
-#message(STATUS ${CMAKE_BINARY_DIR}/Lib)
-link_directories(${CMAKE_BINARY_DIR}/Lib)
-target_link_libraries(test qc_base qc_mq qc_psist qc_qsys qc_net)
+#message(STATUS ${CMAKE_BINARY_DIR}/lib)
+link_directories(${CMAKE_BINARY_DIR}/lib)
+target_link_libraries(test qc_base qc_mq qc_psist qc_qsys qc_sock)
 
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Windows")

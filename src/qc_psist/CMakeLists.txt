@@ -6,7 +6,7 @@ include_directories("../qc_mq")
 
 
 add_library(qc_psist
-            STATIC
+            OBJECT
             qc_psist_file.h
             qc_psist_file.c 
             qc_psist.h

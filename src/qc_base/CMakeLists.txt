@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.5 FATAL_ERROR)
-project(qc_base LANGUAGES C)
+#project(qc_base LANGUAGES C)
 
 list(APPEND qc_base_source
             qc_prelude.h
@@ -33,8 +33,8 @@ else()
 endif()
 
 
-add_library(qc_base 
-            STATIC
+add_library(qc_base
+            OBJECT
             ${qc_base_source}
             )
 

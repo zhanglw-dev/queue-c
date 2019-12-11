@@ -21,7 +21,7 @@ include_directories("../src/qc_sock")
 
 #message(STATUS ${CMAKE_BINARY_DIR}/lib)
 link_directories(${CMAKE_BINARY_DIR}/lib)
-target_link_libraries(test qc_base qc_mq qc_psist qc_qsys qc_sock)
+target_link_libraries(test qc)
 
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Windows")

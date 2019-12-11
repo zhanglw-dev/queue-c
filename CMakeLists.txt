@@ -12,4 +12,14 @@ add_subdirectory(src/qc_mq)
 add_subdirectory(src/qc_psist)
 add_subdirectory(src/qc_qsys)
 add_subdirectory(src/qc_sock)
+add_subdirectory(demo)
 add_subdirectory(test)
+
+add_library(qc
+            STATIC
+            $<TARGET_OBJECTS:qc_base>
+            $<TARGET_OBJECTS:qc_mq>
+            $<TARGET_OBJECTS:qc_psist>
+            $<TARGET_OBJECTS:qc_qsys>
+            $<TARGET_OBJECTS:qc_sock>
+            )

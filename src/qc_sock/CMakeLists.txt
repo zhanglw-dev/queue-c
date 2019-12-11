@@ -6,7 +6,7 @@ include_directories("../qc_mq")
 include_directories("../qc_qsys")
 
 add_library(qc_sock
-            STATIC
+            OBJECT
             qc_protocol.h
             qc_protocol.c
             qc_service.h

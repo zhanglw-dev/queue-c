@@ -4,7 +4,7 @@ project(qc_mq LANGUAGES C)
 include_directories("../qc_base")
 
 add_library(qc_mq
-            STATIC
+            OBJECT
             qc_message.h
             qc_message.c 
             qc_getters.h

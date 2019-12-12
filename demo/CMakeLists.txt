@@ -2,8 +2,9 @@ cmake_minimum_required(VERSION 3.5 FATAL_ERROR)
 project(demo LANGUAGES C)
 
 add_executable(demo 
-               demo_mq.h
                demo_mq.c 
+               demo_qsys.c 
+               demo_sock.c
                main.c 
               )
 

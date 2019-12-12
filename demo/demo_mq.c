@@ -37,5 +37,8 @@ int demo_mq()
         qc_message_release(message, 1);
     }
 
-    exit(0);
+    qc_queue_destroy(queue);
+
+    printf("qc mq is ok!\n");
+    return 0;
 }

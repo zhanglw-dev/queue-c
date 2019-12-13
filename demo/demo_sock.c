@@ -45,7 +45,7 @@ int demo_sock()
     }
 
     char *buff = "hello qc_sock!";
-    QcMessage *message_put = qc_message_create(buff, strlen(buff)+1, 0);
+    QcMessage *message_put = qc_message_create(buff, (int)strlen(buff)+1, 0);
     if(0 != qc_client_msgput(client, "queue01", message_put, 3, &err)){
         printf("client msgput failed.\n");
         exit(-1);

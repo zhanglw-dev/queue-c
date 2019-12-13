@@ -1,5 +1,6 @@
 
 #include "qc_thread.h"
+#include "qc_prelude.h"
 
 
 struct __QcThread{
@@ -23,7 +24,7 @@ struct __QcCondLock{
 };
 
 
-struct __QcCond{
+struct __QcCondition{
 	CONDITION_VARIABLE cond_hdl;
 };
 
@@ -214,11 +215,11 @@ int qc_thread_mutex_unlock(QcMutex *mutex)
 
 /*--------------------------------------------------------------------------------------------------*/
 
-QcCond* qc_thread_cond_create()
+QcCondition* qc_thread_condition_create()
 {
-	QcCond *cond;
+	QcCondition *cond;
 
-	cond = malloc(sizeof(QcCond));
+	cond = malloc(sizeof(QcCondition));
 
 	InitializeConditionVariable(&cond->cond_hdl);
 
@@ -226,7 +227,7 @@ QcCond* qc_thread_cond_create()
 }
 
 
-int qc_thread_cond_destroy(QcCond *cond)
+int qc_thread_condition_destroy(QcCondition *cond)
 {
 	free(cond);
 
@@ -234,7 +235,7 @@ int qc_thread_cond_destroy(QcCond *cond)
 }
 
 
-int qc_thread_cond_wait(QcCond *cond, QcCondLock *condlock)
+int qc_thread_condition_wait(QcCondition *cond, QcCondLock *condlock)
 {
 	if(!SleepConditionVariableCS(&cond->cond_hdl, &condlock->lock_hdl, INFINITE))
 		return -1;
@@ -243,7 +244,7 @@ int qc_thread_cond_wait(QcCond *cond, QcCondLock *condlock)
 }
 
 
-int qc_thread_cond_timedwait(QcCond *cond, QcCondLock *condlock, int msec)
+int qc_thread_condition_timedwait(QcCondition *cond, QcCondLock *condlock, int msec)
 {
 	if (!SleepConditionVariableCS(&cond->cond_hdl, &condlock->lock_hdl, msec)) {
 		if (ERROR_TIMEOUT == GetLastError())
@@ -255,7 +256,7 @@ int qc_thread_cond_timedwait(QcCond *cond, QcCondLock *condlock, int msec)
 }
 
 
-int qc_thread_cond_signal(QcCond *cond)
+int qc_thread_condition_signal(QcCondition *cond)
 {
 	WakeConditionVariable(&cond->cond_hdl);
 

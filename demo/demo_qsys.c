@@ -26,7 +26,7 @@ int demo_qsys()
     }
 
     char *buff = "hello qsys!";
-    QcMessage *message_put = qc_message_create(buff, strlen(buff)+1, 0);
+    QcMessage *message_put = qc_message_create(buff, (int)strlen(buff)+1, 0);
 
     if( 0!= qc_qsys_putmsg(qSys, qname, message_put, 0, &err)){
         printf("qsys put msg failed: %s\n", err.desc);

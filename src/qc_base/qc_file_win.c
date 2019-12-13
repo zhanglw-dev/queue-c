@@ -59,8 +59,8 @@ QcFile* qc_file_open(const char *pathname, int oflag)
 	//hTemplateFile
 	hTempFile = NULL;
 
-	LPCTSTR lpfname = convertW(pathname);
-	File->hdl = CreateFileW((LPCTSTR)lpfname, dwAccess, dwShard, \
+	LPCWSTR lpfname = convertW(pathname);
+	File->hdl = CreateFileW((LPCWSTR)lpfname, dwAccess, dwShard, \
 		               qcSecurity, dwCreatDis, dwFlagsAndAttrs, hTempFile );
 	free((void*)lpfname);
 
@@ -239,9 +239,9 @@ int qc_file_rename(const char *oldname, const char *newname)
 int qc_file_truncate(const char *pathname, off_t length)
 {
 	HANDLE hdl;
-	LPCTSTR lpfname = convertW(pathname);
+	LPCWSTR lpfname = convertW(pathname);
 
-	hdl = CreateFileW((LPCTSTR)lpfname, GENERIC_WRITE, FILE_SHARE_WRITE, \
+	hdl = CreateFileW((LPCWSTR)lpfname, GENERIC_WRITE, FILE_SHARE_WRITE, \
 		NULL, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 
 	free((void*)lpfname);
@@ -288,7 +288,7 @@ int qc_dir_remove(char *dirname)
 {
 	qc_assert(dirname);
 
-	if(!RemoveDirectory((LPCWSTR)dirname))
+	if(!RemoveDirectoryW((LPCWSTR)dirname))
 	{
 		qc_perror("dir(%s) remove failed", dirname);
 		return -1;
@@ -317,7 +317,7 @@ int qc_dir_make(char *dirname)
 {
 	qc_assert(dirname);
 
-    if (!CreateDirectory((LPCWSTR)dirname, NULL))
+    if (!CreateDirectoryW((LPCWSTR)dirname, NULL))
 	{
 		qc_perror("dir(%s) make failed", dirname);
         return -1;

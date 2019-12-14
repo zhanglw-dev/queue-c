@@ -54,7 +54,7 @@ int test_psist_file()
 			return -1;
 		}
 
-		printf("msg:%s\n", qc_message_buff(message1));
+		//printf("msg:%s\n", qc_message_buff(message1));
 		qc_message_release(message1, 0);
 	}
 

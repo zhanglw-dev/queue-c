@@ -90,6 +90,7 @@ int qc_proc_msgget(ProcParam *procParam, QcPrtclHead *prtclHead, char *prtcl_bod
 	qc_prtcl_msgget_ntoh(prtclMsgGet);
 
 	if (prtclHead->type != QC_TYPE_MSGGET) {
+		qc_seterr(err, QC_ERR_RUNTIME, "runtime error");
 		goto failed;
 	}
 
@@ -97,26 +98,32 @@ int qc_proc_msgget(ProcParam *procParam, QcPrtclHead *prtclHead, char *prtcl_bod
 
 	QcMessage* message = qc_qsys_getmsg(procParam->qSystem, prtclMsgGet->qname, prtclMsgGet->wait_msec, err);
 	if (NULL == message)
-		return -1;
+		goto failed;
 
 	int msg_len = qc_message_bufflen(message);
 
 	prtclHead->type = QC_TYPE_REPLY;
 	ret = qc_tcp_send(procParam->socket, (char*)prtclHead, sizeof(QcPrtclHead));
-	if (ret != sizeof(QcPrtclHead))
+	if (ret != sizeof(QcPrtclHead)){
+		qc_seterr(err, QC_ERR_SOCKET, "socket send err");
 		goto failed;
+	}
 
 	QcPrtclReply prtclReply;
 	prtclReply.result = 0;
 	prtclReply.msg_len = msg_len;
 	qc_prtcl_reply_hton(&prtclReply);
 	ret = qc_tcp_send(procParam->socket, (char*)&prtclReply, sizeof(QcPrtclReply));
-	if (ret != sizeof(QcPrtclReply))
+	if (ret != sizeof(QcPrtclReply)){
+		qc_seterr(err, QC_ERR_SOCKET, "socket send err");
 		goto failed;
+	}
 
 	ret = qc_tcp_send(procParam->socket, (char*)qc_message_buff(message), msg_len);
-	if (ret != msg_len)
+	if (ret != msg_len){
+		qc_seterr(err, QC_ERR_SOCKET, "socket send err");
 		goto failed;
+	}
 
 	return 0;
 
@@ -141,8 +148,9 @@ void* work_thread_routine(void *param)
 
 	while (1) {
 		ret = qc_tcp_recvall(socket, head_buff, head_len);
-		if (ret <= 0)
+		if (ret <= 0){
 			goto failed;
+		}
 
 		QcPrtclHead *prtclHead = (QcPrtclHead*)head_buff;
 		qc_prtcl_head_ntoh(prtclHead);

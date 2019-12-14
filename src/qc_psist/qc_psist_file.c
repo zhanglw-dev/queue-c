@@ -86,8 +86,7 @@ QcPsistFile* qc_psist_file_open(int msgbuff_size, int msgcount_limit, const char
 {
 	qc_assert(msgbuff_size > 0 && msgcount_limit > 0 && table_filename);
 	if (strlen(table_filename) > QC_PSIST_PATHLEN) {
-		err->code = QC_ERR_BADLENGTH;
-		strcpy(err->desc, "table name is too long.");
+		qc_seterr(err, QC_ERR_BADLENGTH, "table name is too long.");
 		return NULL;
 	}
 
@@ -108,11 +107,13 @@ QcPsistFile* qc_psist_file_open(int msgbuff_size, int msgcount_limit, const char
 	if (0 != qc_file_exist(table_filename)) {
 		//truncate file
 		if (0 != qc_file_truncate(table_filename, filesize)) {
+			qc_seterr(err, QC_ERR_IO, "truncate file(%s) failed.", table_filename);
 			goto failed;
 		}
 
 		QcFile *file = qc_file_open(table_filename, O_CREAT|O_RDWR);
 		if (!file) {
+			qc_seterr(err, QC_ERR_IO, "open file(%s) failed.", table_filename);
 			goto failed;
 		}
 
@@ -121,17 +122,22 @@ QcPsistFile* qc_psist_file_open(int msgbuff_size, int msgcount_limit, const char
 		//write head info
 		qc_psistfile_info_hton(qtbl->fileInfo);
 		size_t sz = qc_file_write(file, qtbl->fileInfo, sizeof(Qc_PsistFileInfo));
-		if (sz <= 0)
+		if (sz <= 0){
+			qc_seterr(err, QC_ERR_IO, "write file(%s) failed.", table_filename);
 			goto failed;
+		}
 		qc_psistfile_info_hton(qtbl->fileInfo);   //used later
 	}
 	else {
 		size_t fsz = qc_file_size(table_filename);
-		if (fsz != filesize)
+		if (fsz != filesize){
+			qc_seterr(err, QC_ERR_IO, "get size of file(%s) failed.", table_filename);
 			goto failed;
+		}
 
 		QcFile *file = qc_file_open(table_filename, O_CREAT|O_RDWR);
 		if (!file) {
+			qc_seterr(err, QC_ERR_IO, "open file(%s) failed.", table_filename);
 			goto failed;
 		}
 
@@ -139,12 +145,16 @@ QcPsistFile* qc_psist_file_open(int msgbuff_size, int msgcount_limit, const char
 
 		Qc_PsistFileInfo tblFileInfo;
 		size_t sz = qc_file_read(file, &tblFileInfo, sizeof(Qc_PsistFileInfo));
-		if (sz <= 0)
+		if (sz <= 0){
+			qc_seterr(err, QC_ERR_IO, "read file(%s) failed.", table_filename);
 			goto failed;
+		}
 		qc_psistfile_info_ntoh(&tblFileInfo);
 
-		if (0 != qc_tblfileinfo_compare(&tblFileInfo, qtbl->fileInfo))
+		if (0 != qc_tblfileinfo_compare(&tblFileInfo, qtbl->fileInfo)){
+			qc_seterr(err, QC_ERR_VERIFY, "verify table file(%s) failed.", table_filename);
 			goto failed;
+		}
 	}
 
 	return qtbl;
@@ -180,8 +190,10 @@ int qc_psist_file_append(QcPsistFile *qtbl, Qc_MsgRecord *msgRecord, QcErr *err)
 	QcFile *file = qtbl->file;
 	qc_file_seek(file, offset_msgbody, 0);
 	sz = qc_file_write(file, msgRecord->buff, msgRecord->bufflen);
-	if (sz <= 0)
+	if (sz <= 0){
+		qc_seterr(err, QC_ERR_IO,"write file[%s] failed.", qtbl->filename);
 		return -1;
+	}
 	
 	Qc_MsgInfo msgInfo;
 	msgInfo.flag = 1;
@@ -191,8 +203,10 @@ int qc_psist_file_append(QcPsistFile *qtbl, Qc_MsgRecord *msgRecord, QcErr *err)
 	qc_file_seek(file, offset_msghead, 0);
 	qc_msginfo_hton(&msgInfo);
 	sz = qc_file_write(file, &msgInfo, sizeof(Qc_MsgInfo));
-	if (sz <= 0)
+	if (sz <= 0){
+		qc_seterr(err, QC_ERR_IO,"write file[%s] failed.", qtbl->filename);
 		return -1;
+	}
 
 	//qc_file_sync(file);
 
@@ -202,6 +216,7 @@ int qc_psist_file_append(QcPsistFile *qtbl, Qc_MsgRecord *msgRecord, QcErr *err)
 
 int qc_psist_file_remove(QcPsistFile *qtbl, Qc_MsgRecord *msgRecord, QcErr *err)
 {
+	int sz;
 	int persist_id = msgRecord->persist_id;
 	off_t offset_msghead = sizeof(Qc_PsistFileInfo) + persist_id * (sizeof(Qc_MsgInfo) + qtbl->fileInfo->msgbuff_size);
 
@@ -211,20 +226,32 @@ int qc_psist_file_remove(QcPsistFile *qtbl, Qc_MsgRecord *msgRecord, QcErr *err)
 	msgInfo.bufflen = 0;
 
 	QcFile *file = qtbl->file;
-	qc_file_seek(file, offset_msghead, 0);
+	sz = qc_file_seek(file, offset_msghead, 0);
+	if(sz < 0){
+		qc_seterr(err, QC_ERR_IO,"seek file[%s] failed.", qtbl->filename);
+		return -1;
+	}
 	qc_msginfo_hton(&msgInfo);
-	qc_file_write(file, &msgInfo, sizeof(Qc_MsgInfo));
+	sz = qc_file_write(file, &msgInfo, sizeof(Qc_MsgInfo));
+	if(sz < 0){
+		qc_seterr(err, QC_ERR_IO,"write file[%s] failed.", qtbl->filename);
+		return -1;
+	}
 
-	//qc_file_sync(file);
-
+	//qc_file_sync(file);  //too slow
 	return 0;
 }
 
 
 int qc_psist_file_fetch_ready(QcPsistFile *qtbl, QcErr *err)
 {
+	int sz;
 	QcFile *file = qtbl->file;
-	qc_file_seek(file, sizeof(Qc_PsistFileInfo), 0);
+	sz = qc_file_seek(file, sizeof(Qc_PsistFileInfo), 0);
+	if(sz < 0){
+		qc_seterr(err, QC_ERR_IO,"seek file[%s] failed.", qtbl->filename);
+		return -1;
+	}
 	return 0;
 }
 
@@ -245,23 +272,29 @@ int qc_psist_file_do_fetch(QcPsistFile *qtbl, Qc_MsgRecord *msgRecord, QcErr *er
 
 		size_t hsz = qc_file_read(file, &msgInfo, sizeof(Qc_MsgInfo));
 		qc_msginfo_ntoh(&msgInfo);
-		if (hsz != sizeof(Qc_MsgInfo))
+		if (hsz != sizeof(Qc_MsgInfo)){
+			qc_seterr(err, QC_ERR_IO,"read file[%s] failed.", qtbl->filename);
 			return -1;
+		}
 
 		offset += sizeof(Qc_MsgInfo) + qtbl->fileInfo->msgbuff_size;
 
 		if (0 == msgInfo.flag){
 			int bsz = qc_file_seek(file, qtbl->fileInfo->msgbuff_size, 1);
-			if(bsz < 0)
+			if(bsz < 0){
+				qc_seterr(err, QC_ERR_IO,"seek file[%s] failed.", qtbl->filename);
 				return -1;
+			}
 			continue;  //not in use, next..
 		}
 		else{
 			char *buff;
 			qc_malloc(buff, msgInfo.bufflen);
 			size_t bsz = qc_file_read(file, buff, msgInfo.bufflen);
-			if (bsz != msgInfo.bufflen)
-				return -1;
+			if (bsz != msgInfo.bufflen){
+				qc_seterr(err, QC_ERR_IO,"read file[%s] failed.", qtbl->filename);
+				return -1;				
+			}
 
 			msgRecord->persist_id = persist_id;
 			msgRecord->priority = msgInfo.priority;
@@ -269,7 +302,6 @@ int qc_psist_file_do_fetch(QcPsistFile *qtbl, Qc_MsgRecord *msgRecord, QcErr *er
 			msgRecord->buff = buff;
 			break;
 		}
-
 
 	}
 

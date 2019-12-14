@@ -40,9 +40,10 @@ int qc_qmng_addqueue(QcQueManager *qManager, const char* qname, QcQueue* queue, 
 {
 	int ret;
 	ret = qc_hashtbl_insert(qManager->queueTable, (void*)qname, queue);
-	if (ret != 0)
+	if (ret != 0){
+		qc_seterr(err, QC_ERR_RUNTIME, "qmanager add queue(%s) failed.", qname);
 		return -1;
-
+	}
 	return 0;
 }
 
@@ -51,8 +52,10 @@ int qc_qmng_delqueue(QcQueManager *qManager, const char *qname, QcErr *err)
 {
 	int ret;
 	ret = qc_hashtbl_delete(qManager->queueTable, (void*)qname);
-	if (ret != 0)
+	if (ret != 0){
+		qc_seterr(err, QC_ERR_RUNTIME, "qmanager delete queue(%s) failed.", qname);
 		return -1;
+	}
 	return 0;
 }
 
@@ -60,5 +63,8 @@ int qc_qmng_delqueue(QcQueManager *qManager, const char *qname, QcErr *err)
 QcQueue* qc_qmng_getqueue(QcQueManager *qManager, const char *qname, QcErr *err)
 {
 	QcQueue *queue = qc_hashtbl_find(qManager->queueTable, (void*)qname);
+	if(NULL == queue){
+		qc_seterr(err, QC_ERR_RUNTIME, "qmanager can't find queue(%s).", qname);
+	}
 	return queue;
 }

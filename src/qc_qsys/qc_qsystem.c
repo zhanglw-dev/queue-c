@@ -66,7 +66,6 @@ int qc_qsys_putmsg(QcQSystem *qSys, const char *qname, QcMessage *message, int m
 	QcQueue *queue;
 	queue = qc_qmng_getqueue(qSys->qManager, qname, err);
 	if (NULL == queue) {
-		qc_seterr(err, QC_ERR_QUEUE_NOTEXIST, "queue not exist.");
 		return QC_ERR_QUEUE_NOTEXIST;
 	}
 

@@ -4,13 +4,14 @@
 #include "qc_prelude.h"
 
 
-#define QC_SUCCEED    0
-#define QC_ERR_BADPARAM  -10
-#define QC_ERR_BADLENGTH -11
-#define QC_ERR_RUNTIME   -20
-#define QC_ERR_SOCKET    -30
-#define QC_ERR_QUEUE_NOTEXIST -40
-#define QC_ERR_INTERNAL  -50
+#define QC_ERR_BADPARAM  10
+#define QC_ERR_BADLENGTH 11
+#define QC_ERR_RUNTIME   20
+#define QC_ERR_IO        21
+#define QC_ERR_VERIFY    22
+#define QC_ERR_SOCKET    30
+#define QC_ERR_QUEUE_NOTEXIST 40
+#define QC_ERR_INTERNAL 50
 
 #define QC_MAXSIZE_ERRDESC 255
 

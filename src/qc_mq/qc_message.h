@@ -1,11 +1,7 @@
 #ifndef H_QC_MESSAGE
 #define H_QC_MESSAGE
 
-#include "qc_prelude.h"
-
-
 typedef struct __QcMessage QcMessage;
-
 
 
 #ifdef __cplusplus

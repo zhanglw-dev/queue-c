@@ -23,3 +23,10 @@ add_library(qc
             $<TARGET_OBJECTS:qc_qsys>
             $<TARGET_OBJECTS:qc_sock>
             )
+
+file(COPY "src/qc_base/qc_error.h" DESTINATION ${CMAKE_BINARY_DIR}/include)
+file(COPY "src/qc_mq/qc_message.h" DESTINATION ${CMAKE_BINARY_DIR}/include)
+file(COPY "src/qc_mq/qc_queue.h" DESTINATION ${CMAKE_BINARY_DIR}/include)
+file(COPY "src/qc_qsys/qc_qsystem.h" DESTINATION ${CMAKE_BINARY_DIR}/include)
+file(COPY "src/qc_sock/qc_service.h" DESTINATION ${CMAKE_BINARY_DIR}/include)
+file(COPY "src/qc_sock/qc_client.h" DESTINATION ${CMAKE_BINARY_DIR}/include)

@@ -1,7 +1,6 @@
 #ifndef QC_QSYSTEM_H
 #define QC_QSYSTEM_H
 
-#include "qc_qmanager.h"
 #include "qc_queue.h"
 #include "qc_error.h"
 

@@ -1,7 +1,6 @@
 #ifndef H_QC_MQUEUE
 #define H_QC_MQUEUE
 
-#include "qc_prelude.h"
 #include "qc_error.h"
 #include "qc_message.h"
 

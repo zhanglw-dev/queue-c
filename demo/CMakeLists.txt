@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.5 FATAL_ERROR)
-project(demo LANGUAGES C)
+project(qcdemo LANGUAGES C)
 
-add_executable(demo 
+add_executable(qcdemo 
                demo_mq.c 
                demo_qsys.c 
                demo_sock.c
@@ -16,13 +16,13 @@ include_directories("../src/qc_sock")
 
 #message(STATUS ${CMAKE_BINARY_DIR}/lib)
 link_directories(${CMAKE_BINARY_DIR}/lib)
-target_link_libraries(demo qc)
+target_link_libraries(qcdemo qc)
 
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
-    target_link_libraries(demo ws2_32)
+    target_link_libraries(qcdemo ws2_32)
 else()
-    target_link_libraries(demo pthread)
+    target_link_libraries(qcdemo pthread)
 endif()
 
-target_compile_definitions(demo PUBLIC "_CRT_SECURE_NO_WARNINGS")
+target_compile_definitions(qcdemo PUBLIC "_CRT_SECURE_NO_WARNINGS")

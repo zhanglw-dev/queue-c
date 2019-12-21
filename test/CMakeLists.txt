@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.5 FATAL_ERROR)
-project(test LANGUAGES C)
+project(qctest LANGUAGES C)
 
-add_executable(test 
+add_executable(qctest 
                test_mq.h 
                test_mq.c 
                test_psist.h 
@@ -21,13 +21,21 @@ include_directories("../src/qc_sock")
 
 #message(STATUS ${CMAKE_BINARY_DIR}/lib)
 link_directories(${CMAKE_BINARY_DIR}/lib)
-target_link_libraries(test qc)
+target_link_libraries(qctest qc)
 
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
-    target_link_libraries(test ws2_32)
+    target_link_libraries(qctest ws2_32)
 else()
-    target_link_libraries(test pthread)
+    target_link_libraries(qctest pthread)
 endif()
 
-target_compile_definitions(test PUBLIC "_CRT_SECURE_NO_WARNINGS")
+target_compile_definitions(qctest PUBLIC "_CRT_SECURE_NO_WARNINGS")
+
+
+enable_testing()
+
+add_test(
+    NAME qctest
+    COMMAND $<TARGET_FILE:qctest>
+)

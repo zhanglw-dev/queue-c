@@ -31,11 +31,3 @@ else()
 endif()
 
 target_compile_definitions(qctest PUBLIC "_CRT_SECURE_NO_WARNINGS")
-
-
-enable_testing()
-
-add_test(
-    NAME qctest
-    COMMAND $<TARGET_FILE:qctest>
-)

@@ -30,3 +30,10 @@ file(COPY "src/qc_mq/qc_queue.h" DESTINATION ${CMAKE_BINARY_DIR}/include)
 file(COPY "src/qc_qsys/qc_qsystem.h" DESTINATION ${CMAKE_BINARY_DIR}/include)
 file(COPY "src/qc_sock/qc_service.h" DESTINATION ${CMAKE_BINARY_DIR}/include)
 file(COPY "src/qc_sock/qc_client.h" DESTINATION ${CMAKE_BINARY_DIR}/include)
+
+enable_testing()
+
+add_test(
+    NAME qctest
+    COMMAND $<TARGET_FILE:qctest>
+)

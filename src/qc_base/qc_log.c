@@ -1,4 +1,3 @@
-
 /*
  * BSD 3-Clause License
  * 
@@ -35,31 +34,59 @@
 #include "qc_file.h"
 #include "qc_thread.h"
 
-static QcFile *logf = NULL;
-static QcMutex *log_mutex;
-static char logbuff[1024];
+static QcFile *_logf = NULL;
+static QcMutex *_log_mutex;
+static int mbytes = 10;
+static int rollnum = 5;
 
 
-void qc_log_init()
+//Todo: mbyes, rollnum
+int qc_log_init(const char* logfile, int mbytes, int rollnum)
 {
-    logf = qc_file_open("log.txt", O_CREAT|O_WRONLY);
-    if(NULL == logf)
-        logf = (QcFile*)-1;
+    _logf = qc_file_open(logfile, O_CREAT|O_WRONLY);
+    if(NULL == _logf){
+        _logf = (QcFile*)-1;
+        return -1;
+    }
 
-    log_mutex = qc_thread_mutex_create();
+    _log_mutex = qc_thread_mutex_create();
+    return 0;
+}
+
+
+static void _qc_log_init()
+{
+    qc_log_init("qc.log", 10, 5);
+}
+
+
+static void _qc_log_write(char *logbuff)
+{
+    char buff[512];
+    time_t t;
+    struct tm * lt;
+    time (&t);
+    lt = localtime (&t);
+    snprintf(buff, sizeof(buff), "[%4d/%2d/%2d %2d:%2d:%2d] %s",\
+            lt->tm_year+1900, lt->tm_mon, lt->tm_mday, lt->tm_hour, lt->tm_min, lt->tm_sec, logbuff);
+
+    int len = strlen(buff) + 1;
+    qc_thread_mutex_lock(_log_mutex);
+    qc_file_write(_logf, buff, len);
+    qc_thread_mutex_unlock(_log_mutex);
+
+    printf("%s", buff);
 }
 
 
 void _qc_error(char *srcfile, int srcline, const char *str)
 {
-    if(logf == NULL) qc_log_init();
+    char logbuff[512];
+    if(_logf == NULL) _qc_log_init();
     snprintf(logbuff, sizeof(logbuff), "error: [%s; line:%d; syserr:%d] ==> %s\n", srcfile, srcline, errno, str);
-    if((int)logf != -1){
-        qc_thread_mutex_lock(log_mutex);
-        qc_file_write(logf, logbuff, strlen(logbuff)+1);
-        qc_thread_mutex_unlock(log_mutex);
+    if((int)_logf != -1){
+        _qc_log_write(logbuff);
     }
-    printf("%s", logbuff);
 }
 
 
@@ -67,8 +94,6 @@ void _qc_perror(char *srcfile, int srcline, const char *fmt, ...)
 {
     char vs[512];
     va_list vl;
-
-    memset(vs, 0, sizeof(vs));
 
     va_start(vl, fmt);
     vsnprintf(vs, sizeof(vs), fmt, vl);
@@ -79,14 +104,12 @@ void _qc_perror(char *srcfile, int srcline, const char *fmt, ...)
 
 void _qc_debug(char *srcfile, int srcline, int level, const char *str)
 {
-    if(logf == NULL) qc_log_init();
+    char logbuff[512];
+    if(_logf == NULL) _qc_log_init();
     snprintf(logbuff, sizeof(logbuff), "debug[%d]: [%s; line:%d] ==> %s\n", level, srcfile, srcline, str);
-    if((int)logf != -1){
-        qc_thread_mutex_lock(log_mutex);
-        qc_file_write(logf, logbuff, strlen(logbuff)+1);
-        qc_thread_mutex_unlock(log_mutex);
+    if((int)_logf != -1){
+        _qc_log_write(logbuff);
     }
-    printf("%s", logbuff);
 }
 
 
@@ -94,8 +117,6 @@ void _qc_pdebug(char *srcfile, int srcline, int level, const char *fmt, ...)
 {
     char vs[512];
     va_list vl;
-
-    memset(vs, 0, sizeof(vs));
 
     va_start(vl, fmt);
     vsnprintf(vs, sizeof(vs), fmt, vl);
@@ -106,14 +127,12 @@ void _qc_pdebug(char *srcfile, int srcline, int level, const char *fmt, ...)
 
 void _qc_warn(const char *str)
 {
-    if(logf == NULL) qc_log_init();
+    char logbuff[512];
+    if(_logf == NULL) _qc_log_init();
     snprintf(logbuff, sizeof(logbuff), "warning ==> %s\n", str);
-    if((int)logf != -1){
-        qc_thread_mutex_lock(log_mutex);
-        qc_file_write(logf, logbuff, strlen(logbuff)+1);
-        qc_thread_mutex_unlock(log_mutex);
+    if((int)_logf != -1){
+        _qc_log_write(logbuff);
     }
-    printf("%s", logbuff);
 }
 
 
@@ -121,8 +140,6 @@ void _qc_pwarn(const char *fmt, ...)
 {
     char vs[512];
     va_list vl;
-
-    memset(vs, 0, sizeof(vs));
 
     va_start(vl, fmt);
     vsnprintf(vs, sizeof(vs), fmt, vl);
@@ -133,14 +150,12 @@ void _qc_pwarn(const char *fmt, ...)
 
 void _qc_info(const char *str)
 {
-    if(logf == NULL) qc_log_init();
+    char logbuff[512];
+    if(_logf == NULL) _qc_log_init();
     snprintf(logbuff, sizeof(logbuff), "info ==> %s\n", str);
-    if((int)logf != -1){
-        qc_thread_mutex_lock(log_mutex);
-        qc_file_write(logf, logbuff, strlen(logbuff)+1);
-        qc_thread_mutex_unlock(log_mutex);
+    if((int)_logf != -1){
+        _qc_log_write(logbuff);
     }
-    printf("%s", logbuff);    
 }
 
 
@@ -148,8 +163,6 @@ void _qc_pinfo(const char *fmt, ...)
 {
     char vs[512];
     va_list vl;
-
-    memset(vs, 0, sizeof(vs));
 
     va_start(vl, fmt);
     vsnprintf(vs, sizeof(vs), fmt, vl);

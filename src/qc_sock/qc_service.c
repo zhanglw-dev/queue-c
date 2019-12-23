@@ -54,14 +54,14 @@ struct __QcQueueSvc {
 typedef struct {
 	QcQueueSvc *queueSvc;
 	QcSocket* socket;
-	QcErr *err;
+	QcErr err;
 }AcceptParam;
 
 
 typedef struct {
 	QcQueueSvc *queueSvc;
 	QcSocket* socket;
-	QcErr *err;
+	QcErr err;
 }WorkParam;
 
 
@@ -69,18 +69,20 @@ typedef struct {
 	QcSocket *socket;
 	char qname[32];
 	QcQSystem *qSystem;
-	QcErr *err;
+	QcErr err;
 }ProcParam;
 
 
 int qc_proc_msgput(ProcParam *procParam, QcPrtclHead *prtclHead, char *prtcl_body, QcErr *err)
 {
 	int ret;
+	int result = 0;
 
 	QcPrtclMsgPut* prtclMsgPut = (QcPrtclMsgPut*)prtcl_body;
 	qc_prtcl_msgput_ntoh(prtclMsgPut);
 
 	if (prtclHead->type != QC_TYPE_MSGPUT) {
+		qc_seterr(err, QC_ERR_RUNTIME, "runtime error");
 		goto failed;
 	}
 
@@ -92,23 +94,37 @@ int qc_proc_msgput(ProcParam *procParam, QcPrtclHead *prtclHead, char *prtcl_bod
 	QcMessage *message = qc_message_create(buff, msg_len, 1);
 
 	ret = qc_qsys_putmsg(procParam->qSystem, prtclMsgPut->qname, message, wait_msec, err);
-	if (0 != ret)
-		goto failed;
+	if (0 != ret){
+		if(QC_TIMEOUT == err->code){
+			result = QC_RESULT_TIMEOUT;
+		}
+		else{
+			result = QC_RESULT_FAILED;
+		}
+	}
+	else{
+			result = QC_RESULT_SUCC;
+	}
 
 	prtclHead->type = QC_TYPE_REPLY;
 	ret = qc_tcp_send(procParam->socket, (char*)prtclHead, sizeof(QcPrtclHead));
-	if (ret != sizeof(QcPrtclHead))
+	if (ret != sizeof(QcPrtclHead)){
+		qc_seterr(err, QC_ERR_SOCKET, "tcp send head err");
 		goto failed;
+	}
 
 	QcPrtclReply prtclReply;
-	prtclReply.result = 0;
+	prtclReply.result = result;
 	prtclReply.msg_len = msg_len;
 	qc_prtcl_reply_hton(&prtclReply);
 	ret = qc_tcp_send(procParam->socket, (char*)&prtclReply, sizeof(QcPrtclReply));
-	if (ret != sizeof(QcPrtclReply))
+	if (ret != sizeof(QcPrtclReply)){
+		qc_seterr(err, QC_ERR_SOCKET, "tcp send reply err");
 		goto failed;
+	}
 
 	return 0;
+
 failed:
 	return -1;
 }
@@ -117,6 +133,9 @@ failed:
 int qc_proc_msgget(ProcParam *procParam, QcPrtclHead *prtclHead, char *prtcl_body, QcErr *err)
 {
 	int ret;
+	int result = 0;
+	int msg_len = 0;
+	QcMessage* message  = NULL;
 
 	QcPrtclMsgGet* prtclMsgGet = (QcPrtclMsgGet*)prtcl_body;
 	qc_prtcl_msgget_ntoh(prtclMsgGet);
@@ -128,11 +147,20 @@ int qc_proc_msgget(ProcParam *procParam, QcPrtclHead *prtclHead, char *prtcl_bod
 
 	int wait_msec = prtclMsgGet->wait_msec;
 
-	QcMessage* message = qc_qsys_getmsg(procParam->qSystem, prtclMsgGet->qname, prtclMsgGet->wait_msec, err);
-	if (NULL == message)
-		goto failed;
+	message = qc_qsys_getmsg(procParam->qSystem, prtclMsgGet->qname, prtclMsgGet->wait_msec, err);
 
-	int msg_len = qc_message_bufflen(message);
+	if (NULL == message){
+		if(QC_TIMEOUT == err->code){
+			result = QC_RESULT_TIMEOUT;
+		}
+		else{
+			result = QC_RESULT_FAILED;
+		}
+	}
+	else{
+			result = QC_RESULT_SUCC;
+			msg_len = qc_message_bufflen(message);
+	}
 
 	prtclHead->type = QC_TYPE_REPLY;
 	ret = qc_tcp_send(procParam->socket, (char*)prtclHead, sizeof(QcPrtclHead));
@@ -142,7 +170,7 @@ int qc_proc_msgget(ProcParam *procParam, QcPrtclHead *prtclHead, char *prtcl_bod
 	}
 
 	QcPrtclReply prtclReply;
-	prtclReply.result = 0;
+	prtclReply.result = result;
 	prtclReply.msg_len = msg_len;
 	qc_prtcl_reply_hton(&prtclReply);
 	ret = qc_tcp_send(procParam->socket, (char*)&prtclReply, sizeof(QcPrtclReply));
@@ -151,16 +179,19 @@ int qc_proc_msgget(ProcParam *procParam, QcPrtclHead *prtclHead, char *prtcl_bod
 		goto failed;
 	}
 
-	ret = qc_tcp_send(procParam->socket, (char*)qc_message_buff(message), msg_len);
-	if (ret != msg_len){
-		qc_seterr(err, QC_ERR_SOCKET, "socket send err");
-		goto failed;
+    if(msg_len >0){
+		ret = qc_tcp_send(procParam->socket, (char*)qc_message_buff(message), msg_len);
+		if (ret != msg_len){
+			qc_seterr(err, QC_ERR_SOCKET, "socket send err");
+			goto failed;
+		}
 	}
 
 	qc_message_release(message, 1);
 	return 0;
 
 failed:
+    if(message) qc_message_release(message, 1);
 	return -1;
 }
 
@@ -200,14 +231,14 @@ void* work_thread_routine(void *param)
 		case QC_TYPE_MSGGET:
 			procParam.qSystem = workParam->queueSvc->qSystem;
 			procParam.socket  = socket;
-			ret = qc_proc_msgget(&procParam, prtclHead, body_buff, workParam->err);
+			ret = qc_proc_msgget(&procParam, prtclHead, body_buff, &workParam->err);
 			if (ret < 0)
 				goto failed;
 			break;
 		case QC_TYPE_MSGPUT:
 			procParam.qSystem = workParam->queueSvc->qSystem;
 			procParam.socket  = socket;
-			ret = qc_proc_msgput(&procParam, prtclHead, body_buff, workParam->err);
+			ret = qc_proc_msgput(&procParam, prtclHead, body_buff, &workParam->err);
 			if (ret < 0)
 				goto failed;
 			break;
@@ -235,8 +266,8 @@ void* accept_thread_routine(void *param)
 	while (1) {
 		QcSocket* socket = qc_tcp_accept(acceptParam->socket);
 		if (!socket) {
-			if (acceptParam->err)
-				qc_seterr(acceptParam->err, QC_ERR_SOCKET, "tcp accept failed");
+			if (&acceptParam->err)
+				qc_seterr(&acceptParam->err, QC_ERR_SOCKET, "tcp accept failed");
 			goto failed;
 		}
 
@@ -289,6 +320,7 @@ int qc_queuesvc_start(QcQueueSvc *queueSvc, int is_async, QcErr *err)
 		qc_seterr(err, QC_ERR_SOCKET, "create socket failed.");
 		return -1;
 	}
+	qc_socket_nagle_onoff(socket, 1);
 
 	AcceptParam *acceptParam;
 	qc_malloc(acceptParam, sizeof(AcceptParam));

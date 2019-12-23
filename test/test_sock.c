@@ -40,14 +40,14 @@
 #include "qc_log.h"
 
 
-#define PRODUCER_NUM  5
-#define CONSUMER_NUM  5
+#define PRODUCER_NUM  10
+#define CONSUMER_NUM  10
 
 const char *ip = "127.0.0.1";
 const int port = 5555;
 const char *qname = "queue01";
 const char *msgstr = "123456789";
-const int msgcount = 100000;
+const int msgcount = 10000;
 
 
 void* producer_routine(void* arg) {
@@ -57,17 +57,21 @@ void* producer_routine(void* arg) {
 
 	QcClient* client = qc_client_connect(ip, port, &err);
 	if (!client) {
-		printf("client connect failed.");
+		printf("client connect failed.\n");
 		return NULL;
 	}
 
+	//printf("producer connected.\n");
+
 	for (int i = 0; i < msgcount; i++) {
 		QcMessage* message_put = qc_message_create(msgstr, (int)strlen(msgstr), 0);
-		ret = qc_client_msgput(client, "queue01", message_put, 3, &err);
+		ret = qc_client_msgput(client, "queue01", message_put, -1, &err);
 		if (0 != ret) {
-			printf("client msgput failed.");
+			printf("client msgput failed.\n");
+			qc_client_disconnect(client);
 			return NULL;
 		}
+        //printf("message put ok.\n");
 		qc_message_release(message_put, 0);
 	}
 
@@ -82,19 +86,25 @@ void* consumer_routine(void* arg) {
 
 	QcClient* client = qc_client_connect(ip, port, &err);
 	if (!client) {
-		printf("client connect failed.");
+		printf("client connect failed.\n");
 		return NULL;
 	}
 
+	//printf("consumer connected.\n");
+
 	for (int i = 0; i < msgcount; i++) {
-		QcMessage* message_get = qc_client_msgget(client, "queue01", 3, &err);
+		QcMessage* message_get = qc_client_msgget(client, "queue01", -1, &err);
 		if (!message_get) {
-			printf("client msgget failed");
+			printf("client msgget failed.\n");
+			qc_client_disconnect(client);
 			return NULL;
 		}
+
+		//printf("message get ok.\n");
 		char* buff = qc_message_buff(message_get);
 		if (0 != strcmp(buff, msgstr)) {
-			printf("message get error");
+			printf("message get error.\n");
+			qc_client_disconnect(client);
 			return NULL;
 		}
 
@@ -113,30 +123,30 @@ int test_net()
 
     QcQueue *queue = qc_queue_create(1000, 10, &err);
     if(!queue){
-        printf("create queue failed.");
+        printf("create queue failed.\n");
         return -1;
     }
 
     QcQSystem *qSystem = qc_qsys_create();
     ret = qc_qsys_addqueue(qSystem, qname, queue, &err);
     if(0 != ret){
-        printf("add queue to qsys failed.");
+        printf("add queue to qsys failed.\n");
         return -1;
     }
 
     QcQueueSvc *queueSvc = qc_queuesvc_create(ip, port, qSystem, &err);
     if(!queueSvc){
-        printf("create queuesvc failed.");
+        printf("create queuesvc failed.\n");
         return -1;
     }
 
     ret = qc_queuesvc_start(queueSvc, 1, &err);
     if(0 != ret){
-        printf("start queuesvc failed");
+        printf("start queuesvc failed.\n");
         return -1;
     }
 
-	qc_info("test concurrent producer/consumer start");
+	qc_info("test concurrent producer/consumer start.\n");
 	time_t rawtime;
 	time(&rawtime);
 	qc_pinfo("%s", asctime(localtime(&rawtime)));
@@ -170,7 +180,7 @@ int test_net()
 	time(&rawtime);
 	qc_pinfo("%s", asctime(localtime(&rawtime)));
 
-	qc_info("test concurrent producer/consumer succeed.");
+	qc_info("test concurrent producer/consumer succeed.\n");
 
     qc_queuesvc_stop(queueSvc);
     qc_queuesvc_destory(queueSvc);

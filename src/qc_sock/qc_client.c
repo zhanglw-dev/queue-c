@@ -46,6 +46,7 @@ QcClient* qc_client_connect(const char *ip, int port, QcErr *err)
 
 	QcClient *client = (QcClient*)malloc(sizeof(QcClient));
 	QcSocket *socket = qc_socket_create(AF_INET, SOCK_STREAM, 0);
+	qc_socket_nagle_onoff(socket, 1);
 
 	ret = qc_tcp_connect(socket, ip, port);
 	if (0 != ret)
@@ -87,29 +88,42 @@ int qc_client_msgput(QcClient *client, const char *qname, QcMessage *message, in
 
 	qc_prtcl_head_hton(&prtclHead);
 	ret = qc_tcp_send(socket, (char*)&prtclHead, sizeof(QcPrtclHead));
-	if (ret != sizeof(QcPrtclHead))
+	if (ret != sizeof(QcPrtclHead)){
 		goto failed;
+	}
 
 	qc_prtcl_msgput_hton(&prtclMsgPut);
 	ret = qc_tcp_send(socket, (char*)&prtclMsgPut, sizeof(QcPrtclMsgPut));
-	if (ret != sizeof(QcPrtclMsgPut))
+	if (ret != sizeof(QcPrtclMsgPut)){
 		goto failed;
+	}
 
 	ret = qc_tcp_send(socket, (char*)qc_message_buff(message), qc_message_bufflen(message));
-	if (ret != qc_message_bufflen(message))
+	if (ret != qc_message_bufflen(message)){
 		goto failed;
-	
+	}
+
 	ret = qc_tcp_recvall(socket, (char*)&prtclHead, sizeof(QcPrtclHead));
-	if (ret <= 0)
+	if (ret <= 0){
 		goto failed;
+	}
 
 	QcPrtclReply prtclReply;
 	ret = qc_tcp_recvall(socket, (char*)&prtclReply, sizeof(QcPrtclReply));
-	if (ret <= 0)
+	if (ret <= 0){
 		goto failed;
+	}
 
-	if (prtclReply.result != 0)
-		goto failed;
+	if (prtclReply.result != QC_RESULT_SUCC){
+		if(prtclReply.result == QC_RESULT_TIMEOUT){
+			qc_seterr(err, QC_ERR_TIMEOUT, "time out");
+			goto failed;
+		}
+		else{
+			qc_seterr(err, QC_ERR_UNKOWN, "unkown failed");
+			goto failed;
+		}
+	}
 
 	return 0;
 
@@ -138,38 +152,57 @@ QcMessage* qc_client_msgget(QcClient *client, const char *qname, int msec, QcErr
 
 	qc_prtcl_head_hton(&prtclHead);
 	ret = qc_tcp_send(socket, (char*)&prtclHead, sizeof(QcPrtclHead));
-	if (ret != sizeof(QcPrtclHead))
+	if (ret != sizeof(QcPrtclHead)){
+		qc_seterr(err, QC_ERR_SOCKET, "tcp send head failed.");
 		goto failed;
+	}
 
 	qc_prtcl_msgget_hton(&prtclMsgGet);
 	ret = qc_tcp_send(socket, (char*)&prtclMsgGet, sizeof(prtclMsgGet));
-	if (ret != sizeof(QcPrtclMsgGet))
+	if (ret != sizeof(QcPrtclMsgGet)){
+		qc_seterr(err, QC_ERR_SOCKET, "tcp send body failed.");
 		goto failed;
+	}
 
 	//receive
 	ret = qc_tcp_recvall(socket, (char*)&prtclHead, sizeof(QcPrtclHead));
-	if (ret <= 0)
+	if (ret <= 0){
+		qc_seterr(err, QC_ERR_SOCKET, "tcp recv head failed.");
 		goto failed;
+	}
 
 	QcPrtclReply prtclReply;
 	ret = qc_tcp_recvall(socket, (char*)&prtclReply, sizeof(QcPrtclReply));
-	if (ret <= 0)
+	if (ret <= 0){
+		qc_seterr(err, QC_ERR_SOCKET, "tcp recv relpy failed.");
 		goto failed;
+	}
+
 	qc_prtcl_reply_ntoh(&prtclReply);
 
-	if (prtclReply.result != 0)
+	if (prtclReply.result == QC_RESULT_SUCC){
+		char *buff;
+		qc_malloc(buff, prtclReply.msg_len+1);
+
+		int buff_len = prtclReply.msg_len;
+		ret = qc_tcp_recvall(socket, buff, buff_len);
+		if (ret <= 0){
+			qc_seterr(err, QC_ERR_SOCKET, "tcp recv buff failed.");
+			goto failed;
+		}
+
+		QcMessage *message = qc_message_create(buff, buff_len, 0);
+		return message;
+
+	}
+	else if(prtclReply.result == QC_RESULT_TIMEOUT){
+		qc_seterr(err, QC_ERR_TIMEOUT, "time out");
 		goto failed;
-
-	char *buff;
-	qc_malloc(buff, prtclReply.msg_len+1);
-
-	int buff_len = prtclReply.msg_len;
-	ret = qc_tcp_recvall(socket, buff, buff_len);
-	if (ret <= 0)
+	}
+	else{
+		qc_seterr(err, QC_ERR_UNKOWN, "unkown failed");
 		goto failed;
-
-	QcMessage *message = qc_message_create(buff, buff_len, 0);
-	return message;
+	}
 
 failed:
 	return NULL;

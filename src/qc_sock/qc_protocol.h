@@ -40,6 +40,10 @@
 #define QC_TYPE_MSGGET    121
 #define QC_TYPE_REPLY     130
 
+#define QC_RESULT_SUCC  0
+#define QC_RESULT_FAILED -1
+#define QC_RESULT_TIMEOUT 100
+
 #pragma pack(push)
 #pragma pack(1)
 

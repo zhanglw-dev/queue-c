@@ -157,6 +157,7 @@ int qc_proc_msgget(ProcParam *procParam, QcPrtclHead *prtclHead, char *prtcl_bod
 		goto failed;
 	}
 
+	qc_message_release(message, 1);
 	return 0;
 
 failed:
@@ -211,6 +212,8 @@ void* work_thread_routine(void *param)
 				goto failed;
 			break;
 		}
+
+		qc_free(body_buff);
 	}
 
 	return NULL;

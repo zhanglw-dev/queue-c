@@ -36,9 +36,75 @@
 #include "qc_message.h"
 #include "qc_queue.h"
 #include "qc_qsystem.h"
+#include "qc_thread.h"
+#include "qc_log.h"
 
 
+#define PRODUCER_NUM  5
+#define CONSUMER_NUM  5
+
+const char *ip = "127.0.0.1";
+const int port = 5555;
+const char *qname = "queue01";
 const char *msgstr = "123456789";
+const int msgcount = 100000;
+
+
+void* producer_routine(void* arg) {
+	//printf("producer start.\n");
+	int ret;
+	QcErr err;
+
+	QcClient* client = qc_client_connect(ip, port, &err);
+	if (!client) {
+		printf("client connect failed.");
+		return NULL;
+	}
+
+	for (int i = 0; i < msgcount; i++) {
+		QcMessage* message_put = qc_message_create(msgstr, (int)strlen(msgstr), 0);
+		ret = qc_client_msgput(client, "queue01", message_put, 3, &err);
+		if (0 != ret) {
+			printf("client msgput failed.");
+			return NULL;
+		}
+		qc_message_release(message_put, 0);
+	}
+
+	qc_client_disconnect(client);
+	return NULL;
+}
+
+
+void* consumer_routine(void* arg) {
+	//printf("consumer start.\n");
+	QcErr err;
+
+	QcClient* client = qc_client_connect(ip, port, &err);
+	if (!client) {
+		printf("client connect failed.");
+		return NULL;
+	}
+
+	for (int i = 0; i < msgcount; i++) {
+		QcMessage* message_get = qc_client_msgget(client, "queue01", 3, &err);
+		if (!message_get) {
+			printf("client msgget failed");
+			return NULL;
+		}
+		char* buff = qc_message_buff(message_get);
+		if (0 != strcmp(buff, msgstr)) {
+			printf("message get error");
+			return NULL;
+		}
+
+		qc_message_release(message_get, 1);
+	}
+
+	qc_client_disconnect(client);
+	return NULL;
+}
+
 
 int test_net()
 {
@@ -52,13 +118,13 @@ int test_net()
     }
 
     QcQSystem *qSystem = qc_qsys_create();
-    ret = qc_qsys_addqueue(qSystem, "queue01", queue, &err);
+    ret = qc_qsys_addqueue(qSystem, qname, queue, &err);
     if(0 != ret){
         printf("add queue to qsys failed.");
         return -1;
     }
 
-    QcQueueSvc *queueSvc = qc_queuesvc_create("127.0.0.1", 5555, qSystem, &err);
+    QcQueueSvc *queueSvc = qc_queuesvc_create(ip, port, qSystem, &err);
     if(!queueSvc){
         printf("create queuesvc failed.");
         return -1;
@@ -70,32 +136,41 @@ int test_net()
         return -1;
     }
 
-    QcClient* client = qc_client_connect("127.0.0.1", 5555, &err);
-    if(!client){
-        printf("client connect failed.");
-        return -1;
-    }
+	qc_info("test concurrent producer/consumer start");
+	time_t rawtime;
+	time(&rawtime);
+	qc_pinfo("%s", asctime(localtime(&rawtime)));
 
-    QcMessage *message_put = qc_message_create(msgstr, (int)strlen(msgstr), 0);
-    ret = qc_client_msgput(client, "queue01", message_put, 3, &err);
-    if(0 != ret){
-        printf("client msgput failed.");
-        return -1;
-    }
+	QcThread* producer[PRODUCER_NUM];
 
-    QcMessage *message_get = qc_client_msgget(client, "queue01", 3, &err);
-    if(!message_get){
-        printf("client msgget failed");
-        return -1;
-    }
+	for (int i = 0; i < PRODUCER_NUM; i++) {
+		QcThread* putthread = qc_thread_create(producer_routine, NULL);
+		producer[i] = putthread;
+	}
 
-    char *buff = qc_message_buff(message_get);
-    if(0 != strcmp(buff, msgstr)){
-        printf("message get error");
-        return -1;
-    }
 
-    qc_client_disconnect(client);
+	QcThread* consumer[CONSUMER_NUM];
+
+	for (int i = 0; i < CONSUMER_NUM; i++) {
+		QcThread* getthread = qc_thread_create(consumer_routine, NULL);
+		consumer[i] = getthread;
+	}
+
+
+	for (int i = 0; i < PRODUCER_NUM; i++) {
+		int exitcode;
+		qc_thread_join(producer[i], &exitcode);
+	}
+
+	for (int i = 0; i < CONSUMER_NUM; i++) {
+		int exitcode;
+		qc_thread_join(consumer[i], &exitcode);
+	}
+
+	time(&rawtime);
+	qc_pinfo("%s", asctime(localtime(&rawtime)));
+
+	qc_info("test concurrent producer/consumer succeed.");
 
     qc_queuesvc_stop(queueSvc);
     qc_queuesvc_destory(queueSvc);

@@ -67,7 +67,7 @@ static void _qc_log_write(char *logbuff)
     struct tm * lt;
     time (&t);
     lt = localtime (&t);
-    snprintf(buff, sizeof(buff), "[%4d/%2d/%2d %2d:%2d:%2d] %s",\
+    snprintf(buff, sizeof(buff), "[%4d/%2d/%2d %2d:%2d:%2d] %s\n",\
             lt->tm_year+1900, lt->tm_mon, lt->tm_mday, lt->tm_hour, lt->tm_min, lt->tm_sec, logbuff);
 
     int len = strlen(buff) + 1;
@@ -83,7 +83,7 @@ void _qc_error(char *srcfile, int srcline, const char *str)
 {
     char logbuff[512];
     if(_logf == NULL) _qc_log_init();
-    snprintf(logbuff, sizeof(logbuff), "error: [%s; line:%d; syserr:%d] ==> %s\n", srcfile, srcline, errno, str);
+    snprintf(logbuff, sizeof(logbuff), "error: [%s; line:%d; syserr:%d] ==> %s", srcfile, srcline, errno, str);
     if((int)_logf != -1){
         _qc_log_write(logbuff);
     }
@@ -106,7 +106,7 @@ void _qc_debug(char *srcfile, int srcline, int level, const char *str)
 {
     char logbuff[512];
     if(_logf == NULL) _qc_log_init();
-    snprintf(logbuff, sizeof(logbuff), "debug[%d]: [%s; line:%d] ==> %s\n", level, srcfile, srcline, str);
+    snprintf(logbuff, sizeof(logbuff), "debug[%d]: [%s; line:%d] ==> %s", level, srcfile, srcline, str);
     if((int)_logf != -1){
         _qc_log_write(logbuff);
     }
@@ -129,7 +129,7 @@ void _qc_warn(const char *str)
 {
     char logbuff[512];
     if(_logf == NULL) _qc_log_init();
-    snprintf(logbuff, sizeof(logbuff), "warning ==> %s\n", str);
+    snprintf(logbuff, sizeof(logbuff), "warning ==> %s", str);
     if((int)_logf != -1){
         _qc_log_write(logbuff);
     }
@@ -152,7 +152,7 @@ void _qc_info(const char *str)
 {
     char logbuff[512];
     if(_logf == NULL) _qc_log_init();
-    snprintf(logbuff, sizeof(logbuff), "info ==> %s\n", str);
+    snprintf(logbuff, sizeof(logbuff), "info ==> %s", str);
     if((int)_logf != -1){
         _qc_log_write(logbuff);
     }

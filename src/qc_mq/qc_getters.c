@@ -57,23 +57,39 @@ QcGetter* qc_getter_create() {
 		return NULL;
 	}
 
+	getter->mutex = qc_thread_mutex_create();
+	if (NULL == getter->mutex) {
+		qc_error("create getter->mutex failed.");
+		qc_free(getter);
+		return NULL;
+	}
+
 	//getter->message = NULL;
 	getter->is_timedout = 0;
+	getter->ref_count = 1;
 
 	return getter;
 }
 
 
 int qc_getter_destroy(QcGetter *getter) {
+	int ref_count;
+
 	if (NULL == getter) {
 		qc_error("invalid params.");
 		return -1;
 	}
 
-	qc_thread_condition_destroy(getter->cond);
-	qc_thread_condlock_destroy(getter->condlock);
+	qc_thread_mutex_lock(getter->mutex);
+	ref_count = --getter->ref_count;
+	qc_thread_mutex_unlock(getter->mutex);
 
-	qc_free(getter);
+	if(0 == ref_count){
+		qc_thread_condition_destroy(getter->cond);
+		qc_thread_condlock_destroy(getter->condlock);
+		qc_thread_mutex_destroy(getter->mutex);
+		qc_free(getter);
+	}
 
 	return 0;
 }
@@ -138,10 +154,18 @@ int qc_getterslist_push(QcGettersList *getterList, QcGetter *getter) {
 QcGetter* qc_getterslist_pop(QcGettersList *getterList) {
 	QcGetter *getter;
 	qc_list_w_lock(getterList->_gettersList);
+
 	getter = qc_list_pophead(getterList->_gettersList);
+	if(getter){
+		getter->_entry = NULL;
+
+		qc_thread_mutex_lock(getter->mutex);
+		if(getter != NULL) getter->ref_count++;
+		qc_thread_mutex_unlock(getter->mutex);
+	}
+
 	qc_list_w_unlock(getterList->_gettersList);
 
-	//qc_assert(getter);
 	return getter;
 }
 
@@ -150,10 +174,12 @@ int qc_getterslist_remove(QcGettersList *getterList, QcGetter *getter) {
 	if (NULL == getterList || NULL == getter) {
 		return -1;
 	}
-
-	QcListEntry *listEntry = getter->_entry;
 	qc_list_w_lock(getterList->_gettersList);
-	int ret = qc_list_removeentry(getterList->_gettersList, listEntry);
+	if(NULL == getter || NULL == getter->_entry){
+		qc_list_w_unlock(getterList->_gettersList);
+		return -1;
+	}
+	int ret = qc_list_removeentry(getterList->_gettersList, (QcListEntry*)getter->_entry);
 	qc_list_w_unlock(getterList->_gettersList);
 
 	qc_assert(ret == 0);

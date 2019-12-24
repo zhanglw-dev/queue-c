@@ -676,6 +676,7 @@ void* qc_list_data(QcListEntry *entry)
 int qc_list_removeentry(QcList *list, QcListEntry *entry)
 {
     qc_assert(list);
+    qc_assert(entry);
 
     if(NULL != entry->prev)
     {
@@ -689,7 +690,6 @@ int qc_list_removeentry(QcList *list, QcListEntry *entry)
         }
         list->head = entry->next;
     }
-
     if(entry->next)
     {
         entry->next->prev = entry->prev;
@@ -702,7 +702,6 @@ int qc_list_removeentry(QcList *list, QcListEntry *entry)
         }
         list->tail = entry->prev;
     }
-
     if(list->cur == entry)
     {
         list->cur = entry->next;
@@ -710,7 +709,6 @@ int qc_list_removeentry(QcList *list, QcListEntry *entry)
 
     list->count --;
     qc_free(entry);
-
     return 0;
 }
 

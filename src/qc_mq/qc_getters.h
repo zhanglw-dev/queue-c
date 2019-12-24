@@ -45,8 +45,10 @@
 typedef struct {
 	QcCondLock *condlock;
 	QcCondition *cond;
+	QcMutex *mutex;
 	//QcMessage *message;
 	int is_timedout;
+	int ref_count;
 
 	QcListEntry *_entry;
 }QcGetter;

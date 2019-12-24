@@ -40,14 +40,14 @@
 int main(int argc, char **argv)
 {
 	int ret;
-	/*
+	
 	ret = mq_test_all();
 	if (0 != ret) {
 		printf("mq test failed.");
 		exit(-1);
 	}
 
-
+	/*
 	ret = test_qsys();
 	if (0 != ret) {
 		printf("qsys test failed.");

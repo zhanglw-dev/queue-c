@@ -41,9 +41,11 @@
 typedef struct __QcPutter {
 	QcCondLock *condlock;
 	QcCondition *cond;
+	QcMutex *mutex;
 	QcMessage *message;
 	int is_timedout;
 	int priority;
+	int ref_count;
 	QcListEntry *_entry;
 }QcPutter;
 
@@ -59,6 +61,7 @@ typedef struct {
 	int bucket_count;
 	int cursor_bucketsn;
 	int putter_count;
+	QcRWLock *rwlock;
 }QcPuttersChain;
 
 

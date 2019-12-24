@@ -266,8 +266,7 @@ void* accept_thread_routine(void *param)
 	while (1) {
 		QcSocket* socket = qc_tcp_accept(acceptParam->socket);
 		if (!socket) {
-			if (&acceptParam->err)
-				qc_seterr(&acceptParam->err, QC_ERR_SOCKET, "tcp accept failed");
+			qc_seterr(&acceptParam->err, QC_ERR_SOCKET, "tcp accept failed");
 			goto failed;
 		}
 

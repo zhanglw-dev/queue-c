@@ -136,9 +136,7 @@ int qc_queue_msgput(QcQueue *queue, QcMessage *message, int msec, QcErr *err){
 put_loop:
 
 	qc_thread_mutex_lock(queue->quelock);
-
 	QcGetter *getter = qc_getterslist_pop(queue->gettersList);
-
 	//if there are getters waiting
 	if(getter){
 		qc_thread_condlock_lock(getter->condlock);
@@ -147,7 +145,7 @@ put_loop:
 		//maybe this getter has justly wait-timeout
 		if(getter->is_timedout){
 			qc_thread_condlock_unlock(getter->condlock);
-			qc_getter_destroy(getter); //destroy popped timeouted getter
+			qc_getter_destroy(getter);
 			goto put_loop;
 		}
 
@@ -184,8 +182,8 @@ put_loop:
 			qc_thread_condlock_unlock(putter->condlock);
 
 			if(putter->is_timedout){
-				int r = qc_putterschain_remove(queue->puttersChain, putter);
-				if(r == 0) qc_putter_destroy(putter);  //distroy un-popped timeouted putter
+				qc_putterschain_remove(queue->puttersChain, putter);
+				qc_putter_destroy(putter);  //distroy un-popped timeouted putter
 
 				qc_seterr(err, QC_TIMEOUT, "time out.");
 				return -1;
@@ -244,9 +242,8 @@ QcMessage* qc_queue_msgget(QcQueue *queue, int msec, QcErr *err){
 		qc_thread_condlock_unlock(getter->condlock);
 
 		if(getter->is_timedout){
-			int r = qc_getterslist_remove(queue->gettersList, getter);
-			if(r == 0) qc_getter_destroy(getter);  //distroy un-popped timeouted getter
-
+			qc_getterslist_remove(queue->gettersList, getter);  //do nothing if has been popped(entry is null)
+			qc_getter_destroy(getter);
 			qc_seterr(err, QC_TIMEOUT, "time out.");
 			return NULL;
 		}

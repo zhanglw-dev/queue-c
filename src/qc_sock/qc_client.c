@@ -107,12 +107,14 @@ int qc_client_msgput(QcClient *client, const char *qname, QcMessage *message, in
 	if (ret <= 0){
 		goto failed;
 	}
+	qc_prtcl_head_ntoh(&prtclHead);
 
 	QcPrtclReply prtclReply;
 	ret = qc_tcp_recvall(socket, (char*)&prtclReply, sizeof(QcPrtclReply));
 	if (ret <= 0){
 		goto failed;
 	}
+	qc_prtcl_reply_ntoh(&prtclReply);
 
 	if (prtclReply.result != QC_RESULT_SUCC){
 		if(prtclReply.result == QC_RESULT_TIMEOUT){
@@ -170,6 +172,7 @@ QcMessage* qc_client_msgget(QcClient *client, const char *qname, int msec, QcErr
 		qc_seterr(err, QC_ERR_SOCKET, "tcp recv head failed.");
 		goto failed;
 	}
+	qc_prtcl_head_ntoh(&prtclHead);
 
 	QcPrtclReply prtclReply;
 	ret = qc_tcp_recvall(socket, (char*)&prtclReply, sizeof(QcPrtclReply));
@@ -177,7 +180,6 @@ QcMessage* qc_client_msgget(QcClient *client, const char *qname, int msec, QcErr
 		qc_seterr(err, QC_ERR_SOCKET, "tcp recv relpy failed.");
 		goto failed;
 	}
-
 	qc_prtcl_reply_ntoh(&prtclReply);
 
 	if (prtclReply.result == QC_RESULT_SUCC){

@@ -57,24 +57,39 @@ QcPutter* qc_putter_create() {
 		return NULL;
 	}
 
+	putter->mutex = qc_thread_mutex_create();
+	if (NULL == putter->mutex) {
+		qc_error("create putter->mutex failed.");
+		qc_free(putter);
+		return NULL;
+	}
+
 	putter->message = NULL;
 	putter->is_timedout = 0;
 	putter->priority = 0;
+	putter->ref_count = 1;
 
 	return putter;
 }
 
 
-int qc_putter_destroy(QcPutter *putter) {
+int qc_putter_destroy(QcPutter *putter) {	
+	int ref_count;
 	if (NULL == putter) {
 		qc_error("invalid params.");
 		return -1;
 	}
 
-	qc_thread_condition_destroy(putter->cond);
-	qc_thread_condlock_destroy(putter->condlock);
+	qc_thread_mutex_lock(putter->mutex);
+	ref_count = --putter->ref_count;
+	qc_thread_mutex_unlock(putter->mutex);
 
-	qc_free(putter);
+	if(0 == ref_count){
+		qc_thread_condition_destroy(putter->cond);
+		qc_thread_condlock_destroy(putter->condlock);
+		qc_thread_mutex_destroy(putter->mutex);
+		qc_free(putter);
+	}
 
 	return 0;
 }
@@ -137,6 +152,10 @@ QcPuttersChain* qc_putterschain_create(int bucket_count) {
 		putterChain->putBuckets[i] = putBucket;
 	}
 
+	putterChain->rwlock = qc_thread_rwlock_create();
+	if(NULL == putterChain->rwlock)
+		goto failed;
+
 	return putterChain;
 
 failed:
@@ -158,6 +177,7 @@ int qc_putterschain_destroy(QcPuttersChain *putterChain) {
 		qc_free(putterChain->putBuckets);
 	}
 
+	if(putterChain->rwlock) qc_thread_rwlock_destroy(putterChain->rwlock);
 	qc_free(putterChain);
 
 	return 0;
@@ -169,6 +189,7 @@ int qc_putterschain_push(QcPuttersChain *putterChain, QcPutter *putter) {
 	qc_assert(NULL != putterChain && NULL != putter);
 	qc_assert(putter->message);
 
+	qc_thread_wrlock_lock(putterChain->rwlock);
 	QcListEntry *listEntry;
 
 	int bucket_sn = putter->priority - 1;
@@ -182,14 +203,19 @@ int qc_putterschain_push(QcPuttersChain *putterChain, QcPutter *putter) {
 	if (bucket_sn > putterChain->cursor_bucketsn)
 		putterChain->cursor_bucketsn = bucket_sn;
 
+	qc_thread_wrlock_unlock(putterChain->rwlock);
 	return 0;
 }
 
 
 QcPutter* qc_putterschain_pop(QcPuttersChain *putterChain) {
 
-	if (putterChain->putter_count == 0)
+	qc_thread_wrlock_lock(putterChain->rwlock);
+
+	if (putterChain->putter_count == 0){
+		qc_thread_wrlock_unlock(putterChain->rwlock);
 		return NULL;
+	}
 
 	int bucket_sn = putterChain->cursor_bucketsn;
 
@@ -219,6 +245,15 @@ try_loop:
 			putter = qc_list_pophead(putterChain->putBuckets[bucket_sn]->puttersChain);
 			bucket->pop_counter++;
 			putterChain->putter_count--;
+
+			qc_thread_mutex_lock(putter->mutex);
+			if(putter){
+				putter->_entry = NULL;
+				putter->ref_count++;
+			}
+			qc_thread_mutex_unlock(putter->mutex);
+
+			qc_thread_wrlock_unlock(putterChain->rwlock);
 			return putter;
 		}
 		else {
@@ -232,6 +267,15 @@ try_loop:
 		if (qc_list_count(putterChain->putBuckets[bucket_sn]->puttersChain) == putterChain->putter_count) {
 			putter = qc_list_pophead(bucket->puttersChain);
 			putterChain->putter_count--;
+
+			qc_thread_mutex_lock(putter->mutex);
+			if(putter){
+				putter->_entry = NULL;
+				putter->ref_count++;
+			}
+			qc_thread_mutex_unlock(putter->mutex);
+
+			qc_thread_wrlock_unlock(putterChain->rwlock);
 			return putter;
 		}
 
@@ -245,6 +289,7 @@ try_loop:
 		goto try_loop;
 	}
 
+	qc_thread_wrlock_unlock(putterChain->rwlock);
 	return NULL;
 }
 
@@ -252,12 +297,18 @@ try_loop:
 int qc_putterschain_remove(QcPuttersChain *putterChain, QcPutter *putter) {
 	qc_assert(NULL != putterChain && NULL != putter);
 
-	QcListEntry *listEntry = putter->_entry;
+	qc_thread_wrlock_lock(putterChain->rwlock);
 	int bucket_sn = putter->priority - 1;
-	int ret = qc_list_removeentry(putterChain->putBuckets[bucket_sn]->puttersChain, listEntry);
+
+	if(putter->_entry == NULL){  //null if putter is popped
+		qc_thread_wrlock_unlock(putterChain->rwlock);
+		return -1;
+	}
+	int ret = qc_list_removeentry(putterChain->putBuckets[bucket_sn]->puttersChain, putter->_entry);
 	qc_assert(ret == 0);
 
 	putterChain->putter_count--;
+	qc_thread_wrlock_unlock(putterChain->rwlock);
 	return 0;
 }
 

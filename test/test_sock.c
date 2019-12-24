@@ -48,6 +48,9 @@ const int port = 5555;
 const char *qname = "queue01";
 const char *msgstr = "123456789";
 const int msgcount = 10000;
+const int msec = -1;
+const int quelimit = 1000;
+const int maxlevel = 3;
 
 
 void* producer_routine(void* arg) {
@@ -65,8 +68,15 @@ void* producer_routine(void* arg) {
 
 	for (int i = 0; i < msgcount; i++) {
 		QcMessage* message_put = qc_message_create(msgstr, (int)strlen(msgstr), 0);
-		ret = qc_client_msgput(client, "queue01", message_put, -1, &err);
+		ret = qc_client_msgput(client, "queue01", message_put, msec, &err);
 		if (0 != ret) {
+			//printf("msgput fail: %d %s\n", err.code, err.desc);
+			if(err.code == QC_ERR_TIMEOUT){
+				i--;
+				qc_message_release(message_put, 0);
+				continue;
+			}
+
 			printf("client msgput failed.\n");
 			qc_client_disconnect(client);
 			return NULL;
@@ -93,8 +103,14 @@ void* consumer_routine(void* arg) {
 	//printf("consumer connected.\n");
 
 	for (int i = 0; i < msgcount; i++) {
-		QcMessage* message_get = qc_client_msgget(client, "queue01", -1, &err);
+		QcMessage* message_get = qc_client_msgget(client, "queue01", msec, &err);
 		if (!message_get) {
+			//printf("msgget fail: %d %s\n", err.code, err.desc);
+			if(err.code == QC_ERR_TIMEOUT){
+				i--;
+				continue;
+			}
+
 			printf("client msgget failed.\n");
 			qc_client_disconnect(client);
 			return NULL;
@@ -121,7 +137,7 @@ int test_net()
     int ret;
     QcErr err;
 
-    QcQueue *queue = qc_queue_create(1000, 10, &err);
+    QcQueue *queue = qc_queue_create(quelimit, maxlevel, &err);
     if(!queue){
         printf("create queue failed.\n");
         return -1;
@@ -158,14 +174,12 @@ int test_net()
 		producer[i] = putthread;
 	}
 
-
 	QcThread* consumer[CONSUMER_NUM];
 
 	for (int i = 0; i < CONSUMER_NUM; i++) {
 		QcThread* getthread = qc_thread_create(consumer_routine, NULL);
 		consumer[i] = getthread;
 	}
-
 
 	for (int i = 0; i < PRODUCER_NUM; i++) {
 		int exitcode;
@@ -180,7 +194,13 @@ int test_net()
 	time(&rawtime);
 	qc_pinfo("%s", asctime(localtime(&rawtime)));
 
-	qc_info("test concurrent producer/consumer succeed.\n");
+	int ct = qc_queue_msgcount(queue);
+	if(ct != 0){
+		printf("sock test failed: last count != 0 (%d)\n", ct);
+	}
+	else{
+		qc_info("test concurrent producer/consumer succeed.\n");
+	}
 
     qc_queuesvc_stop(queueSvc);
     qc_queuesvc_destory(queueSvc);

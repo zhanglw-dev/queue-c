@@ -42,7 +42,7 @@ typedef struct __QcPsist QcPsist;
 
 
 
-QcPsist* qc_psist_open(int msgbuff_size, int msgcount_limit, const char *table_filepath, QcErr *err);
+QcPsist* qc_psist_open(int msgbuff_size, int msgcount_limit, const char *descript, QcErr *err);
 
 void qc_psist_close(QcPsist *qTable);
 

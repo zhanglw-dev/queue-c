@@ -43,14 +43,21 @@ struct __QcPsist {
 
 
 
-QcPsist* qc_psist_open(int msgbuff_size, int msgcount_limit, const char *table_filepath, QcErr *err)
+QcPsist* qc_psist_open(int msgbuff_size, int msgcount_limit, const char *descript, QcErr *err)
 {
-	qc_assert(table_filepath);
+	qc_assert(descript);
 
 	QcPsist *queQdb;
 	qc_malloc(queQdb, sizeof(QcPsist));
 
-	QcPsistFile* qtbl = qc_psist_file_open(msgbuff_size, msgcount_limit, table_filepath, err);
+	char* filedesc = "file://";
+	if (strstr(descript, filedesc) == 0) {
+		qc_seterr(err, QC_ERR_BADPARAM, "psist descript unlegal");
+		return NULL;
+	}
+	char* filepath = (char*)descript + strlen(filedesc);
+
+	QcPsistFile* qtbl = qc_psist_file_open(msgbuff_size, msgcount_limit, filepath, err);
 	if (!qtbl) {
 		qc_free(queQdb);
 		return NULL;

@@ -47,7 +47,7 @@ int main(int argc, char **argv)
 		exit(-1);
 	}
 
-	/*
+
 	ret = test_qsys();
 	if (0 != ret) {
 		printf("qsys test failed.");
@@ -60,7 +60,7 @@ int main(int argc, char **argv)
 		printf("psist test failed.");
 		exit(-1);
 	}
-	*/
+
 	
 	ret = test_net();
 	if (0 != ret){

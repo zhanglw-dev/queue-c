@@ -51,12 +51,12 @@ int test_psist_file()
 
 	char* cwd = qc_dir_getcwd(buf, sizeof(buf));
 
-	char filepath[512];
-	memset(filepath, 0, sizeof(filepath));
-	sprintf(filepath, "%s/%s", cwd, filename);
+	char descript[512];
+	memset(descript, 0, sizeof(descript));
+	sprintf(descript, "file://%s/%s", cwd, filename);
 
 
-	QcPsist *qPsist = qc_psist_open(MSG_BUFF_SIZE, MSG_COUNT_LIMIT, filepath, &err);
+	QcPsist *qPsist = qc_psist_open(MSG_BUFF_SIZE, MSG_COUNT_LIMIT, descript, &err);
 	if (!qPsist) {
 		printf("open psist failed.\n");
 		return -1;

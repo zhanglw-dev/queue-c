@@ -84,7 +84,7 @@ void _qc_error(char *srcfile, int srcline, const char *str)
     char logbuff[512];
     if(_logf == NULL) _qc_log_init();
     snprintf(logbuff, sizeof(logbuff), "error: [%s; line:%d; syserr:%d] ==> %s", srcfile, srcline, errno, str);
-    if((int)_logf != -1){
+    if((long)_logf != -1){
         _qc_log_write(logbuff);
     }
 }
@@ -107,7 +107,7 @@ void _qc_debug(char *srcfile, int srcline, int level, const char *str)
     char logbuff[512];
     if(_logf == NULL) _qc_log_init();
     snprintf(logbuff, sizeof(logbuff), "debug[%d]: [%s; line:%d] ==> %s", level, srcfile, srcline, str);
-    if((int)_logf != -1){
+    if((long)_logf != -1){
         _qc_log_write(logbuff);
     }
 }
@@ -130,7 +130,7 @@ void _qc_warn(const char *str)
     char logbuff[512];
     if(_logf == NULL) _qc_log_init();
     snprintf(logbuff, sizeof(logbuff), "warning ==> %s", str);
-    if((int)_logf != -1){
+    if((long)_logf != -1){
         _qc_log_write(logbuff);
     }
 }
@@ -153,7 +153,7 @@ void _qc_info(const char *str)
     char logbuff[512];
     if(_logf == NULL) _qc_log_init();
     snprintf(logbuff, sizeof(logbuff), "info ==> %s", str);
-    if((int)_logf != -1){
+    if((long)_logf != -1){
         _qc_log_write(logbuff);
     }
 }

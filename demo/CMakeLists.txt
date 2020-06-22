@@ -26,3 +26,11 @@ else()
 endif()
 
 target_compile_definitions(qcdemo PUBLIC "_CRT_SECURE_NO_WARNINGS")
+
+install(
+    TARGETS
+    qcdemo
+    RUNTIME
+    DESTINATION ${INSTALL_BINDIR}
+    COMPONENT bin
+)

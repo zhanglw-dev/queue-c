@@ -1,10 +1,7 @@
 cmake_minimum_required(VERSION 3.5 FATAL_ERROR)
 project(queue-c LANGUAGES C)
-#SET(CMAKE_BUILD_TYPE "Debug")
 
-if(NOT CMAKE_BUILD_TYPE)
-    set(CMAKE_BUILD_TYPE Debug CACHE STRING "Build type" FORCE)
-endif()
+set(CMAKE_BUILD_TYPE Debug CACHE STRING "Build type" FORCE)
 message(STATUS "Build type set to ${CMAKE_BUILD_TYPE}")
 
 
@@ -18,15 +15,9 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_BINDIR}
 set(INSTALL_LIBDIR ${CMAKE_INSTALL_LIBDIR} CACHE PATH "Installation directory for libraries")
 set(INSTALL_BINDIR ${CMAKE_INSTALL_BINDIR} CACHE PATH "Installation directory for executables")
 set(INSTALL_INCLUDEDIR ${CMAKE_INSTALL_INCLUDEDIR} CACHE PATH "Installation directory for header")
-if(WIN32 AND NOT CYGWIN)
-    set(DEF_INSTALL_CMAKEDIR CMake)
-else()
-    set(DEF_INSTALL_CMAKEDIR share/cmake/${PROJECT_NAME})
-endif()
-set(INSTALL_CMAKEDIR ${DEF_INSTALL_CMAKEDIR} CACHE PATH "Installation directory for CMake files")
 
 # Report to user
-foreach(p LIB BIN INCLUDE CMAKE)
+foreach(p LIB BIN INCLUDE)
     file(TO_NATIVE_PATH ${CMAKE_INSTALL_PREFIX}/${INSTALL_${p}DIR} _path )
     message(STATUS "Installing ${p} components to ${_path}")
     unset(_path)

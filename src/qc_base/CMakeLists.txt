@@ -38,7 +38,6 @@ add_library(qc_base
             ${qc_base_source}
             )
 
-target_compile_definitions(qc_base PUBLIC "_CRT_SECURE_NO_WARNINGS")
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
 target_compile_definitions(qc_base PUBLIC "IS_LINUX")
@@ -48,4 +47,5 @@ target_compile_definitions(qc_base PUBLIC "IS_MACOS")
 endif()
 if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
 target_compile_definitions(qc_base PUBLIC "IS_WINDOWS")
+target_compile_definitions(qc_base PUBLIC "_CRT_SECURE_NO_WARNINGS")
 endif()

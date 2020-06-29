@@ -15,4 +15,6 @@ add_library(qc_sock
             qc_client.c  
             )
 
+if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
 target_compile_definitions(qc_sock PUBLIC "_CRT_SECURE_NO_WARNINGS")
+endif()

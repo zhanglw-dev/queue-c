@@ -17,4 +17,6 @@ add_library(qc_mq
             qc_queue.c 
             )
 
+if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
 target_compile_definitions(qc_mq PUBLIC "_CRT_SECURE_NO_WARNINGS")
+endif()

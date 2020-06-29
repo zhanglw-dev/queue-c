@@ -13,4 +13,6 @@ add_library(qc_psist
             qc_psist.c 
             )
 
+if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
 target_compile_definitions(qc_psist PUBLIC "_CRT_SECURE_NO_WARNINGS")
+endif()

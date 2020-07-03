@@ -13,6 +13,8 @@ list(APPEND qc_base_source
             qc_error.c 
             qc_log.h 
             qc_log.c 
+            qc_ini.h 
+            qc_ini.c 
             qc_thread.h
             qc_socket.h
             qc_file.h

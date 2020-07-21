@@ -356,23 +356,24 @@ int qc_thread_condition_wait(QcCondition *cond, QcCondLock *condlock)
 }
 
 
-int qc_thread_condition_timedwait(QcCondition *cond, QcCondLock *condlock, int sec)
+int qc_thread_condition_timedwait(QcCondition *cond, QcCondLock *condlock, int msec)
 {
-    struct timespec timeout;
-    timeout.tv_sec = sec;
-    timeout.tv_nsec = 0;
     int ret;
+    struct timespec ts;
+    clock_gettime(CLOCK_REALTIME, &ts);
+    ts.tv_sec += msec/1000;
+    ts.tv_nsec += (msec%1000)*1000000;
 
-    if(sec >= 0)
+    if(msec >= 0)
     {
-    	  ret = pthread_cond_timedwait(&cond->cond_t, &condlock->mutex_t, &timeout);
+    	  ret = pthread_cond_timedwait(&cond->cond_t, &condlock->mutex_t, &ts);
     	  if (ETIMEDOUT == ret){
     	  	return QC_TIMEOUT;
     	  }
     	  
         if(0 != ret)
         {
-            qc_perror("thread cond timewait(%d) failed", sec);
+            qc_perror("thread cond timewait(%d) failed", msec);
             return -1;
         }
     }
@@ -380,7 +381,7 @@ int qc_thread_condition_timedwait(QcCondition *cond, QcCondLock *condlock, int s
     {
         if(0 != pthread_cond_wait(&cond->cond_t, &condlock->mutex_t))
         {
-            qc_perror("thread cond timewait(%d) failed", sec);
+            qc_perror("thread cond timewait(%d) failed", msec);
             return -1;
         }
     }

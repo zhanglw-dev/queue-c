@@ -2,9 +2,6 @@
 #include "qc_sem.h"
 
 
-#define QC_SEMNAME_MAXLEN 256
-
-
 struct __QcSem__ {
 	char name[QC_SEMNAME_MAXLEN];
 	HANDLE semHdl;
@@ -12,7 +9,7 @@ struct __QcSem__ {
 
 
 
-QcSem* qc_sem_create(const char *name, int initcount, int maxcount, QcErr *err)
+QcSem* qc_sem_create(const char *name, int initcount, QcErr *err)
 {
 	HANDLE semHdl;
 	QcSem *sem;
@@ -23,7 +20,7 @@ QcSem* qc_sem_create(const char *name, int initcount, int maxcount, QcErr *err)
 		return NULL;
 	}
 
-	semHdl = CreateSemaphore(name, initcount, maxcount, NULL);
+	semHdl = CreateSemaphore(name, initcount, 10000000, NULL);
 	if (NULL == semHdl)
 	{
 		qc_seterr(err, -1, "create semaphore (name : s%) call failed.", name);

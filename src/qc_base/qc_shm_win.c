@@ -2,8 +2,6 @@
 #include "qc_shm.h"
 
 
-#define QC_SHMNAME_MAXLEN 256
-
 struct __QcShm__ {
 	HANDLE mapHdl;
 	LPVOID lpdata;
@@ -11,11 +9,12 @@ struct __QcShm__ {
 };
 
 
+
 QcShm* qc_shm_create(const char *name, size_t shmsize, QcErr *err)
 {
 	HANDLE mapHdl;
 	LPVOID lpdata;
-	QcShm *shm;
+	QcShm *qcShm;
 
 	if (strlen(name) > QC_SHMNAME_MAXLEN)
 	{
@@ -38,19 +37,19 @@ QcShm* qc_shm_create(const char *name, size_t shmsize, QcErr *err)
 		return NULL;
 	}
 
-	qc_malloc(shm, sizeof(QcShm));
-	shm->mapHdl = mapHdl;
-	shm->lpdata = lpdata;
-	shm->shmsize = shmsize;
+	qc_malloc(qcShm, sizeof(QcShm));
+	qcShm->mapHdl = mapHdl;
+	qcShm->lpdata = lpdata;
+	qcShm->shmsize = shmsize;
 
-	return shm;
+	return qcShm;
 }
 
 
-int qc_shm_destroy(QcShm *shm)
+int qc_shm_destroy(QcShm *qcShm)
 {
-	UnmapViewOfFile(shm->lpdata);
-	CloseHandle(shm->mapHdl);
+	UnmapViewOfFile(qcShm->lpdata);
+	CloseHandle(qcShm->mapHdl);
 	return 0;
 }
 
@@ -59,7 +58,7 @@ QcShm* qc_shm_open(const char *name, QcErr *err)
 {
 	HANDLE mapHdl;
 	LPVOID lpdata;
-	QcShm *shm;
+	QcShm *qcShm;
 
 	if (strlen(name) > QC_SHMNAME_MAXLEN)
 	{
@@ -85,31 +84,31 @@ QcShm* qc_shm_open(const char *name, QcErr *err)
 	MEMORY_BASIC_INFORMATION lBuffer;
 	SIZE_T shmsize = VirtualQuery(lpdata, &lBuffer, sizeof(lBuffer));
 
-	qc_malloc(shm, sizeof(QcShm));
-	shm->mapHdl = mapHdl;
-	shm->lpdata = lpdata;
-	shm->shmsize = shmsize;
+	qc_malloc(qcShm, sizeof(QcShm));
+	qcShm->mapHdl = mapHdl;
+	qcShm->lpdata = lpdata;
+	qcShm->shmsize = shmsize;
 
-	return shm;
+	return qcShm;
 }
 
 
-int qc_shm_close(QcShm *shm)
+int qc_shm_close(QcShm *qcShm)
 {
-	UnmapViewOfFile(shm->lpdata);
-	CloseHandle(shm->mapHdl);
+	UnmapViewOfFile(qcShm->lpdata);
+	CloseHandle(qcShm->mapHdl);
 	return 0;
 }
 
 
-size_t qc_shm_getsize(QcShm *shm)
+size_t qc_shm_getsize(QcShm *qcShm)
 {
-	return shm->shmsize;
+	return qcShm->shmsize;
 }
 
 
-char* qc_shm_getaddr(QcShm *shm)
+char* qc_shm_getaddr(QcShm *qcShm)
 {
-	return (char*)shm->lpdata;
+	return (char*)qcShm->lpdata;
 }
 

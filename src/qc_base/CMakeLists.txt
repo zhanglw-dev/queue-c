@@ -25,12 +25,16 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
                 qc_thread_win.c
                 qc_socket_win.c
                 qc_file_win.c
+				qc_sem_win.c
+				qc_shm_win.c
                 )
 else()
     list(APPEND qc_base_source
                 qc_thread.c
                 qc_socket.c
                 qc_file.c
+				qc_sem.c
+				qc_shm.c
                 )
 endif()
 

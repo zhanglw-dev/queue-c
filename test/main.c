@@ -41,6 +41,18 @@ int main(int argc, char **argv)
 {
 	int ret;
 	
+	ret = test_sem();
+	if (0 != ret) {
+		printf("sem test failed.");
+		exit(-1);
+	}
+	
+	ret = test_shm();
+	if (0 != ret) {
+		printf("shm test failed.");
+		exit(-1);
+	}
+
 	ret = mq_test_all();
 	if (0 != ret) {
 		printf("mq test failed.");

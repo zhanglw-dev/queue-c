@@ -18,6 +18,8 @@ list(APPEND qc_base_source
             qc_thread.h
             qc_socket.h
             qc_file.h
+			qc_sem.h
+			qc_shm.h
             )
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Windows")

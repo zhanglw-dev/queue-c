@@ -20,7 +20,7 @@ QcSem* qc_sem_create(const char *name, int initcount, QcErr *err)
 		return NULL;
 	}
 
-	semHdl = CreateSemaphore(name, initcount, 10000000, NULL);
+	semHdl = CreateSemaphore(NULL, initcount, 10000000, name);
 	if (NULL == semHdl)
 	{
 		qc_seterr(err, -1, "create semaphore (name : s%) call failed.", name);
@@ -33,7 +33,7 @@ QcSem* qc_sem_create(const char *name, int initcount, QcErr *err)
 		return NULL;
 	}
 
-	qc_malloc(sem, QC_SEMNAME_MAXLEN+1);
+	qc_malloc(sem, sizeof(QcSem));
 	strncpy((char*)sem->name, name, QC_SEMNAME_MAXLEN);
 	sem->semHdl = semHdl;
 
@@ -41,7 +41,7 @@ QcSem* qc_sem_create(const char *name, int initcount, QcErr *err)
 }
 
 
-int qc_sem_delete(QcSem *sem)
+int qc_sem_destroy(QcSem *sem)
 {
 	CloseHandle(sem->semHdl);
 	qc_free(sem);
@@ -54,7 +54,7 @@ QcSem* qc_sem_open(const char *name, QcErr *err)
 	HANDLE semHdl;
 	QcSem *sem;
 
-	if (strlen > QC_SEMNAME_MAXLEN)
+	if (strlen(name) > QC_SEMNAME_MAXLEN)
 	{
 		qc_seterr(err, -1, "parameter name (%s) is too long.", name);
 		return NULL;
@@ -67,7 +67,7 @@ QcSem* qc_sem_open(const char *name, QcErr *err)
 		return NULL;
 	}
 
-	qc_malloc(sem, QC_SEMNAME_MAXLEN + 1);
+	qc_malloc(sem, sizeof(QcSem));
 	strncpy((char*)sem->name, name, QC_SEMNAME_MAXLEN);
 	sem->semHdl = semHdl;
 

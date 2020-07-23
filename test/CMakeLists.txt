@@ -10,6 +10,10 @@ add_executable(qctest
                test_qsys.c 
                test_sock.h 
                test_sock.c 
+			   test_sem.h
+			   test_sem.c 
+			   test_shm.h
+			   test_shm.c
                main.c 
               )
 

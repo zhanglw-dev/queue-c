@@ -29,13 +29,13 @@ QcShm* qc_shm_create(const char *name, size_t shmsize, QcErr *err)
         return NULL;
     }
 
-    if(ftruncate(fd, shm_size) == -1)
+    if(ftruncate(fd, shmsize) == -1)
     {
         qc_seterr(err, -1, "ftruncate failed. errno=%d\n", errno);
         return NULL;
     }
 
-    addr = mmap(NULL, shm_size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+    addr = mmap(NULL, shmsize, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
     if(addr == MAP_FAILED)
     {
         qc_seterr(err, -1, "mmap faied, errno=%d\n", errno);
@@ -113,11 +113,11 @@ int qc_shm_close(QcShm *qcShm)
 
 size_t qc_shm_getsize(QcShm *qcShm)
 {
-    return qcShm->shmaddr;
+    return qcShm->shmsize;
 }
 
 
 char* qc_shm_getaddr(QcShm *qcShm)
 {
-    return qcShm->shmsize;
+    return qcShm->shmaddr;
 }

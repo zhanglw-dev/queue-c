@@ -89,6 +89,8 @@
     #include <arpa/inet.h>
     #include <pthread.h>
     #include <signal.h>
+    #include <semaphore.h>
+    #include <sys/mman.h>
 
     #include <string.h>       /*for stricmp? no use yet*/
     #include <netinet/tcp.h>  /*TCP_NODELAY, TCP_CORK on linux*/

@@ -21,8 +21,10 @@ target_link_libraries(qcdemo qc)
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
     target_link_libraries(qcdemo ws2_32)
-else()
+elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")    
     target_link_libraries(qcdemo pthread)
+else()
+    target_link_libraries(qcdemo rt pthread)
 endif()
 
 target_compile_definitions(qcdemo PUBLIC "_CRT_SECURE_NO_WARNINGS")

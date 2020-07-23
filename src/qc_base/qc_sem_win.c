@@ -23,13 +23,13 @@ QcSem* qc_sem_create(const char *name, int initcount, QcErr *err)
 	semHdl = CreateSemaphore(NULL, initcount, 10000000, name);
 	if (NULL == semHdl)
 	{
-		qc_seterr(err, -1, "create semaphore (name : s%) call failed.", name);
+		qc_seterr(err, -1, "create semaphore (name : %s) call failed.", name);
 		return NULL;
 	}
 
 	if (ERROR_ALREADY_EXISTS == GetLastError())
 	{
-		qc_seterr(err, -1, "semaphore (name : s%) is already existed.", name);
+		qc_seterr(err, -1, "semaphore (name : %s) is already existed.", name);
 		return NULL;
 	}
 
@@ -63,7 +63,7 @@ QcSem* qc_sem_open(const char *name, QcErr *err)
 	semHdl = OpenSemaphore(SEMAPHORE_ALL_ACCESS, TRUE, name);
 	if (NULL == semHdl)
 	{
-		qc_seterr(err, -1, "open semaphore (name : s%) call failed.", name);
+		qc_seterr(err, -1, "open semaphore (name : %s) call failed.", name);
 		return NULL;
 	}
 

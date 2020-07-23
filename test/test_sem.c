@@ -9,6 +9,8 @@ int test_sem()
 	QcErr err;
 	QcSem *qcSem1;
 	QcSem *qcSem2;
+	
+	printf("sem test start...\n");
 
 	qcSem1 = qc_sem_create("test_sem_1", 1, &err);
 	if (NULL == qcSem1)

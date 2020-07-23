@@ -30,8 +30,10 @@ target_link_libraries(qctest qc)
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
     target_link_libraries(qctest ws2_32)
-else()
+elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")    
     target_link_libraries(qctest pthread)
+else()
+    target_link_libraries(qctest rt pthread)
 endif()
 
 target_compile_definitions(qctest PUBLIC "_CRT_SECURE_NO_WARNINGS")

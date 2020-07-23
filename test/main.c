@@ -35,6 +35,8 @@
 #include "test_psist.h"
 #include "test_qsys.h"
 #include "test_sock.h"
+#include "test_sem.h"
+#include "test_shm.h"
 
 
 int main(int argc, char **argv)

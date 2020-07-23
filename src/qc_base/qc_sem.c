@@ -4,7 +4,7 @@
 
 struct __QcSem__ {
 	char name[QC_SEMNAME_MAXLEN+1];
-	sem_t sem;
+	sem_t *sem;
 };
 
 
@@ -18,6 +18,9 @@ QcSem* qc_sem_create(const char *name, int initcount, QcErr *err)
     flags = O_CREAT|O_EXCL|O_RDWR;
     mode  = S_IRUSR|S_IWUSR;
 
+    //unlink first?!
+    sem_unlink(name);
+
 	if (strlen(name) > QC_SEMNAME_MAXLEN)
 	{
 		qc_seterr(err, -1, "parameter name (%s) is too long.", name);
@@ -25,7 +28,7 @@ QcSem* qc_sem_create(const char *name, int initcount, QcErr *err)
 	}
 
     sem = sem_open(name, flags, mode, initcount);
-    if(0 != sem)
+    if(NULL == sem)
     {
         qc_seterr(err, -1, "create sem (name : %s) failed.", name);
         return NULL;
@@ -63,7 +66,7 @@ QcSem* qc_sem_open(const char *name, QcErr *err)
 	}
 
     sem = sem_open(name, flags);
-    if(0 != sem)
+    if(NULL == sem)
     {
         qc_seterr(err, -1, "create sem (name : %s) failed.", name);
         return NULL;
@@ -93,35 +96,48 @@ int qc_sem_wait(QcSem *qcSem, int wait_msec)
 
     if(wait_msec < 0)
     {
-        sem_wait(qcSem->sem);
+        while ((ret = sem_wait(qcSem->sem)) == -1 && errno == EAGAIN)
+            continue;       /* Restart if interrupted by handler */
+        if(ret < 0)
+            return -1;
     }
     else if(0 == wait_msec)
     {
-        ret = sem_trywait(qcSem->sem);
-        if(-1 == ret && errno == EAGAIN)
-        {
-            return QC_ERR_TIMEOUT;
-        }
-        else
-        {
+        while ((ret = sem_trywait(qcSem->sem)) == -1 && errno == EAGAIN)
+            continue;       /* Restart if interrupted by handler */
+        if(ret < 0)
             return -1;
-        }
     }
     else
     {
         clock_gettime(CLOCK_REALTIME, &ts);
-        ts.tv_sec += msec/1000;
-        ts.tv_nsec += (msec%1000)*1000000;
+        ts.tv_sec += wait_msec/1000;
+        ts.tv_nsec += (wait_msec%1000)*1000000;
 
-        ret = sem_timedwait(qcSem->sem, &ts);
-        if(-1 == ret && errno == EAGAIN)
+#ifdef IS_DARWIN   //since no sem_timedwait() in darwin
+        int slp_int = 10; //10 millsec
+        int slp_time = wait_msec/slp_int;
+
+        while(1)
+        {
+            ret = sem_trywait(qcSem->sem);
+            if(ret == -1 && errno == EAGAIN) continue;
+
+            if(0 == ret) break;
+            sleep(slp_int/1000);
+            if(--slp_time<0)
+                return QC_ERR_TIMEOUT;
+        }
+#else
+        while ((ret = sem_timedwait(qcSem->sem, &ts)) == -1 && errno == EAGAIN)
+            continue;       /* Restart if interrupted by handler */
+        if(-1 == ret && errno == ETIMEDOUT)
         {
             return QC_ERR_TIMEOUT;
         }
-        else
-        {
+        if(ret < 0)
             return -1;
-        }
+#endif
     }
 
     return 0;

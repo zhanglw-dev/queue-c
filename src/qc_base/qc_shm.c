@@ -45,7 +45,7 @@ QcShm* qc_shm_create(const char *name, size_t shmsize, QcErr *err)
     close(fd);
 
     QcShm *qcShm;
-    qcShm = qc_malloc(qcShm, sizeof(QcShm));
+    qc_malloc(qcShm, sizeof(QcShm));
     strncpy(qcShm->name, name, QC_SHMNAME_MAXLEN);
     qcShm->shmaddr = addr;
     qcShm->shmsize = shmsize;
@@ -95,7 +95,7 @@ QcShm* qc_shm_open(const char *name, QcErr *err)
     close(fd);
 
     QcShm *qcShm;
-    qcShm = qc_malloc(qcShm, sizeof(QcShm));
+    qc_malloc(qcShm, sizeof(QcShm));
     strncpy(qcShm->name, name, QC_SHMNAME_MAXLEN);
     qcShm->shmaddr = addr;
     qcShm->shmsize = sb.st_size;

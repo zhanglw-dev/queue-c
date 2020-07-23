@@ -96,14 +96,14 @@ int qc_sem_wait(QcSem *qcSem, int wait_msec)
 
     if(wait_msec < 0)
     {
-        while ((ret = sem_wait(qcSem->sem)) == -1 && errno == EAGAIN)
+        while ((ret = sem_wait(qcSem->sem)) == -1 && errno == EINTR)
             continue;       /* Restart if interrupted by handler */
         if(ret < 0)
             return -1;
     }
     else if(0 == wait_msec)
     {
-        while ((ret = sem_trywait(qcSem->sem)) == -1 && errno == EAGAIN)
+        while ((ret = sem_trywait(qcSem->sem)) == -1 && errno == EINTR)
             continue;       /* Restart if interrupted by handler */
         if(ret < 0)
             return -1;
@@ -121,15 +121,16 @@ int qc_sem_wait(QcSem *qcSem, int wait_msec)
         while(1)
         {
             ret = sem_trywait(qcSem->sem);
-            if(ret == -1 && errno == EAGAIN) continue;
+            if(ret == -1 && errno == EINTR) continue;
 
             if(0 == ret) break;
-            sleep(slp_int/1000);
-            if(--slp_time<0)
+            usleep(slp_int*1000);
+            if((--slp_time)<0)
                 return QC_ERR_TIMEOUT;
+            //printf("sem_trywait slp_time : %d\n", slp_time);
         }
 #else
-        while ((ret = sem_timedwait(qcSem->sem, &ts)) == -1 && errno == EAGAIN)
+        while ((ret = sem_timedwait(qcSem->sem, &ts)) == -1 && errno == EINTR)
             continue;       /* Restart if interrupted by handler */
         if(-1 == ret && errno == ETIMEDOUT)
         {

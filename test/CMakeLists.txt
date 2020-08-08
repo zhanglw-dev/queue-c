@@ -14,6 +14,7 @@ add_executable(qctest
 			   test_sem.c 
 			   test_shm.h
 			   test_shm.c
+               test_log.c
                main.c 
               )
 

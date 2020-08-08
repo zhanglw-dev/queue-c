@@ -36,12 +36,19 @@
 #include "qc_prelude.h"
 
 
-#define DEBUG_LEVEL1 1
-#define DEBUG_LEVEL2 2
-#define DEBUG_LEVEL3 3
-#define DEBUG_LEVEL4 4
-#define DEBUG_LEVEL5 5
-#define DEBUG_LEVEL6 6
+#define DEBUG_LEVEL1  1
+#define DEBUG_LEVEL2  2
+#define DEBUG_LEVEL3  3
+#define DEBUG_LEVEL4  4
+#define DEBUG_LEVEL5  5
+#define DEBUG_LEVEL6  6
+#define DEBUG_LEVEL7  7
+#define DEBUG_LEVEL8  8
+#define DEBUG_LEVEL9  9
+#define DEBUG_LEVEL10 10
+
+
+int qc_log_init(const char* logfile, int debug_level, off_t kbytes, int rollnum);
 
 
 #define qc_error(str) \

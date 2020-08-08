@@ -36,6 +36,8 @@
 
 #include "qc_prelude.h"
 
+#define QC_FILENAME_MAXLEN  256
+
 
 typedef struct __QcFile QcFile;
 

@@ -30,73 +30,31 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "qc_prelude.h"
-#include "test_mq.h"
-#include "test_psist.h"
-#include "test_qsys.h"
-#include "test_sock.h"
-#include "test_sem.h"
-#include "test_shm.h"
 #include "test_log.h"
+#include "qc_log.h"
 
 
-#define ENABLE_LOG_TEST  1
-
-
-
-int main(int argc, char **argv)
+int test_log()
 {
-	int ret;
+    qc_log_init("test.log", 8, 10, 5);
 
-	ret = test_sem();
-	if (0 != ret) {
-		printf("sem test failed.");
-		exit(-1);
-	}
-	
-	ret = test_shm();
-	if (0 != ret) {
-		printf("shm test failed.");
-		exit(-1);
-	}
+    qc_info("log test start...");
 
-	ret = mq_test_all();
-	if (0 != ret) {
-		printf("mq test failed.");
-		exit(-1);
-	}
+    for(int i=0; i<100000; i++)
+    {
+        qc_pdebug(1, "test debug(level%d) out =========================================== %d", 1, i);
+        qc_pdebug(2, "test debug(level%d) out =========================================== %d", 2, i);
+        qc_pdebug(3, "test debug(level%d) out =========================================== %d", 3, i);
+        qc_pdebug(4, "test debug(level%d) out =========================================== %d", 4, i);
+        qc_pdebug(5, "test debug(level%d) out =========================================== %d", 5, i);
+        qc_pdebug(6, "test debug(level%d) out =========================================== %d", 6, i);
+        qc_pdebug(7, "test debug(level%d) out =========================================== %d", 7, i);
+        qc_pdebug(8, "test debug(level%d) out =========================================== %d", 8, i);
+        qc_pdebug(9, "test debug(level%d) out =========================================== %d", 9, i);
+        qc_pdebug(10, "test debug(level%d) out =========================================== %d", 10, i);
+    }
 
+    qc_info("log test stoped!");
 
-	ret = test_qsys();
-	if (0 != ret) {
-		printf("qsys test failed.");
-		exit(-1);
-	}
-
-
-	ret = test_psist_file();
-	if (0 != ret) {
-		printf("psist test failed.");
-		exit(-1);
-	}
-
-	
-	ret = test_net();
-	if (0 != ret){
-		printf("net test failed.");
-		exit(-1);
-	}
-
-
-	if(ENABLE_LOG_TEST)
-	{
-		ret = test_log();
-		if (0 != ret){
-			printf("log test failed.");
-			exit(-1);
-		}
-	}
-	
-	printf("all test succeed!\n");
-	exit(0);
+    return 0;
 }

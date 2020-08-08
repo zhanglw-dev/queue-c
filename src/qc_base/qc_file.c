@@ -83,7 +83,7 @@ int qc_file_close(QcFile *file)
         return -1;
     }
 
-    free(file);
+    qc_free(file);
     return 0;
 }
 

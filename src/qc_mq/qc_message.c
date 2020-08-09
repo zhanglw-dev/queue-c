@@ -49,7 +49,7 @@ struct __QcMessage {
 
 
 
-QcMessage* qc_message_create(const char *buff, int len, int do_dupbuff){
+QcMessage* qc_message_create(const char *buff, int len, int do_allocbuff){
     QcMessage *message;
 
     qc_malloc(message, sizeof(QcMessage));
@@ -58,7 +58,7 @@ QcMessage* qc_message_create(const char *buff, int len, int do_dupbuff){
     
     if(NULL == (char *)buff) len = 0;
 
-    if(do_dupbuff){
+    if(do_allocbuff){
         qc_malloc(message->buff, len);
         if(NULL == message->buff){
             qc_free(message);

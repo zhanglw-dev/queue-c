@@ -41,7 +41,7 @@ extern "C" {
 #endif
 
 
-QcMessage* qc_message_create(const char *buff, int len, int do_dupbuff);
+QcMessage* qc_message_create(const char *buff, int len, int do_allocbuff);
 
 void qc_message_release(QcMessage *message, int do_freebuff);
 

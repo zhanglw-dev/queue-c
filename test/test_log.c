@@ -40,7 +40,7 @@ int test_log()
 
     qc_info("log test start...");
 
-    for(int i=0; i<100000; i++)
+    for(int i=0; i<30000; i++)
     {
         qc_pdebug(1, "test debug(level%d) out =========================================== %d", 1, i);
         qc_pdebug(2, "test debug(level%d) out =========================================== %d", 2, i);

@@ -49,7 +49,7 @@ int qc_numpool_init(QcNumPool *numPool, int init_count)
 
 	memset(numPool, 0, sizeof(QcNumPool));
 
-	ret = qc_staticlist_init(&numPool->qc_freeList, init_count);
+	ret = qc_staticlist_init(&numPool->qc_freeList, init_count, NULL);
 	if (ret != 0)
 	{
 		return -1;
@@ -244,13 +244,13 @@ QcNBlockQue* qc_nblockque_create(int limit, int with_rwlock)
 	nblckQ->limit = limit;
 	nblckQ->with_rwlock = with_rwlock;
 
-	if (0 != qc_staticlist_init(&nblckQ->lst_used, limit))
+	if (0 != qc_staticlist_init(&nblckQ->lst_used, limit, NULL))
 	{
 		qc_error("nblckque lst_used init failed");
 		goto failed;
 	}
 
-	if (0 != qc_staticlist_init(&nblckQ->lst_free, limit))
+	if (0 != qc_staticlist_init(&nblckQ->lst_free, limit, NULL))
 	{
 		qc_error("nblckque lst_free init failed");
 		goto failed;
@@ -419,7 +419,7 @@ QcBlockQue* qc_blockque_create(int limit)
 
 	memset(queue, 0, sizeof(QcBlockQue));
 
-	if (0 != qc_staticlist_init(&queue->lst_used, limit))
+	if (0 != qc_staticlist_init(&queue->lst_used, limit, NULL))
 	{
 		qc_error("QcBlockQue->lst_used init failed.");
 		goto failed;
@@ -427,7 +427,7 @@ QcBlockQue* qc_blockque_create(int limit)
 
 	qc_staticlist_clear(&queue->lst_used);
 
-	if (0 != qc_staticlist_init(&queue->lst_free, limit))
+	if (0 != qc_staticlist_init(&queue->lst_free, limit, NULL))
 	{
 		qc_error("QcBlockQue->lst_free init failed.");
 		goto failed;

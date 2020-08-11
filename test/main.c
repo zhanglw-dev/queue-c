@@ -80,7 +80,7 @@ int main(int argc, char **argv)
 		exit(-1);
 	}
 
-	
+
 	ret = test_net();
 	if (0 != ret){
 		printf("net test failed.");
@@ -96,7 +96,7 @@ int main(int argc, char **argv)
 			exit(-1);
 		}
 	}
-	
+
 	printf("all test succeed!\n");
 	exit(0);
 }

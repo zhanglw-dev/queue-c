@@ -15,6 +15,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_BINDIR}
 set(INSTALL_LIBDIR ${CMAKE_INSTALL_LIBDIR} CACHE PATH "Installation directory for libraries")
 set(INSTALL_BINDIR ${CMAKE_INSTALL_BINDIR} CACHE PATH "Installation directory for executables")
 set(INSTALL_INCLUDEDIR ${CMAKE_INSTALL_INCLUDEDIR} CACHE PATH "Installation directory for header")
+set(INSTALL_ETCDIR ${CMAKE_INSTALL_BINDIR}/../etc CACHE PATH "Installation directory for header")
 
 # Report to user
 foreach(p LIB BIN INCLUDE)
@@ -29,6 +30,7 @@ add_subdirectory(src/qc_mq)
 add_subdirectory(src/qc_psist)
 add_subdirectory(src/qc_qsys)
 add_subdirectory(src/qc_sock)
+add_subdirectory(src/qc_shmq)
 add_subdirectory(demo)
 add_subdirectory(test)
 
@@ -39,6 +41,7 @@ add_library(qc
             $<TARGET_OBJECTS:qc_psist>
             $<TARGET_OBJECTS:qc_qsys>
             $<TARGET_OBJECTS:qc_sock>
+            $<TARGET_OBJECTS:qc_shmq>
 )
 
 
@@ -68,6 +71,7 @@ list(APPEND qc_API_HEADERS
             src/qc_qsys/qc_qsystem.h
             src/qc_sock/qc_service.h
             src/qc_sock/qc_client.h
+            src/qc_shmq/shmque_api.h
             )
 
 set_target_properties(qc

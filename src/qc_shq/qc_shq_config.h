@@ -1,7 +1,7 @@
 /*
  * BSD 3-Clause License
  * 
- * Copyright (c) 2019, zhanglw (zhanglw366@163.com)
+ * Copyright (c) 2021, zhanglw (zhanglw366@163.com)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -30,73 +30,33 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#ifndef SHM_CONFIG_H
+#define SHM_CONFIG_H
+
 #include "qc_prelude.h"
-#include "test_mq.h"
-#include "test_psist.h"
-#include "test_qsys.h"
-#include "test_sock.h"
-#include "test_sem.h"
-#include "test_shm.h"
-#include "test_log.h"
+#include "qc_error.h"
+#include "qc_list.h"
 
 
-#define ENABLE_LOG_TEST  1
+typedef struct{
+    char qname[QC_QUENAME_MAXLEN];
+    int queuesize;
+    off_t msgsize;
+}QueConf;
 
 
-
-int main(int argc, char **argv)
-{
-	int ret;
-
-	ret = test_sem();
-	if (0 != ret) {
-		printf("sem test failed.");
-		exit(-1);
-	}
-	
-	ret = test_shm();
-	if (0 != ret) {
-		printf("shm test failed.");
-		exit(-1);
-	}
-
-	ret = mq_test_all();
-	if (0 != ret) {
-		printf("mq test failed.");
-		exit(-1);
-	}
+typedef struct{
+    char shmname[QC_SHMNAME_MAXLEN];
+    QcList *queConfList;
+}ShmConf;
 
 
-	ret = test_qsys();
-	if (0 != ret) {
-		printf("qsys test failed.");
-		exit(-1);
-	}
+typedef struct {
+    QcList *shmConfList;
+}QcShqConf;
 
 
-	ret = test_psist_file();
-	if (0 != ret) {
-		printf("psist test failed.");
-		exit(-1);
-	}
+QcShqConf* qc_shqd_read_config(const char* cfgfile, QcErr *err);
 
 
-	ret = test_net();
-	if (0 != ret){
-		printf("net test failed.");
-		exit(-1);
-	}
-
-
-	if(ENABLE_LOG_TEST)
-	{
-		ret = test_log();
-		if (0 != ret){
-			printf("log test failed.");
-			exit(-1);
-		}
-	}
-
-	printf("all test succeed!\n");
-	exit(0);
-}
+#endif  //SHM_CONFIG_H

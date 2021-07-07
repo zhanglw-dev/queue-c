@@ -37,7 +37,7 @@
 #pragma pack(push)
 #pragma pack(1)
 
-//must as same as qc_persist_file.c::Qc_MsgEqual !!!
+//must as same as qc_persist_file.h::Qc_MsgRecord !!!
 struct __QcMessage {
 	int priority;
 	int persist_id;

@@ -87,6 +87,9 @@ static int _rollfiles()
     char filename[QC_FILENAME_MAXLEN+16];      //16 for compile warnning
     char new_filename[QC_FILENAME_MAXLEN+32];  //32 for compile warnning
 
+    qc_file_close(_logf);
+    _logf = NULL;
+
     for(int i=_rollnum-1; i>0; i--)
     {
         snprintf((char*)filename, sizeof(filename), "%s_%d", _filename, i);
@@ -113,9 +116,6 @@ static int _rollfiles()
             }
         }
     }
-
-    qc_file_close(_logf);
-    _logf = NULL;
 
     snprintf((char*)new_filename, sizeof(new_filename), "%s_%d", _filename, 1);
 
@@ -148,13 +148,13 @@ static void _qc_log_write(char *logbuff)
     snprintf(buff, sizeof(buff), "[%4d/%2d/%2d %2d:%2d:%2d] %s\n",\
             lt->tm_year+1900, lt->tm_mon, lt->tm_mday, lt->tm_hour, lt->tm_min, lt->tm_sec, logbuff);
 
-    len = strlen(buff) + 1;
+    len = (int)strlen(buff);
     qc_thread_mutex_lock(_log_mutex);
 
     if(_logf)
     {
         wtn = qc_file_write(_logf, buff, len);
-        _curoffset += wtn;
+        _curoffset += (int)wtn;
 
         if(_curoffset >= _kbytes*1024)
         {

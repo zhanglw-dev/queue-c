@@ -125,7 +125,7 @@ int qc_psist_loadqueue(QcPsist *qTbl, QcQueue *queue, QcErr *err)
 	Qc_MsgRecord *msgRecord = NULL;
 
 	while (1) {
-		qc_malloc(msgRecord, sizeof(Qc_MsgRecord));  //Qc_MsgRecord === QcMessage :-|
+		qc_malloc(msgRecord, sizeof(Qc_MsgRecord)); //Qc_MsgRecord === QcMessage :-|
 		ret = qc_psist_file_do_fetch(qtbl, msgRecord, err);
 		if (0 == ret) {
 			ret = qc_queue_msgput(queue, (QcMessage*)msgRecord, 0, err);

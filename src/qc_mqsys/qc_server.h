@@ -30,73 +30,23 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "qc_prelude.h"
-#include "test_mq.h"
-#include "test_psist.h"
-#include "test_qsys.h"
-#include "test_sock.h"
-#include "test_sem.h"
-#include "test_shm.h"
-#include "test_log.h"
+#ifndef QC_SERVICE_H
+#define QC_SERVICE_H
+
+#include "qc_error.h"
+#include "qc_qsystem.h"
 
 
-#define ENABLE_LOG_TEST  1
+typedef struct __QcQueueSrv QcQueueSrv;
 
 
+QcQueueSrv* qc_queuesrv_create(const char *ip, int port, QcQSystem *qSystem, QcErr *err);
 
-int main(int argc, char **argv)
-{
-	int ret;
+void qc_queuesrv_destory(QcQueueSrv *queueSrv);
 
-	ret = test_sem();
-	if (0 != ret) {
-		printf("sem test failed.");
-		exit(-1);
-	}
-	
-	ret = test_shm();
-	if (0 != ret) {
-		printf("shm test failed.");
-		exit(-1);
-	}
+int qc_queuesrv_start(QcQueueSrv *queueSrv, int is_async, QcErr *err);
 
-	ret = mq_test_all();
-	if (0 != ret) {
-		printf("mq test failed.");
-		exit(-1);
-	}
+void qc_queuesrv_stop(QcQueueSrv *queueSrv);
 
 
-	ret = test_qsys();
-	if (0 != ret) {
-		printf("qsys test failed.");
-		exit(-1);
-	}
-
-
-	ret = test_psist_file();
-	if (0 != ret) {
-		printf("psist test failed.");
-		exit(-1);
-	}
-
-
-	ret = test_net();
-	if (0 != ret){
-		printf("net test failed.");
-		exit(-1);
-	}
-
-
-	if(ENABLE_LOG_TEST)
-	{
-		ret = test_log();
-		if (0 != ret){
-			printf("log test failed.");
-			exit(-1);
-		}
-	}
-
-	printf("all test succeed!\n");
-	exit(0);
-}
+#endif /*QC_SERVICE_H*/

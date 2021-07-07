@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.5 FATAL_ERROR)
 project(qc_mq LANGUAGES C)
 
-include_directories("../qc_base")
+include_directories("../qc_rt")
 
 add_library(qc_mq
             OBJECT

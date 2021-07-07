@@ -1,7 +1,7 @@
 /*
  * BSD 3-Clause License
  * 
- * Copyright (c) 2019, zhanglw (zhanglw366@163.com)
+ * Copyright (c) 2021, zhanglw (zhanglw366@163.com)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -30,16 +30,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef QC_FILE_H
-#define QC_FILE_H
+#ifndef QC_SHMQUE_API_H
+#define QC_SHMQUE_API_H
 
-
-#include "qc_prelude.h"
-
-#define QC_FILENAME_MAXLEN  256
-
-
-typedef struct __QcFile QcFile;
+#include "qc_error.h"
+#include "qc_shq_def.h"
 
 
 
@@ -47,45 +42,17 @@ typedef struct __QcFile QcFile;
 extern "C" {
 #endif
 
+QcShmQue* qc_shqueue_attach(const char *shm_name, const char *que_name, QcErr *err);
 
-/*oflag: O_CREAT O_EXCL O_TRUNC O_APPEND O_RDONLY O_WRONLY O_RDWR*/
-QcFile* qc_file_open(const char *pathname, int oflag);
+void qc_shqueue_deattach(QcShmQue *shmQue);
 
-int qc_file_close(QcFile *file);
+int qc_shqueue_pull_begin(QcShmQue *shmQue, int wait_msec, int *idx, char **pp_buff, int *p_bufflen, QcErr *err);
 
-size_t qc_file_read(QcFile *file, void *buf, size_t nbytes);
+int qc_shqueue_pull_end(QcShmQue *shmQue, int idx, QcErr *err);
 
-size_t qc_file_write(QcFile *file, const void *buf, size_t nbytes);
+int qc_shqueue_push_begin(QcShmQue *shmQue, int *idx, char **pp_buff, int *p_bufflen, QcErr *err);
 
-int qc_file_sync(QcFile *file);
-
-/*whence: SEEK_SET SEEK_CUR SEEK_END*/
-off_t qc_file_seek(QcFile *file, off_t offset, int whence);
-
-off_t qc_file_tell(QcFile *file);
-
-int qc_file_exist(const char *pathname);
-
-size_t qc_file_size(const char *pathname);
-
-int qc_file_remove(const char *pathname);
-
-int qc_file_rename(const char *oldname, const char *newname);
-
-int qc_file_truncate(const char *pathname, off_t length);
-
-/*---------------------------------------------------------------------*/
-
-
-int qc_dir_exist(char *dirname);
-
-int qc_dir_make(char *dirname);
-
-int qc_dir_remove(char *dirname);
-
-int qc_dir_rename(char *dirname, char *newname);
-
-char* qc_dir_getcwd(char *buff, int maxlen);
+int qc_shqueue_push_end(QcShmQue *shmQue, int idx, int bufflen, QcErr *err);
 
 
 #ifdef __cplusplus
@@ -93,4 +60,4 @@ char* qc_dir_getcwd(char *buff, int maxlen);
 #endif
 
 
-#endif  /*QC_FILE_H*/
+#endif //QC_SHMQUE_API_H

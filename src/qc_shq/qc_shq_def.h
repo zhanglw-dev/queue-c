@@ -1,7 +1,7 @@
 /*
  * BSD 3-Clause License
  * 
- * Copyright (c) 2019, zhanglw (zhanglw366@163.com)
+ * Copyright (c) 2021, zhanglw (zhanglw366@163.com)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -30,23 +30,59 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef QC_SERVICE_H
-#define QC_SERVICE_H
+#ifndef SHMQ_DEF_H
+#define SHMQ_DEF_H
 
-#include "qc_error.h"
-#include "qc_qsystem.h"
+#include "qc_prelude.h"
+#include "qc_list.h"
+#include "qc_sem.h"
+#include "qc_shm.h"
+#include "qc_thread.h"
 
-
-typedef struct __QcQueueSvc QcQueueSvc;
-
-
-QcQueueSvc* qc_queuesvc_create(const char *ip, int port, QcQSystem *qSystem, QcErr *err);
-
-void qc_queuesvc_destory(QcQueueSvc *queueSvc);
-
-int qc_queuesvc_start(QcQueueSvc *queueSvc, int is_async, QcErr *err);
-
-void qc_queuesvc_stop(QcQueueSvc *queueSvc);
+#define QUENAME_MAXLEN 32
 
 
-#endif /*QC_SERVICE_H*/
+#pragma pack(push)
+#pragma pack(1)
+
+
+typedef struct {
+	int status;
+	unsigned int quenum;
+}P_Shmem;
+
+
+typedef struct{
+    char quename[QUENAME_MAXLEN];
+    int que_sn;
+    int que_size;
+    int msg_size;
+
+    char semname_que[QC_SEMNAME_MAXLEN];
+    char semname_lst[QC_SEMNAME_MAXLEN];
+
+    QcStaticList lst_free;
+	QcStaticList lst_used;
+
+    off_t data_offset;
+    off_t next_offset;
+}P_ShmQue;
+
+
+#pragma pack(pop)
+
+typedef struct __QcShmQue__ {
+    QcShm* qcShm;
+    P_ShmQue* p_shmQue;
+    QcSem* sem_que;
+    QcSem* sem_lst;
+}QcShmQue;
+
+typedef struct _ShmQHdl_{
+    int que_sn;
+    char *shm_addr;
+    P_ShmQue *p_shmQue;
+}ShmQHdl;
+
+
+#endif //SHMQ_DEF_H

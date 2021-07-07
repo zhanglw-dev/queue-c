@@ -33,7 +33,7 @@
 #include "demo_sock.h"
 #include "qc_qsystem.h"
 #include "qc_message.h"
-#include "qc_service.h"
+#include "qc_server.h"
 #include "qc_client.h"
 
 
@@ -59,14 +59,14 @@ int demo_sock()
         exit(-1);
     }
 
-    QcQueueSvc *queueSvc = qc_queuesvc_create("127.0.0.1", 5555, qSys, &err);
-    if(!queueSvc){
-        printf("create queuesvc failed.\n");
+    QcQueueSrv *queueSrv = qc_queuesrv_create("127.0.0.1", 5555, qSys, &err);
+    if(!queueSrv){
+        printf("create queuesrv failed.\n");
         exit(-1);
     }
 
-    if(0 != qc_queuesvc_start(queueSvc, 1, &err)){
-        printf("start queuesvc failed.\n");
+    if(0 != qc_queuesrv_start(queueSrv, 1, &err)){
+        printf("start queuesrv failed.\n");
         exit(-1);
     }
 
@@ -96,8 +96,8 @@ int demo_sock()
     }
 
     qc_client_disconnect(client);
-    qc_queuesvc_stop(queueSvc);
-    qc_queuesvc_destory(queueSvc);
+    qc_queuesrv_stop(queueSrv);
+    qc_queuesrv_destory(queueSrv);
 
     printf("qc sock is ok!\n");
 

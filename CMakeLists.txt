@@ -24,21 +24,21 @@ foreach(p LIB BIN INCLUDE)
 endforeach()
 
 
-add_subdirectory(src/qc_base)
+add_subdirectory(src/qc_rt)
 add_subdirectory(src/qc_mq)
+add_subdirectory(src/qc_mqsys)
+add_subdirectory(src/qc_shq)
 add_subdirectory(src/qc_psist)
-add_subdirectory(src/qc_qsys)
-add_subdirectory(src/qc_sock)
 add_subdirectory(demo)
 add_subdirectory(test)
 
 add_library(qc
             STATIC
-            $<TARGET_OBJECTS:qc_base>
+            $<TARGET_OBJECTS:qc_rt>
             $<TARGET_OBJECTS:qc_mq>
-            $<TARGET_OBJECTS:qc_psist>
-            $<TARGET_OBJECTS:qc_qsys>
-            $<TARGET_OBJECTS:qc_sock>
+            $<TARGET_OBJECTS:qc_mqsys>
+            $<TARGET_OBJECTS:qc_shq>
+			$<TARGET_OBJECTS:qc_psist>
 )
 
 
@@ -61,18 +61,29 @@ set_target_properties(qc
 )
 
 
-list(APPEND qc_API_HEADERS
-            src/qc_base/qc_error.h
+list(APPEND QC_API_HEADERS
+            src/qc_rt/qc_prelude.h
+            src/qc_rt/qc_error.h
+            src/qc_rt/qc_file.h
+            src/qc_rt/qc_hash.h
+            src/qc_rt/qc_list.h
+            src/qc_rt/qc_log.h
+            src/qc_rt/qc_sem.h
+            src/qc_rt/qc_shm.h
+            src/qc_rt/qc_socket.h
+            src/qc_rt/qc_thread.h
             src/qc_mq/qc_message.h
             src/qc_mq/qc_queue.h
-            src/qc_qsys/qc_qsystem.h
-            src/qc_sock/qc_service.h
-            src/qc_sock/qc_client.h
+            src/qc_mqsys/qc_qsystem.h
+            src/qc_mqsys/qc_server.h
+            src/qc_mqsys/qc_client.h
+            src/qc_shq/qc_shq_mem.h
+            src/qc_shq/qc_shq_que.h
             )
 
 set_target_properties(qc
 PROPERTIES
-PUBLIC_HEADER "${qc_API_HEADERS}"
+PUBLIC_HEADER "${QC_API_HEADERS}"
 )
 
 

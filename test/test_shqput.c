@@ -1,7 +1,7 @@
 /*
  * BSD 3-Clause License
  * 
- * Copyright (c) 2019, zhanglw (zhanglw366@163.com)
+ * Copyright (c) 2021, zhanglw (zhanglw366@163.com)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -31,72 +31,47 @@
  */
 
 #include "qc_prelude.h"
-#include "test_mq.h"
-#include "test_psist.h"
-#include "test_qsys.h"
-#include "test_sock.h"
-#include "test_sem.h"
-#include "test_shm.h"
-#include "test_log.h"
+#include "qc_shq_que.h"
 
 
-#define ENABLE_LOG_TEST  1
-
-
-
-int main(int argc, char **argv)
+int main()
 {
-	int ret;
-
-	ret = test_sem();
-	if (0 != ret) {
-		printf("sem test failed.");
-		exit(-1);
-	}
-	
-	ret = test_shm();
-	if (0 != ret) {
-		printf("shm test failed.");
-		exit(-1);
-	}
-
-	ret = mq_test_all();
-	if (0 != ret) {
-		printf("mq test failed.");
-		exit(-1);
-	}
+    int ret;
+    QcErr err;
+    int idx;
+    char* buff;
+    int bufflen, msglen;
+    QcShmQue *shmQue;
+    char *msg = "hello world!";
+    
+    shmQue = qc_shqueue_attach("shm_1", "queue_2", &err);
+    if(NULL == shmQue)
+    {
+        printf("qc_shqueue_attach failed, err=%s.\n", err.desc);
+        exit(-1);
+    }
 
 
-	ret = test_qsys();
-	if (0 != ret) {
-		printf("qsys test failed.");
-		exit(-1);
-	}
+    ret = qc_shqueue_push_begin(shmQue, &idx, &buff, &bufflen, &err);
+    if(ret < 0)
+    {
+        printf("qc_shqueue_push_begin failed, err=%s.\n", err.desc);
+        exit(-1);
+    }
 
+    msglen = strlen(msg);
+    strncpy(buff, msg, msglen);
 
-	ret = test_psist_file();
-	if (0 != ret) {
-		printf("psist test failed.");
-		exit(-1);
-	}
+    ret = qc_shqueue_push_end(shmQue, idx, msglen, &err);
+    if (ret < 0)
+    {
+        printf("qc_shqueue_push_end failed, err=%s.\n", err.desc);
+        exit(-1);
+    }
 
+    printf("put message succeed, len=%d.\n", msglen);
 
-	ret = test_net();
-	if (0 != ret){
-		printf("net test failed.");
-		exit(-1);
-	}
+    qc_shqueue_deattach(shmQue);
 
-
-	if(ENABLE_LOG_TEST)
-	{
-		ret = test_log();
-		if (0 != ret){
-			printf("log test failed.");
-			exit(-1);
-		}
-	}
-
-	printf("all test succeed!\n");
-	exit(0);
+    exit(0);
 }

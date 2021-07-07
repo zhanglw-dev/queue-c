@@ -1,7 +1,7 @@
 /*
  * BSD 3-Clause License
  * 
- * Copyright (c) 2019, zhanglw (zhanglw366@163.com)
+ * Copyright (c) 2021, zhanglw (zhanglw366@163.com)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -30,73 +30,27 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "qc_prelude.h"
-#include "test_mq.h"
-#include "test_psist.h"
-#include "test_qsys.h"
-#include "test_sock.h"
-#include "test_sem.h"
-#include "test_shm.h"
-#include "test_log.h"
+#ifndef QC_SHM_H
+#define QC_SHM_H
+
+#include "qc_error.h"
 
 
-#define ENABLE_LOG_TEST  1
+typedef struct __QcShm__ QcShm;
 
 
 
-int main(int argc, char **argv)
-{
-	int ret;
+QcShm* qc_shm_create(const char *name, size_t shmsize, QcErr *err);
 
-	ret = test_sem();
-	if (0 != ret) {
-		printf("sem test failed.");
-		exit(-1);
-	}
-	
-	ret = test_shm();
-	if (0 != ret) {
-		printf("shm test failed.");
-		exit(-1);
-	}
+int qc_shm_destroy(QcShm *qcShm);
 
-	ret = mq_test_all();
-	if (0 != ret) {
-		printf("mq test failed.");
-		exit(-1);
-	}
+QcShm* qc_shm_open(const char *name, QcErr *err);
+
+int qc_shm_close(QcShm *qcShm);
+
+size_t qc_shm_getsize(QcShm *qcShm);
+
+char* qc_shm_getaddr(QcShm *qcShm);
 
 
-	ret = test_qsys();
-	if (0 != ret) {
-		printf("qsys test failed.");
-		exit(-1);
-	}
-
-
-	ret = test_psist_file();
-	if (0 != ret) {
-		printf("psist test failed.");
-		exit(-1);
-	}
-
-
-	ret = test_net();
-	if (0 != ret){
-		printf("net test failed.");
-		exit(-1);
-	}
-
-
-	if(ENABLE_LOG_TEST)
-	{
-		ret = test_log();
-		if (0 != ret){
-			printf("log test failed.");
-			exit(-1);
-		}
-	}
-
-	printf("all test succeed!\n");
-	exit(0);
-}
+#endif //QC_SHM_H

@@ -8,11 +8,9 @@ add_executable(qcdemo
                main.c 
               )
 
-include_directories("../src/qc_base")
+include_directories("../src/qc_rt")
 include_directories("../src/qc_mq")
-include_directories("../src/qc_psist")
-include_directories("../src/qc_qsys")
-include_directories("../src/qc_sock")
+include_directories("../src/qc_mqsys")
 
 #message(STATUS ${CMAKE_BINARY_DIR}/lib)
 link_directories(${CMAKE_BINARY_DIR}/lib)

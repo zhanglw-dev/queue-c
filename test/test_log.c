@@ -36,11 +36,21 @@
 
 int test_log()
 {
-    qc_log_init("test.log", 8, 10, 5);
+    char cwd[128];
+    char logfile[256];
+
+    memset(cwd, 0, sizeof(cwd));
+    memset(logfile, 0, sizeof(logfile));
+
+    getcwd(cwd, sizeof(cwd));
+
+    sprintf(logfile, "%s/%s", cwd, "test.log");
+
+    qc_log_init(logfile, 8, 10, 5);
 
     qc_info("log test start...");
 
-    for(int i=0; i<100000; i++)
+    for(int i=0; i<30000; i++)
     {
         qc_pdebug(1, "test debug(level%d) out =========================================== %d", 1, i);
         qc_pdebug(2, "test debug(level%d) out =========================================== %d", 2, i);

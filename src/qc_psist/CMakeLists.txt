@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.5 FATAL_ERROR)
 project(qc_psist LANGUAGES C)
 
-include_directories("../qc_base")
+include_directories("../qc_rt")
 include_directories("../qc_mq")
 
 

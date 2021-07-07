@@ -30,6 +30,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+
 #include "qc_prelude.h"
 #include "qc_thread.h"
 #include "qc_list.h"
@@ -44,15 +45,18 @@
 #define QC_STLIST_CELL_SIZE sizeof(_StaticCell)
 
 
-void *get_staticlist_cell(char *buff, int cell)
+void *get_staticlist_cell(QcStaticList *staticList, int cell)
 {
+    char *buff = (char*)staticList + staticList->buff_offset;
     return (void *)((char *)buff + QC_STLIST_CELL_SIZE*cell);
 }
 
 
-int qc_staticlist_init(QcStaticList *staticList, int limit)
+int qc_staticlist_init(QcStaticList *staticList, int limit, void* buff_ptr)
 {
     int i;
+    void *_buff_ptr;
+
     _StaticCell *curCell = NULL;
 
     if(limit <= 0)
@@ -62,12 +66,19 @@ int qc_staticlist_init(QcStaticList *staticList, int limit)
 
 	memset(staticList, 0, sizeof(QcStaticList));
 
-    if(NULL == (staticList->buff = malloc(limit*QC_STLIST_CELL_SIZE)))
+    if(NULL == buff_ptr)
     {
-        return -1;
+        if(NULL == (_buff_ptr = malloc(limit*QC_STLIST_CELL_SIZE)))
+            return -1;
+    }
+    else
+    {
+        _buff_ptr = buff_ptr;
     }
 
-    memset(staticList->buff, 0, limit*QC_STLIST_CELL_SIZE);
+    staticList->buff_offset = (off_t)((char*)_buff_ptr - (char*)staticList);
+
+    memset(_buff_ptr, 0, limit*QC_STLIST_CELL_SIZE);
 
     staticList->head = QC_INVALID_INT;
     staticList->tail = QC_INVALID_INT;
@@ -76,7 +87,7 @@ int qc_staticlist_init(QcStaticList *staticList, int limit)
 
     for (i=0; i<limit; i++)
     {
-        curCell = get_staticlist_cell(staticList->buff, i);
+        curCell = get_staticlist_cell(staticList, i);
         curCell->previous  = i==0?QC_INVALID_INT:i-1;
         curCell->next = i + 1;
     }
@@ -105,7 +116,9 @@ void qc_staticlist_clear(QcStaticList *staticList)
 
 void qc_staticlist_release(QcStaticList *staticList)
 {
-    free(staticList->buff);
+    char *buff;
+    buff = (char*)staticList + staticList->buff_offset;
+    free(buff);
     //free(staticList);  no!
 }
 
@@ -130,7 +143,7 @@ int qc_staticlist_get_head(QcStaticList *staticList)
     head = staticList->head;
     if(head != QC_INVALID_INT)
     {
-        headCell = get_staticlist_cell(staticList->buff, staticList->head);
+        headCell = get_staticlist_cell(staticList, staticList->head);
         staticList->head = headCell->next;
         if(staticList->head == QC_INVALID_INT)
         {
@@ -138,7 +151,7 @@ int qc_staticlist_get_head(QcStaticList *staticList)
         }
         else
         {
-            secondCell = get_staticlist_cell(staticList->buff, staticList->head);
+            secondCell = get_staticlist_cell(staticList, staticList->head);
             secondCell->previous = QC_INVALID_INT;
         }
         staticList->num --;
@@ -162,7 +175,7 @@ int qc_staticlist_get_tail(QcStaticList *staticList)
     tail = staticList->tail;
     if(tail != QC_INVALID_INT)
     {
-        tailCell = get_staticlist_cell(staticList->buff, staticList->tail);
+        tailCell = get_staticlist_cell(staticList, staticList->tail);
         staticList->tail = tailCell->previous;
         if(staticList->tail == QC_INVALID_INT)
         {
@@ -170,7 +183,7 @@ int qc_staticlist_get_tail(QcStaticList *staticList)
         }
         else
         {
-            secondCell = get_staticlist_cell(staticList->buff, staticList->tail);
+            secondCell = get_staticlist_cell(staticList, staticList->tail);
             secondCell->next = QC_INVALID_INT;
         }
         staticList->num --;
@@ -194,14 +207,14 @@ int qc_staticlist_get_at(QcStaticList *staticList, int cell)
     if(staticList->head == QC_INVALID_INT)
         return QC_INVALID_INT;
 
-    curCell = get_staticlist_cell(staticList->buff, cell);
+    curCell = get_staticlist_cell(staticList, cell);
 
     pre  = curCell->previous;
     next = curCell->next;
     
     if(pre != QC_INVALID_INT)
     {
-        preCell = get_staticlist_cell(staticList->buff, pre);
+        preCell = get_staticlist_cell(staticList, pre);
         preCell->next = next;
     }
     else
@@ -211,7 +224,7 @@ int qc_staticlist_get_at(QcStaticList *staticList, int cell)
 
     if(next != QC_INVALID_INT)
     {
-        nextCell = get_staticlist_cell(staticList->buff, next);
+        nextCell = get_staticlist_cell(staticList, next);
         nextCell->previous = pre;
     }
     else
@@ -235,7 +248,7 @@ int qc_staticlist_add_head(QcStaticList *staticList, int cell)
     if(NULL == staticList || cell<0 || cell>=staticList->limit)
         return -1;
 
-    curCell = get_staticlist_cell(staticList->buff, cell);
+    curCell = get_staticlist_cell(staticList, cell);
     if(staticList->head == QC_INVALID_INT)
     {
         curCell->previous  = QC_INVALID_INT;
@@ -246,7 +259,7 @@ int qc_staticlist_add_head(QcStaticList *staticList, int cell)
     }
     else
     {
-        headCell = get_staticlist_cell(staticList->buff, staticList->head);
+        headCell = get_staticlist_cell(staticList, staticList->head);
         
         curCell->previous  = QC_INVALID_INT;
         curCell->next = staticList->head;
@@ -267,7 +280,7 @@ int qc_staticlist_add_tail(QcStaticList *staticList, int cell)
     if(NULL == staticList || cell<0 || cell>=staticList->limit)
         return -1;
 
-    curCell = get_staticlist_cell(staticList->buff, cell);
+    curCell = get_staticlist_cell(staticList, cell);
     if (staticList->head == QC_INVALID_INT)
     {
         curCell->previous  = QC_INVALID_INT;
@@ -278,7 +291,7 @@ int qc_staticlist_add_tail(QcStaticList *staticList, int cell)
     }
     else
     {
-        tailCell = get_staticlist_cell(staticList->buff, staticList->tail);
+        tailCell = get_staticlist_cell(staticList, staticList->tail);
 
         curCell->previous  = staticList->tail;
         curCell->next = QC_INVALID_INT;
@@ -309,13 +322,13 @@ int qc_staticlist_add_at(QcStaticList *staticList, int previous_cell, int cell)
     if(staticList->head == QC_INVALID_INT)
         return QC_INVALID_INT;
 
-    curCell = get_staticlist_cell(staticList->buff, cell);
-    preCell=get_staticlist_cell(staticList->buff, previous_cell);
+    curCell = get_staticlist_cell(staticList, cell);
+    preCell=get_staticlist_cell(staticList, previous_cell);
     next=preCell->next;
 
     if(next!= QC_INVALID_INT)
     {
-       nextCell=get_staticlist_cell(staticList->buff, next);
+       nextCell=get_staticlist_cell(staticList, next);
        preCell->next=cell;
        nextCell->previous=cell;
        curCell->previous=previous_cell;
@@ -359,7 +372,7 @@ int qc_staticlist_peek_precell(QcStaticList *staticList, int cell)
     if(NULL == staticList || cell<0 || cell>=staticList->limit)
         return -1;
 
-    curCell = get_staticlist_cell(staticList->buff, cell);
+    curCell = get_staticlist_cell(staticList, cell);
 
     return curCell->previous;
 }
@@ -372,11 +385,10 @@ int qc_staticlist_peek_nextcell(QcStaticList *staticList, int cell)
     if(NULL == staticList || cell<0 || cell>=staticList->limit)
         return -1;
 
-    curCell = get_staticlist_cell(staticList->buff, cell);
+    curCell = get_staticlist_cell(staticList, cell);
 
     return curCell->next;
 }
-
 
 
 /*////////////////////////////////////////////////////////////////////////////////
@@ -839,3 +851,4 @@ void qc_list_w_unlock(QcList *list)
         qc_thread_wrlock_unlock(list->rwlock);
     }
 }
+

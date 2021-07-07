@@ -33,6 +33,7 @@
 #ifndef QCLIB_LIST_H
 #define QCLIB_LIST_H
 
+#include "qc_prelude.h"
 
 /*////////////////////////////////////////////////////////////////////////////////
 //                               Static List
@@ -52,11 +53,10 @@ struct __QcStaticList {
 	int tail;
 	int limit;
 	int num;
-	void *buff;
+	off_t buff_offset;
 };
 
 #pragma pack(pop)
-
 
 #define QC_INVALID_INT  -99
 typedef struct __QcStaticList QcStaticList;
@@ -66,7 +66,7 @@ typedef struct __QcStaticList QcStaticList;
 extern "C" {
 #endif
 
-int qc_staticlist_init(QcStaticList *staticList, int limit);
+int qc_staticlist_init(QcStaticList *staticList, int limit, void* buff_ptr);
 void qc_staticlist_release(QcStaticList *staticList);
 
 int  qc_staticlist_count(QcStaticList *staticList);

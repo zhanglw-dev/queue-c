@@ -249,7 +249,7 @@ int qc_file_truncate(const char *pathname, off_t length)
 /*-------------------------------------------------------------------*/
 
 
-int qc_dir_exist(char *dirname)
+int qc_dir_exist(const char *dirname)
 {
     qc_assert(dirname);
 
@@ -263,7 +263,7 @@ int qc_dir_exist(char *dirname)
 }
 
 
-int qc_dir_remove(char *dirname)
+int qc_dir_remove(const char *dirname)
 {
     qc_assert(dirname);
 
@@ -277,7 +277,7 @@ int qc_dir_remove(char *dirname)
 }
 
 
-int qc_dir_rename(char *dirname, char *newname)
+int qc_dir_rename(const char *dirname, const char *newname)
 {
     qc_assert(dirname);
     qc_assert(newname);
@@ -292,7 +292,7 @@ int qc_dir_rename(char *dirname, char *newname)
 }
 
 
-int qc_dir_make(char *dirname)
+int qc_dir_make(const char *dirname)
 {
     qc_assert(dirname);
 

@@ -30,73 +30,67 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#ifndef QC_FILE_H
+#define QC_FILE_H
+
+
 #include "qc_prelude.h"
-#include "test_mq.h"
-#include "test_psist.h"
-#include "test_qsys.h"
-#include "test_sock.h"
-#include "test_sem.h"
-#include "test_shm.h"
-#include "test_log.h"
+
+#define QC_FILENAME_MAXLEN  256
 
 
-#define ENABLE_LOG_TEST  1
+typedef struct __QcFile QcFile;
 
 
 
-int main(int argc, char **argv)
-{
-	int ret;
-
-	ret = test_sem();
-	if (0 != ret) {
-		printf("sem test failed.");
-		exit(-1);
-	}
-	
-	ret = test_shm();
-	if (0 != ret) {
-		printf("shm test failed.");
-		exit(-1);
-	}
-
-	ret = mq_test_all();
-	if (0 != ret) {
-		printf("mq test failed.");
-		exit(-1);
-	}
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 
-	ret = test_qsys();
-	if (0 != ret) {
-		printf("qsys test failed.");
-		exit(-1);
-	}
+/*oflag: O_CREAT O_EXCL O_TRUNC O_APPEND O_RDONLY O_WRONLY O_RDWR*/
+QcFile* qc_file_open(const char *pathname, int oflag);
+
+int qc_file_close(QcFile *file);
+
+size_t qc_file_read(QcFile *file, void *buf, size_t nbytes);
+
+size_t qc_file_write(QcFile *file, const void *buf, size_t nbytes);
+
+int qc_file_sync(QcFile *file);
+
+/*whence: SEEK_SET SEEK_CUR SEEK_END*/
+off_t qc_file_seek(QcFile *file, off_t offset, int whence);
+
+off_t qc_file_tell(QcFile *file);
+
+int qc_file_exist(const char *pathname);
+
+size_t qc_file_size(const char *pathname);
+
+int qc_file_remove(const char *pathname);
+
+int qc_file_rename(const char *oldname, const char *newname);
+
+int qc_file_truncate(const char *pathname, off_t length);
+
+/*---------------------------------------------------------------------*/
 
 
-	ret = test_psist_file();
-	if (0 != ret) {
-		printf("psist test failed.");
-		exit(-1);
-	}
+int qc_dir_exist(const char *dirname);
+
+int qc_dir_make(const char *dirname);
+
+int qc_dir_remove(const char *dirname);
+
+int qc_dir_rename(const char *dirname, const char *newname);
+
+char* qc_dir_getcwd(char *buff, int maxlen);
 
 
-	ret = test_net();
-	if (0 != ret){
-		printf("net test failed.");
-		exit(-1);
-	}
-
-
-	if(ENABLE_LOG_TEST)
-	{
-		ret = test_log();
-		if (0 != ret){
-			printf("log test failed.");
-			exit(-1);
-		}
-	}
-
-	printf("all test succeed!\n");
-	exit(0);
+#ifdef __cplusplus
 }
+#endif
+
+
+#endif  /*QC_FILE_H*/

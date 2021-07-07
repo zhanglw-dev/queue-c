@@ -64,7 +64,7 @@ QcFile* qc_file_open(const char *pathname, int oflag)
 	File = malloc(sizeof(struct __QcFile));
 	if(NULL == File)
 	{
-		qc_error("file hdl malloc failed");
+		printf("file hdl malloc failed\n");
 		return NULL;
 	}
 
@@ -98,7 +98,7 @@ QcFile* qc_file_open(const char *pathname, int oflag)
 
 	if(INVALID_HANDLE_VALUE == File->hdl)
 	{
-		qc_perror("file(%s) open failed", pathname);
+		printf("file(%s) open failed\n", pathname);
 		free(File);
 		return NULL;
 	}
@@ -119,7 +119,7 @@ int qc_file_close(QcFile *file)
 
 	if(!CloseHandle(file->hdl))
 	{
-		qc_error("file close failed");
+		printf("file close failed\n");
 		return -1;
 	}
 
@@ -136,7 +136,7 @@ size_t qc_file_read(QcFile *file, void *buf, size_t nbytes)
 
 	if(!ReadFile(file->hdl, (LPVOID)buf, (DWORD)nbytes, (LPDWORD)&ssz, NULL))
 	{
-		qc_error("file read failed");
+		printf("file read failed\n");
 		return -1;
 	}
 
@@ -152,7 +152,7 @@ size_t qc_file_write(QcFile *file, const void *buf, size_t nbytes)
 
 	if(!WriteFile(file->hdl, (CONST VOID*)buf, (DWORD)nbytes, (LPDWORD)&ssz, NULL))
 	{
-		qc_error("file write failed");
+		printf("file write failed\n");
 		return -1;
 	}
 
@@ -166,7 +166,7 @@ int qc_file_sync(QcFile *file)
 
 	if(!FlushFileBuffers(file->hdl))
 	{
-		qc_error("file sync failed");
+		printf("file sync failed\n");
 		return -1;
 	}
 
@@ -185,7 +185,7 @@ off_t qc_file_seek(QcFile *file, off_t offset, int whence)
 
 	if(!SetFilePointerEx(file->hdl, off_2move, &off_new, (DWORD)whence))
 	{
-		qc_perror("file seek(offset=%d, whence=%d) failed", offset, whence);
+		printf("file seek(offset=%d, whence=%d) failed\n", offset, whence);
 		return -1;
 	}
 
@@ -204,7 +204,7 @@ off_t qc_file_tell(QcFile *file)
 
 	if(!SetFilePointerEx(file->hdl, off2move, &off, FILE_CURRENT))
 	{
-		qc_error("file tell failed");
+		printf("file tell failed\n");
 		return -1;
 	}
 
@@ -243,9 +243,9 @@ int qc_file_remove(const char *pathname)
 {
 	qc_assert(pathname);
 
-     if (!DeleteFileW((LPCWSTR)pathname))
+     if (!DeleteFileW(convertW(pathname)))
 	 {
-		 qc_error("file(%s) remove failed");
+		 printf("file(%s) remove failed\n", pathname);
          return -1;
 	 }
 
@@ -260,7 +260,7 @@ int qc_file_rename(const char *oldname, const char *newname)
 
     if (0 != rename(oldname, newname))
 	{
-		qc_perror("file rename(%s to %s) failed", oldname, newname);
+		printf("file rename(%s to %s) failed\n", oldname, newname);
         return -1;
 	}
 
@@ -302,13 +302,13 @@ int qc_file_truncate(const char *pathname, off_t length)
 /*--------------------------------------------------------------------------------------------------*/
 
 
-int qc_dir_exist(char *dirname)
+int qc_dir_exist(const char *dirname)
 {
 	qc_assert(dirname);
 
 	if(0 != _access_s(dirname, 0))
 	{
-		qc_perror("dir(%s) asscess failed", dirname);
+		printf("dir(%s) asscess failed\n", dirname);
 		return -1;
 	}
 
@@ -316,13 +316,13 @@ int qc_dir_exist(char *dirname)
 }
 
 
-int qc_dir_remove(char *dirname)
+int qc_dir_remove(const char *dirname)
 {
 	qc_assert(dirname);
 
-	if(!RemoveDirectoryW((LPCWSTR)dirname))
+	if(!RemoveDirectoryW(convertW(dirname)))
 	{
-		qc_perror("dir(%s) remove failed", dirname);
+		printf("dir(%s) remove failed\n", dirname);
 		return -1;
 	}
 
@@ -330,14 +330,14 @@ int qc_dir_remove(char *dirname)
 }
 
 
-int qc_dir_rename(char *dirname, char *newname)
+int qc_dir_rename(const char *dirname, const char *newname)
 {
 	qc_assert(dirname);
 	qc_assert(newname);
 
     if (0 != rename(dirname, newname))
 	{
-		qc_perror("dir rename(%s to %s) failed", dirname, newname);
+		printf("dir rename(%s to %s) failed\n", dirname, newname);
         return -1;
 	}
 
@@ -345,13 +345,13 @@ int qc_dir_rename(char *dirname, char *newname)
 }
 
 
-int qc_dir_make(char *dirname)
+int qc_dir_make(const char *dirname)
 {
 	qc_assert(dirname);
 
-    if (!CreateDirectoryW((LPCWSTR)dirname, NULL))
+    if (!CreateDirectoryW(convertW(dirname), NULL))
 	{
-		qc_perror("dir(%s) make failed", dirname);
+		printf("dir(%s) make failed\n", dirname);
         return -1;
 	}
 

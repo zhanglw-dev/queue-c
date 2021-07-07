@@ -248,7 +248,7 @@ int qc_psist_file_append(QcPsistFile *qtbl, Qc_MsgRecord *msgRecord, QcErr *err)
 
 int qc_psist_file_remove(QcPsistFile *qtbl, Qc_MsgRecord *msgRecord, QcErr *err)
 {
-	int sz;
+	size_t sz;
 	int persist_id = msgRecord->persist_id;
 	off_t offset_msghead = sizeof(Qc_PsistFileInfo) + persist_id * (sizeof(Qc_MsgInfo) + qtbl->fileInfo->msgbuff_size);
 

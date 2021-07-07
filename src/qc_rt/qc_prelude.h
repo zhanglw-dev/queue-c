@@ -59,6 +59,7 @@
 
     #define sleep(x) Sleep(1000*x)
     #define INFTIM -1
+    #define access _access
     #define getcwd _getcwd
     #define PTHREAD_CANCELED -1
 
@@ -111,6 +112,10 @@
 //#define QC_INVALID_INT  -99
 #define QC_TIMEOUT -33
 #define QC_FULLED  -100
+
+#define QC_SEMNAME_MAXLEN 128
+#define QC_SHMNAME_MAXLEN 128
+#define QC_QUENAME_MAXLEN 128
 
 
 typedef size_t qc_size_t;

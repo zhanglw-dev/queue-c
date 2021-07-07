@@ -1,12 +1,44 @@
+/*
+ * BSD 3-Clause License
+ * 
+ * Copyright (c) 2021, zhanglw (zhanglw366@163.com)
+ * All rights reserved.
+ * 
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ * 
+ * 1. Redistributions of source code must retain the above copyright notice, this
+ *    list of conditions and the following disclaimer.
+ * 
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
+ * 
+ * 3. Neither the name of the copyright holder nor the names of its
+ *    contributors may be used to endorse or promote products derived from
+ *    this software without specific prior written permission.
+ * 
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+ * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
 #include "qc_prelude.h"
 #include "qc_sem.h"
 
 
 struct __QcSem__ {
-	char name[QC_SEMNAME_MAXLEN+1];
-	sem_t *sem;
+	char name[QC_SEMNAME_MAXLEN + 1];
+	sem_t* sem;
+    int flags;
 };
-
 
 
 QcSem* qc_sem_create(const char *name, int initcount, QcErr *err)
@@ -39,6 +71,7 @@ QcSem* qc_sem_create(const char *name, int initcount, QcErr *err)
     qc_malloc(qcSem, sizeof(QcSem));
     qcSem->sem = sem;
     strncpy(qcSem->name, name, QC_SEMNAME_MAXLEN);
+    qcSem->flags = flags;
 
     return qcSem;
 }
@@ -48,6 +81,7 @@ int qc_sem_destroy(QcSem *qcSem)
 {
     sem_close(qcSem->sem);
     sem_unlink(qcSem->name);
+    qc_free(qcSem);
     return 0;
 }
 
@@ -68,7 +102,7 @@ QcSem* qc_sem_open(const char *name, QcErr *err)
     sem = sem_open(name, flags);
     if(NULL == sem)
     {
-        qc_seterr(err, -1, "create sem (name : %s) failed.", name);
+        qc_seterr(err, -1, "open sem (name : %s) failed.", name);
         return NULL;
     }
 
@@ -77,6 +111,7 @@ QcSem* qc_sem_open(const char *name, QcErr *err)
     qc_malloc(qcSem, sizeof(QcSem));
     qcSem->sem = sem;
     strncpy(qcSem->name, name, QC_SEMNAME_MAXLEN);
+    qcSem->flags = flags;
 
     return qcSem;
 }
@@ -85,6 +120,7 @@ QcSem* qc_sem_open(const char *name, QcErr *err)
 int qc_sem_close(QcSem *qcSem)
 {
     sem_close(qcSem->sem);
+    qc_free(qcSem);
     return 0;
 }
 

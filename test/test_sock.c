@@ -31,7 +31,7 @@
  */
 
 #include "test_sock.h"
-#include "qc_service.h"
+#include "qc_server.h"
 #include "qc_client.h"
 #include "qc_message.h"
 #include "qc_queue.h"
@@ -150,13 +150,13 @@ int test_net()
         return -1;
     }
 
-    QcQueueSvc *queueSvc = qc_queuesvc_create(ip, port, qSystem, &err);
-    if(!queueSvc){
+    QcQueueSrv *queueSrv = qc_queuesrv_create(ip, port, qSystem, &err);
+    if(!queueSrv){
         printf("create queuesvc failed.\n");
         return -1;
     }
 
-    ret = qc_queuesvc_start(queueSvc, 1, &err);
+    ret = qc_queuesrv_start(queueSrv, 1, &err);
     if(0 != ret){
         printf("start queuesvc failed.\n");
         return -1;
@@ -202,8 +202,8 @@ int test_net()
 		qc_info("test concurrent producer/consumer succeed.\n");
 	}
 
-    qc_queuesvc_stop(queueSvc);
-    qc_queuesvc_destory(queueSvc);
+    qc_queuesrv_stop(queueSrv);
+    qc_queuesrv_destory(queueSrv);
 
     return 0;
 }

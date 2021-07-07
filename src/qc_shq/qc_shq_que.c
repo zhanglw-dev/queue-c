@@ -1,7 +1,7 @@
 /*
  * BSD 3-Clause License
  * 
- * Copyright (c) 2019, zhanglw (zhanglw366@163.com)
+ * Copyright (c) 2021, zhanglw (zhanglw366@163.com)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -30,73 +30,58 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "qc_prelude.h"
-#include "test_mq.h"
-#include "test_psist.h"
-#include "test_qsys.h"
-#include "test_sock.h"
-#include "test_sem.h"
-#include "test_shm.h"
-#include "test_log.h"
+#include "qc_shq_que.h"
+#include "qc_shq_def.h"
+#include "qc_shque.h"
 
 
-#define ENABLE_LOG_TEST  1
-
-
-
-int main(int argc, char **argv)
+QcShmQue* qc_shqueue_attach(const char *shm_name, const char *que_name, QcErr *err)
 {
-	int ret;
+    QcShm* qcShm;
+    QcShmQue* qcShmQue;
 
-	ret = test_sem();
-	if (0 != ret) {
-		printf("sem test failed.");
-		exit(-1);
-	}
-	
-	ret = test_shm();
-	if (0 != ret) {
-		printf("shm test failed.");
-		exit(-1);
-	}
+    qcShm = qc_shm_open(shm_name, err);
+    if (NULL == qcShm)
+    {
+        return NULL;
+    }
 
-	ret = mq_test_all();
-	if (0 != ret) {
-		printf("mq test failed.");
-		exit(-1);
-	}
+    qcShmQue = shm_queue_find(qcShm, que_name, err);
+    if(NULL == qcShmQue)
+    {
+        qc_shm_close(qcShm);
+        return NULL;
+    }
 
-
-	ret = test_qsys();
-	if (0 != ret) {
-		printf("qsys test failed.");
-		exit(-1);
-	}
+    return qcShmQue;
+}
 
 
-	ret = test_psist_file();
-	if (0 != ret) {
-		printf("psist test failed.");
-		exit(-1);
-	}
+void qc_shqueue_deattach(QcShmQue *shmQue)
+{
+    shm_queue_release(shmQue);
+}
 
 
-	ret = test_net();
-	if (0 != ret){
-		printf("net test failed.");
-		exit(-1);
-	}
+int qc_shqueue_pull_begin(QcShmQue *shmQue, int wait_msec, int *idx, char **pp_buff, int *p_bufflen, QcErr *err)
+{
+    return shm_queue_pull_begin(shmQue, wait_msec, idx, pp_buff, p_bufflen, err);
+}
 
 
-	if(ENABLE_LOG_TEST)
-	{
-		ret = test_log();
-		if (0 != ret){
-			printf("log test failed.");
-			exit(-1);
-		}
-	}
+int qc_shqueue_pull_end(QcShmQue *shmQue, int idx, QcErr *err)
+{
+    return shm_queue_pull_end(shmQue, idx, err);
+}
 
-	printf("all test succeed!\n");
-	exit(0);
+
+int qc_shqueue_push_begin(QcShmQue *shmQue, int *idx, char **pp_buff, int *p_bufflen, QcErr *err)
+{
+    return shm_queue_push_begin(shmQue, idx, pp_buff, p_bufflen, err);
+}
+
+
+int qc_shqueue_push_end(QcShmQue *shmQue, int idx, int bufflen, QcErr *err)
+{
+    return shm_queue_push_end(shmQue, idx, bufflen, err);
 }

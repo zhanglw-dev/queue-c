@@ -41,7 +41,8 @@
 struct __QcMessage {
 	int priority;
 	int persist_id;
-	int bufflen;
+	int buff_len;
+    int buff_flag;
 	char *buff;
 };
 
@@ -49,7 +50,7 @@ struct __QcMessage {
 
 
 
-QcMessage* qc_message_create(const char *buff, int len, int do_allocbuff){
+QcMessage* qc_message_create(const char *buff, int len, int buff_flag){
     QcMessage *message;
 
     qc_malloc(message, sizeof(QcMessage));
@@ -58,7 +59,7 @@ QcMessage* qc_message_create(const char *buff, int len, int do_allocbuff){
     
     if(NULL == (char *)buff) len = 0;
 
-    if(do_allocbuff){
+    if(BUFFFLAG_CLONE & buff_flag){
         qc_malloc(message->buff, len);
         if(NULL == message->buff){
             qc_free(message);
@@ -70,18 +71,19 @@ QcMessage* qc_message_create(const char *buff, int len, int do_allocbuff){
         message->buff = (char *)buff;
     }
 
-    message->bufflen = len;
+    message->buff_len = len;
+    message->buff_flag = buff_flag;
     message->priority = 1;
 
     return message;
 }
 
 
-void qc_message_release(QcMessage *message, int do_freebuff){
+void qc_message_release(QcMessage *message){
     if(NULL == message)
         return;
 
-    if(do_freebuff && message->buff) 
+    if(!(BUFFFLAG_NO_FREE & message->buff_flag) && message->buff) 
 		qc_free(message->buff);
 
     qc_free(message);
@@ -98,7 +100,7 @@ char* qc_message_buff(QcMessage *message){
 
 int qc_message_bufflen(QcMessage *message){
     qc_assert(message);    
-    return message->bufflen;
+    return message->buff_len;
 }
 
 

@@ -26,7 +26,7 @@ QcErr err;
 char data = "hello queue-c";  
 
 QcQueue* queue = qc_queue_create(1000, 3, &err);  
-QcMessage *message_put = qc_message_create(data, strlen(data)+1, 0);  
+QcMessage *message_put = qc_message_create(data, strlen(data)+1, BUFFFLAG_NO_FREE);  
 
 if(0 != qc_queue_msgput(queue, message_put, -1, &err)){  
   printf("put msg failed: %s\n", err.desc);  

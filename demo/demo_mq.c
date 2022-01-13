@@ -66,7 +66,7 @@ int demo_mq()
         }
 
         printf("got msg: %s [length:%d]\n", qc_message_buff(message), qc_message_bufflen(message));
-        qc_message_release(message, 1);
+        qc_message_release(message);
     }
 
     qc_queue_destroy(queue);

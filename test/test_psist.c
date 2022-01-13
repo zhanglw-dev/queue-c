@@ -63,13 +63,13 @@ int test_psist_file()
 	}
 
 	for (int i = 0; i < 1000; i++) {
-		QcMessage *message = qc_message_create(buff, (int)strlen(buff), 0);
+		QcMessage *message = qc_message_create(buff, (int)strlen(buff), BUFFFLAG_NO_FREE);
 		ret = qc_psist_append(qPsist, message, &err);
 		if (0 != ret) {
 			printf("psist append failed.\n");
 			return -1;
 		}
-		qc_message_release(message, 0);
+		qc_message_release(message);
 	}
 
 	QcQueue* queue = qc_queue_create(MSG_COUNT_LIMIT, 10, NULL);
@@ -87,7 +87,7 @@ int test_psist_file()
 		}
 
 		//printf("msg:%s\n", qc_message_buff(message1));
-		qc_message_release(message1, 0);
+		qc_message_release(message1);
 	}
 
 	qc_psist_close(qPsist);

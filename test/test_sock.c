@@ -67,13 +67,13 @@ void* producer_routine(void* arg) {
 	//printf("producer connected.\n");
 
 	for (int i = 0; i < msgcount; i++) {
-		QcMessage* message_put = qc_message_create(msgstr, (int)strlen(msgstr), 0);
+		QcMessage* message_put = qc_message_create(msgstr, (int)strlen(msgstr), BUFFFLAG_NO_FREE);
 		ret = qc_client_msgput(client, "queue01", message_put, msec, &err);
 		if (0 != ret) {
 			//printf("msgput fail: %d %s\n", err.code, err.desc);
 			if(err.code == QC_ERR_TIMEOUT){
 				i--;
-				qc_message_release(message_put, 0);
+				qc_message_release(message_put);
 				continue;
 			}
 
@@ -82,7 +82,7 @@ void* producer_routine(void* arg) {
 			return NULL;
 		}
         //printf("message put ok.\n");
-		qc_message_release(message_put, 0);
+		qc_message_release(message_put);
 	}
 
 	qc_client_disconnect(client);
@@ -124,7 +124,7 @@ void* consumer_routine(void* arg) {
 			return NULL;
 		}
 
-		qc_message_release(message_get, 1);
+		qc_message_release(message_get);
 	}
 
 	qc_client_disconnect(client);

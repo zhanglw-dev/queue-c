@@ -45,6 +45,7 @@ typedef struct {
 	int priority;
 	int persist_id;
 	int bufflen;
+	int buff_flag;
 	char *buff;
 }Qc_MsgRecord;
 
@@ -58,7 +59,7 @@ typedef struct __QcPsistFile QcPsistFile;
 QcPsistFile* qc_psist_file_open(int msgbuff_size, int msgcount_limit, const char* persit_filename, QcErr *err);
 
 void qc_psist_file_close(QcPsistFile *qtbl);
-
+ 
 int qc_psist_file_append(QcPsistFile *qtbl, Qc_MsgRecord *msgRecord, QcErr *err);
 
 int qc_psist_file_remove(QcPsistFile *qtbl, Qc_MsgRecord *msgRecord, QcErr *err);

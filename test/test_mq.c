@@ -52,7 +52,7 @@ void* putroutine(void *arg) {
 	int ret;
 
 	for (int i = 0; i < message_num; i++) {
-		QcMessage *message = qc_message_create(buff, (int)strlen(buff), 0);
+		QcMessage *message = qc_message_create(buff, (int)strlen(buff), BUFFFLAG_NO_FREE);
 		qc_message_setpriority(message, 10);
 
 		ret = qc_queue_msgput(queue, message, -1, NULL);
@@ -84,7 +84,7 @@ void* getroutine(void *arg) {
 			return NULL;
 		}
 
-		qc_message_release(message, 0);
+		qc_message_release(message);
 	}
 
 	return NULL;
@@ -104,7 +104,7 @@ int mq_test_all()
 	qc_info("test put start.");
 
 	for (int i = 0; i < queue_limit; i++) {
-		QcMessage *message = qc_message_create(buff, (int)strlen(buff), 0);
+		QcMessage *message = qc_message_create(buff, (int)strlen(buff), BUFFFLAG_NO_FREE);
 
 		ret = qc_queue_msgput(queue, message, -1, NULL);
 		if (ret != 0) {
@@ -121,7 +121,7 @@ int mq_test_all()
 	qc_info("test block put start.");
 
 	QcErr puterr;
-	ret = qc_queue_msgput(queue, qc_message_create(NULL, 0, 0), 1, &puterr);
+	ret = qc_queue_msgput(queue, qc_message_create(NULL, 0, BUFFFLAG_NO_FREE), 1, &puterr);
 	if (0 != ret) {
 		if (QC_TIMEOUT != puterr.code) {
 			qc_perror("qc_queue_msgput failed, errcode=%d", puterr.code);
@@ -146,7 +146,7 @@ int mq_test_all()
 			qc_error("qc_queue_msgget failed.");
 			return -1;
 		}
-		qc_message_release(message, 0);
+		qc_message_release(message);
 	}
 
 	count = qc_queue_msgcount(queue);
@@ -218,24 +218,24 @@ int mq_test_all()
 
 	QcErr forceErr;
 	for(int i=0; i<queue_limit; i++){
-		QcMessage *message = qc_message_create(buff, (int)strlen(buff), 0);
+		QcMessage *message = qc_message_create(buff, (int)strlen(buff), BUFFFLAG_NO_FREE);
 		ret = qc_queue_forceput(queue, message, NULL, &forceErr);
 		qc_assert(ret == 0);
 	}
 
 	for(int i=0; i<queue_limit; i++){
-		QcMessage *message = qc_message_create(buff, (int)strlen(buff), 0);
+		QcMessage *message = qc_message_create(buff, (int)strlen(buff), BUFFFLAG_NO_FREE);
 		QcMessage *msg_popped;
 		ret = qc_queue_forceput(queue, message, &msg_popped, &forceErr);
 		qc_assert(ret == 0);
 		qc_assert(strcmp(buff, qc_message_buff(msg_popped)) == 0);
-		qc_message_release(msg_popped, 0);
+		qc_message_release(msg_popped);
 	}
 
 	for(int i=0; i<queue_limit; i++){
 		QcMessage *message = qc_queue_msgget(queue, 0, &forceErr);
 		qc_assert(strcmp(buff, qc_message_buff(message)) == 0);
-		qc_message_release(message, 0);
+		qc_message_release(message);
 	}
 
 	count = qc_queue_msgcount(queue);

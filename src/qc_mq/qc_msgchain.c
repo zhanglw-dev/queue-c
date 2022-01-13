@@ -236,7 +236,7 @@ int qc_msgchain_forcepush(QcMsgChain *msgChain, QcMessage *message, QcMessage **
                 *msg_popped = popmsg;
             }
             else{
-                qc_message_release(popmsg, 1);
+                qc_message_release(popmsg);
             }
 			msgChain->msg_count--;
             ret = qc_msgchain_pushmsg(msgChain, message);

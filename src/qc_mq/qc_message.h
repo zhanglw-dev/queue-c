@@ -36,17 +36,21 @@
 typedef struct __QcMessage QcMessage;
 
 
+#define BUFFFLAG_CLONE    0x01
+#define BUFFFLAG_NO_FREE  0x02
+
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 
-QcMessage* qc_message_create(const char *buff, int len, int do_allocbuff);
+QcMessage* qc_message_create(const char *buff, int len, int buff_flag);
 
-void qc_message_release(QcMessage *message, int do_freebuff);
+void qc_message_release(QcMessage *message);
 
 char* qc_message_buff(QcMessage *message);
-
+ 
 int qc_message_bufflen(QcMessage *message);
 
 void qc_message_setpriority(QcMessage *message, int priority);

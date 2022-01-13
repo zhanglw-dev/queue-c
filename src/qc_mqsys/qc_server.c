@@ -91,7 +91,7 @@ int qc_proc_msgput(ProcParam *procParam, QcPrtclHead *prtclHead, char *prtcl_bod
 	unsigned int msg_len = prtclMsgPut->msg_len;
 
 	char *buff = prtcl_body + sizeof(QcPrtclMsgPut);
-	QcMessage *message = qc_message_create(buff, msg_len, 1);
+	QcMessage *message = qc_message_create(buff, msg_len, BUFFFLAG_CLONE);
 
 	ret = qc_qsys_putmsg(procParam->qSystem, prtclMsgPut->qname, message, wait_msec, err);
 	if (0 != ret){
@@ -187,11 +187,11 @@ int qc_proc_msgget(ProcParam *procParam, QcPrtclHead *prtclHead, char *prtcl_bod
 		}
 	}
 
-	qc_message_release(message, 1);
+	qc_message_release(message);
 	return 0;
 
 failed:
-    if(message) qc_message_release(message, 1);
+    if(message) qc_message_release(message);
 	return -1;
 }
 

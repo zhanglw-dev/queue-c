@@ -36,24 +36,7 @@
 #include "qc_prelude.h"
 #include "qc_error.h"
 #include "qc_list.h"
-
-
-typedef struct{
-    char qname[QC_QUENAME_MAXLEN];
-    int queuesize;
-    off_t msgsize;
-}QueConf;
-
-
-typedef struct{
-    char shmname[QC_SHMNAME_MAXLEN];
-    QcList *queConfList;
-}ShmConf;
-
-
-typedef struct {
-    QcList *shmConfList;
-}QcShqConf;
+#include "qc_shq_def.h"
 
 
 QcShqConf* qc_shqd_read_config(const char* cfgfile, QcErr *err);

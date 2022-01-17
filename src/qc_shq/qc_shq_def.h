@@ -71,6 +71,7 @@ typedef struct{
 
 #pragma pack(pop)
 
+
 typedef struct __QcShmQue__ {
     QcShm* qcShm;
     P_ShmQue* p_shmQue;
@@ -78,11 +79,30 @@ typedef struct __QcShmQue__ {
     QcSem* sem_lst;
 }QcShmQue;
 
+
 typedef struct _ShmQHdl_{
     int que_sn;
     char *shm_addr;
     P_ShmQue *p_shmQue;
 }ShmQHdl;
+
+
+typedef struct{
+    char qname[QC_QUENAME_MAXLEN];
+    int queuesize;
+    off_t msgsize;
+}QueConf;
+
+
+typedef struct{
+    char shmname[QC_SHMNAME_MAXLEN];
+    QcList *queConfList;
+}ShmConf;
+
+
+typedef struct {
+    QcList *shmConfList;
+}QcShqConf;
 
 
 #endif //SHMQ_DEF_H

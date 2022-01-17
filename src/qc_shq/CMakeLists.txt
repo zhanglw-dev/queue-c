@@ -7,16 +7,12 @@ include_directories("../qc_rt")
 add_library(qc_shq
             OBJECT
 			qc_shq_def.h
-			qc_shq_config.h
-            qc_shq_config.c
 			qc_shq_mem.h
             qc_shq_mem.c 
 			qc_shque.h
             qc_shque.c 
             qc_shq_que.h
             qc_shq_que.c
-            cJSON.h
-            cJSON.c
             )
 
 
@@ -25,6 +21,10 @@ add_library(qc_shq
 
 add_executable(qc_shqd 
                qc_shqd.c 
+               qc_shq_config.h
+               qc_shq_config.c
+               cJSON.h
+               cJSON.c
                $<TARGET_OBJECTS:qc_shq>
                $<TARGET_OBJECTS:qc_rt>
               )

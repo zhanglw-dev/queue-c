@@ -15,6 +15,8 @@ add_library(qc_shq
             qc_shque.c 
             qc_shq_que.h
             qc_shq_que.c
+            cJSON.h
+            cJSON.c
             )
 
 

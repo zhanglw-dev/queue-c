@@ -30,49 +30,36 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "qc_prelude.h"
-#include "qc_shq_config.h"
-#include "qc_shq_mem.h"
-#include "qc_list.h"
+#include "qc_shq_conf.h"
 
 
-QcShqMem* shqMem;
-
-static void sighandler(int sig)
+QcShmConf* qc_create_shmem_config(const char *shmname)
 {
-    printf("received exit signal.\n");
+    qc_assert(strlen(shmname) < QC_SHMNAME_MAXLEN);
 
-    qc_shqmem_destroy(shqMem);
+    QcShmConf *shmConf;
+    qc_malloc(shmConf, sizeof(QcShmConf));
+    strncpy(shmConf->shmname, shmname, QC_SHMNAME_MAXLEN);
 
-    exit(0);
+    shmConf->queConfList = qc_list_create(0);
+    qc_assert(shmConf->queConfList);
+
+    return shmConf;
 }
 
 
-int main()
+void qc_shm_config_addque(QcShmConf *shmConf, const char *qname, int queuesize, off_t msgsize)
 {
-    QcErr err;
-
-    if(signal(SIGINT, sighandler) == SIG_ERR)
-    {
-        fprintf(stderr, "reg-signal failed, errno=%d\n", errno);
-        exit(-1);
-    }
-
-    //create shm
-    printf("creating shm......\n");
-    QcShmConf *shmConf = qc_create_shmem_config("shm_1");
     qc_assert(shmConf);
+    qc_assert(strlen(qname) < QC_QUENAME_MAXLEN);
+    qc_assert(queuesize>0);
+    qc_assert(msgsize>0);
 
-    qc_shm_config_addque(shmConf, "queue_1", 40, 1*1024*1024);
-    qc_shm_config_addque(shmConf, "queue_2", 20, 2*1024*1024);
-    qc_shm_config_addque(shmConf, "queue_3", 10, 4*1024*1024);
+    QueConf *queConf;
+    qc_malloc(queConf, sizeof(QueConf));
+    strncpy(queConf->qname, qname, QC_QUENAME_MAXLEN);
+    queConf->queuesize = queuesize;
+    queConf->msgsize = msgsize;
 
-    shqMem = qc_shqmem_create(shmConf, &err);
-    qc_assert(shqMem);
-
-    while(1)
-    {
-        sleep(1);
-    }
-
+    qc_list_inserttail(shmConf->queConfList, queConf);
 }

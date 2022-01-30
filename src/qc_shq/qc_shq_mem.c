@@ -38,7 +38,7 @@
 #include "qc_shq_mem.h"
 #include "qc_shq_que.h"
 #include "qc_shq_def.h"
-#include "qc_shq_config.h"
+#include "qc_shq_conf.h"
 
 
 size_t calc_shmsize(QcList *queConfList, QcErr *err)

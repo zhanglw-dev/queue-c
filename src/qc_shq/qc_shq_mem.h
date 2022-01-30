@@ -37,7 +37,7 @@
 #include "qc_error.h"
 #include "qc_shm.h"
 #include "qc_shq_def.h"
-#include "qc_shq_config.h"
+#include "qc_shq_conf.h"
 
 
 typedef struct __QcShqMem__{

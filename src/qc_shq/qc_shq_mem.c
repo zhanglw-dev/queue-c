@@ -36,7 +36,7 @@
 #include "qc_shm.h"
 #include "qc_log.h"
 #include "qc_shq_mem.h"
-#include "qc_shque.h"
+#include "qc_shq_que.h"
 #include "qc_shq_def.h"
 #include "qc_shq_config.h"
 

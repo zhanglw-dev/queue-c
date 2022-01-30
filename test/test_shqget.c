@@ -31,7 +31,7 @@
  */
 
 #include "qc_prelude.h"
-#include "qc_shq_que.h"
+#include "qc_shque.h"
 
 
 int main()

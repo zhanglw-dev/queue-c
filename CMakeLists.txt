@@ -80,7 +80,7 @@ list(APPEND QC_API_HEADERS
             src/qc_net/qc_server.h
             src/qc_net/qc_client.h
             src/qc_shq/qc_shq_mem.h
-            src/qc_shq/qc_shq_que.h
+            src/qc_shq/qc_shque.h
             )
 
 set_target_properties(qc

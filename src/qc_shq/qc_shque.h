@@ -30,37 +30,35 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef QC_SHM_QUEUE_H
-#define QC_SHM_QUEUE_H
 
-#include "qc_prelude.h"
+#ifndef QC_SHMQUE_API_H
+#define QC_SHMQUE_API_H
+
 #include "qc_error.h"
 #include "qc_shq_def.h"
 
-#include "qc_shm.h"
-#include "qc_shq_mem.h"
-#include "qc_shq_config.h"
 
 
-#define QUEDATA_SAFE_MARGIN_SIZE 512
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+QcShmQue* qc_shqueue_attach(const char *shm_name, const char *que_name, QcErr *err);
+
+void qc_shqueue_deattach(QcShmQue *shmQue);
+
+int qc_shqueue_pull_begin(QcShmQue *shmQue, int wait_msec, int *idx, char **pp_buff, int *p_bufflen, QcErr *err);
+
+int qc_shqueue_pull_end(QcShmQue *shmQue, int idx, QcErr *err);
+
+int qc_shqueue_push_begin(QcShmQue *shmQue, int *idx, char **pp_buff, int *p_bufflen, QcErr *err);
+
+int qc_shqueue_push_end(QcShmQue *shmQue, int idx, int bufflen, QcErr *err);
 
 
+#ifdef __cplusplus
+}
+#endif
 
-QcShmQue* shm_queue_init(QcShqMem *shmHdl, off_t *offset, QueConf *queConf, int que_num, int sn, QcErr *err);
 
-void shm_queue_destroy(QcShmQue *shmQue);
-
-QcShmQue* shm_queue_find(QcShm *qcShm, const char *que_name, QcErr *err);
-
-void shm_queue_release(QcShmQue *shmQue);
-
-int shm_queue_pull_begin(QcShmQue *shmQue, int wait_msec, int *idx, char **pp_buff, int *p_bufflen, QcErr *err);
-
-int shm_queue_pull_end(QcShmQue *shmQue, int idx, QcErr *err);
-
-//pre alloc from que for put
-int shm_queue_push_begin(QcShmQue *shmQue, int *idx, char **pp_buff, int *p_bufflen, QcErr *err);
-
-int shm_queue_push_end(QcShmQue *shmQue, int idx, int bufflen, QcErr *err);
-
-#endif //QC_SHM_QUEUE_H
+#endif //QC_SHMQUE_API_H

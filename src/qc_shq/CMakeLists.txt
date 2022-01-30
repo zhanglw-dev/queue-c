@@ -23,8 +23,6 @@ add_executable(qc_shqd
                qc_shqd.c 
                qc_shq_config.h
                qc_shq_config.c
-               cJSON.h
-               cJSON.c
                $<TARGET_OBJECTS:qc_shq>
                $<TARGET_OBJECTS:qc_rt>
               )

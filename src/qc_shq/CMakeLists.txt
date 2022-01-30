@@ -48,8 +48,8 @@ install(
     COMPONENT bin
 )
 
-install(
-    FILES shqd_demo.cfg
+#install(
+#   FILES shqd_demo.cfg
     #TYPE SYSCONF
-    DESTINATION etc
-)
+#   DESTINATION etc
+#)

@@ -39,7 +39,23 @@
 #include "qc_shq_def.h"
 
 
-QcShqConf* qc_shqd_read_config(const char* cfgfile, QcErr *err);
+typedef struct{
+    char qname[QC_QUENAME_MAXLEN];
+    int queuesize;
+    off_t msgsize;
+}QueConf;
+
+
+typedef struct{
+    char shmname[QC_SHMNAME_MAXLEN];
+    QcList *queConfList;
+}QcShmConf;
+
+
+
+QcShmConf* qc_create_shmem_config(const char *shmname);
+
+void qc_shm_config_addque(QcShmConf *shmConf, const char *qname, int queuesize, off_t msgsize);
 
 
 #endif  //SHM_CONFIG_H

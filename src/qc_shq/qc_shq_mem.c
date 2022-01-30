@@ -38,6 +38,7 @@
 #include "qc_shq_mem.h"
 #include "qc_shque.h"
 #include "qc_shq_def.h"
+#include "qc_shq_config.h"
 
 
 size_t calc_shmsize(QcList *queConfList, QcErr *err)
@@ -121,7 +122,7 @@ int init_all_shmque(QcShqMem *shqMem, QcList *queConfList, QcErr *err)
 }
 
 
-QcShqMem* qc_shqmem_create(const char* shm_name, ShmConf *shmConf, QcErr *err)
+QcShqMem* qc_shqmem_create(QcShmConf *shmConf, QcErr *err)
 {
     QcShqMem *shqMem;
     qc_malloc(shqMem, sizeof(QcShqMem));
@@ -130,14 +131,14 @@ QcShqMem* qc_shqmem_create(const char* shm_name, ShmConf *shmConf, QcErr *err)
     shqMem->tmp_offset = 0;
     shqMem->que_num = qc_list_count(shmConf->queConfList);
 
-    strncpy((char*)shqMem->shm_name, shm_name, QC_SHMNAME_MAXLEN);
+    strncpy((char*)shqMem->shm_name, shmConf->shmname, QC_SHMNAME_MAXLEN);
 
 	shqMem->shmQueLst = qc_list_create(0);
 
     size_t shm_size = calc_shmsize(shmConf->queConfList, err);
     shqMem->shm_size = shm_size;
 
-    QcShm *qcShm = create_shm(shm_name, shm_size, err);
+    QcShm *qcShm = create_shm(shqMem->shm_name, shm_size, err);
     if(NULL == qcShm)
     {
         return NULL;
@@ -184,59 +185,6 @@ int qc_shqmem_destroy(QcShqMem *shmHdl)
 		QcShmQue *shmQue = qc_list_data(entry);
 		shm_queue_release(shmQue);
 	}
-
-    return 0;
-}
-
-
-QcList* qc_shqmem_createall(QcShqConf *shmQueConf, QcErr *err)
-{
-    QcList *shmemHdlList = qc_list_create(0);
-    qc_list_enumbegin(shmQueConf->shmConfList);
-
-    while(1)
-    {
-        QcListEntry* entry = qc_list_enumentry(shmQueConf->shmConfList);
-        if(NULL == entry)
-        {
-            break;
-        }
-        ShmConf *shmConf = (ShmConf*)qc_list_data(entry);
-
-        QcShqMem *shqMem = qc_shqmem_create(shmConf->shmname, shmConf, err);
-        if(NULL == shqMem)
-        {
-            printf("create shmem (%s) failed. err=%s\n", (char*)shmConf->shmname, err->desc);
-            return NULL;
-        }
-        qc_list_inserttail(shmemHdlList, shqMem);
-    }
-
-    printf("all shmem created!\n");
-    return shmemHdlList;
-}
-
-
-int qc_shqmem_destroyall(QcList *shmemHdlList)
-{
-    int ret;
-    qc_list_enumbegin(shmemHdlList);
-
-    while(1)
-    {
-        QcListEntry* entry = qc_list_enumentry(shmemHdlList);
-        if(NULL == entry)
-        {
-            break;
-        }
-
-        QcShqMem *shqMem = (QcShqMem*)qc_list_data(entry);
-        ret = qc_shqmem_destroy(shqMem);
-        if(ret < 0)
-        {
-            printf("destroy shmem (%s) failed.\n", (char*)shqMem->shm_name);
-        }
-    }
 
     return 0;
 }

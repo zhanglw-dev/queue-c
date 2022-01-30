@@ -36,32 +36,13 @@
 #include "qc_list.h"
 
 
-QcList *_shmConfList;
-QcList *_shmemHdlList;
-
+QcShqMem* shqMem;
 
 static void sighandler(int sig)
 {
     printf("received exit signal.\n");
 
-    qc_list_enumbegin(_shmConfList);
-
-    while(1)
-    {
-        QcListEntry* entry = qc_list_enumentry(_shmConfList);
-        if(NULL == entry) 
-            break;
-        
-        ShmConf *shmConf = (ShmConf*)qc_list_data(entry);
-
-#ifndef IS_WINDOWS
-        if(shm_unlink(shmConf->shmname) == -1)
-        {
-            fprintf(stderr, "shm_unlink (%s) failed, errno=%d\n", shmConf->shmname, errno);
-            exit(-1);
-        }
-#endif
-    }
+    qc_shqmem_destroy(shqMem);
 
     exit(0);
 }
@@ -70,26 +51,6 @@ static void sighandler(int sig)
 int main()
 {
     QcErr err;
-    char binpath[128], filepath[256];
-    printf("shmqueue start...\n");
-
-    char *cwd = getcwd(binpath, sizeof(binpath)-1);
-    sprintf(filepath, "%s/../etc/shqd_demo.cfg", binpath);
-    //printf("config file: %s\n", filepath);
-
-    if(access(filepath, 0) != 0){
-        printf("error: can not find config file:%s\n", filepath);
-        exit(-1);
-    }
-
-    QcShqConf *shmQueConf = qc_shqd_read_config(filepath, &err);
-    if(NULL == shmQueConf)
-    {
-        printf("read config failed, err=%s.\n", err.desc);
-        exit(-1);
-    }
-
-    _shmConfList = shmQueConf->shmConfList;
 
     if(signal(SIGINT, sighandler) == SIG_ERR)
     {
@@ -98,15 +59,20 @@ int main()
     }
 
     //create shm
-    printf("creating all shm......\n");
-    _shmemHdlList = qc_shqmem_createall(shmQueConf, &err);
+    printf("creating shm......\n");
+    QcShmConf *shmConf = qc_create_shmem_config("shm_1");
+    qc_assert(shmConf);
+
+    qc_shm_config_addque(shmConf, "queue_1", 40, 1*1024*1024);
+    qc_shm_config_addque(shmConf, "queue_2", 20, 2*1024*1024);
+    qc_shm_config_addque(shmConf, "queue_3", 10, 4*1024*1024);
+
+    shqMem = qc_shqmem_create(shmConf, &err);
+    qc_assert(shqMem);
 
     while(1)
     {
         sleep(1);
     }
 
-    qc_list_destroy(shmQueConf->shmConfList);
-
-    exit(0);
 }

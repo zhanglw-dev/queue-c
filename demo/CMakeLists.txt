@@ -10,7 +10,8 @@ add_executable(qcdemo
 
 include_directories("../src/qc_rt")
 include_directories("../src/qc_mq")
-include_directories("../src/qc_mqsys")
+include_directories("../src/qc_qsys")
+include_directories("../src/qc_net")
 
 #message(STATUS ${CMAKE_BINARY_DIR}/lib)
 link_directories(${CMAKE_BINARY_DIR}/lib)

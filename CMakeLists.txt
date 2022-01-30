@@ -26,9 +26,10 @@ endforeach()
 
 add_subdirectory(src/qc_rt)
 add_subdirectory(src/qc_mq)
-add_subdirectory(src/qc_mqsys)
-add_subdirectory(src/qc_shq)
+add_subdirectory(src/qc_qsys)
+add_subdirectory(src/qc_net)
 add_subdirectory(src/qc_psist)
+add_subdirectory(src/qc_shq)
 add_subdirectory(demo)
 add_subdirectory(test)
 
@@ -36,7 +37,8 @@ add_library(qc
             STATIC
             $<TARGET_OBJECTS:qc_rt>
             $<TARGET_OBJECTS:qc_mq>
-            $<TARGET_OBJECTS:qc_mqsys>
+            $<TARGET_OBJECTS:qc_qsys>
+            $<TARGET_OBJECTS:qc_net>
             $<TARGET_OBJECTS:qc_shq>
 			$<TARGET_OBJECTS:qc_psist>
 )
@@ -74,9 +76,9 @@ list(APPEND QC_API_HEADERS
             src/qc_rt/qc_thread.h
             src/qc_mq/qc_message.h
             src/qc_mq/qc_queue.h
-            src/qc_mqsys/qc_qsystem.h
-            src/qc_mqsys/qc_server.h
-            src/qc_mqsys/qc_client.h
+            src/qc_qsys/qc_qsystem.h
+            src/qc_net/qc_server.h
+            src/qc_net/qc_client.h
             src/qc_shq/qc_shq_mem.h
             src/qc_shq/qc_shq_que.h
             )

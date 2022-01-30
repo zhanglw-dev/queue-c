@@ -4,7 +4,8 @@ project(qctest LANGUAGES C)
 
 include_directories("../src/qc_rt")
 include_directories("../src/qc_mq")
-include_directories("../src/qc_mqsys")
+include_directories("../src/qc_qsys")
+include_directories("../src/qc_net")
 include_directories("../src/qc_psist")
 include_directories("../src/qc_shq")
 

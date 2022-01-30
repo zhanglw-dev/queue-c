@@ -39,6 +39,7 @@
 
 #include "qc_shm.h"
 #include "qc_shq_mem.h"
+#include "qc_shq_config.h"
 
 
 #define QUEDATA_SAFE_MARGIN_SIZE 512

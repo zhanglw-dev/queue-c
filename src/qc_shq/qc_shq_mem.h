@@ -37,6 +37,7 @@
 #include "qc_error.h"
 #include "qc_shm.h"
 #include "qc_shq_def.h"
+#include "qc_shq_config.h"
 
 
 typedef struct __QcShqMem__{
@@ -49,13 +50,8 @@ typedef struct __QcShqMem__{
 }QcShqMem;
 
 
-QcShqMem* qc_shqmem_create(const char* shm_name, ShmConf *shmConf, QcErr *err);
+QcShqMem* qc_shqmem_create(QcShmConf *shmConf, QcErr *err);
 
 int qc_shqmem_destroy(QcShqMem *shqMem);
-
-QcList* qc_shqmem_createall(QcShqConf *shmQueConf, QcErr *err);
-
-int qc_shqmem_destroyall(QcList *shmemHdlList);
-
 
 #endif //QC_SHM_MEM_H

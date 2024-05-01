@@ -204,6 +204,7 @@ int test_net()
 
     qc_queuesrv_stop(queueSrv);
     qc_queuesrv_destory(queueSrv);
+	printf("qcnet test ok!\n");
 
     return 0;
 }

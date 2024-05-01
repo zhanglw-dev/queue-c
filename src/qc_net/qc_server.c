@@ -260,8 +260,8 @@ void* accept_thread_routine(void *param)
 {
 	AcceptParam *acceptParam = param;
 
-	if (0 != qc_tcp_listen(acceptParam->socket))
-		return NULL;
+	//if (0 != qc_tcp_listen(acceptParam->socket))
+	//	return NULL;
 
 	while (1) {
 		QcSocket* socket = qc_tcp_accept(acceptParam->socket);
@@ -327,6 +327,11 @@ int qc_queuesrv_start(QcQueueSrv *queueSrv, int is_async, QcErr *err)
 	int ret = qc_tcp_bind(socket, queueSrv->ip, queueSrv->port);
 	if (0 != ret) {
 		qc_seterr(err, QC_ERR_SOCKET, "socket bind failed.");
+		return -1;
+	}
+
+	if (0 != qc_tcp_listen(socket)){
+		qc_seterr(err, QC_ERR_SOCKET, "socket listen failed.");
 		return -1;
 	}
 

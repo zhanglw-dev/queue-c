@@ -155,6 +155,7 @@ put_loop:
 		qc_thread_condition_signal(getter->cond);
 		qc_thread_condlock_unlock(getter->condlock);
 
+		qc_getter_destroy(getter);
 		return 0;
 	}
 	else{
@@ -272,6 +273,7 @@ pop_loop:
 			}
 
 			qc_thread_condlock_unlock(putter->condlock);
+			qc_putter_destroy(putter);
 		}
 
 		qc_thread_mutex_unlock(queue->quelock);

@@ -210,7 +210,7 @@ int qc_tcp_send(QcSocket *socket, char *sendbuf, int len)
 {
     size_t bytes;
 
-    bytes = send(socket->sockfd, sendbuf, len, 0);
+    bytes = send(socket->sockfd, sendbuf, len, MSG_NOSIGNAL);
     if(bytes < 0)
     {
         qc_error("tcp send failed");
@@ -225,7 +225,7 @@ int qc_tcp_recv(QcSocket *socket, char *recvbuf, int len)
 {
     int bytes;
 
-    bytes = (int)recv(socket->sockfd, recvbuf, len, 0);
+    bytes = (int)recv(socket->sockfd, recvbuf, len, MSG_NOSIGNAL);
     if(bytes < 0)
     {
         qc_error("tcp recv failed");
@@ -245,7 +245,7 @@ int qc_tcp_recvall(QcSocket *socket, char *recvbuf, int len)
     torcv = len;
     while(1)
     {
-        bytes = (int)recv(socket->sockfd, recvbuf+rcved, torcv, 0);
+        bytes = (int)recv(socket->sockfd, recvbuf+rcved, torcv, MSG_NOSIGNAL);
         if(bytes < 0)
         {
             qc_error("tcp recv(in recvall) failed");

@@ -41,7 +41,7 @@ int demo_sock()
 {
     QcErr err;
 
-    QcQueue *queue = qc_queue_create(1000, 3, &err);
+    QcQueue *queue = qc_queue_create(100000, 3, &err);
     if (!queue) {
         printf("create queue failed: %s\n", err.desc);
         exit(-1);
@@ -69,6 +69,8 @@ int demo_sock()
         printf("start queuesrv failed.\n");
         exit(-1);
     }
+
+    //sleep(100000);
 
     QcClient *client = qc_client_connect("127.0.0.1", 5555, &err);
     if(!client){

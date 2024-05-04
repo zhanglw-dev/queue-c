@@ -42,7 +42,6 @@
 static const int queue_limit = 1000;
 static const int message_num = 100000;
 static const char *buff = "hello queue!";
-
 #define THREAD_NUM 10
 
 
@@ -53,6 +52,7 @@ void* putroutine(void *arg) {
 
 	for (int i = 0; i < message_num; i++) {
 		QcMessage *message = qc_message_create(buff, (int)strlen(buff), BUFFFLAG_NO_FREE);
+		//QcMessage *message = qc_message_create(buff, (int)strlen(buff), 0);
 		qc_message_setpriority(message, 10);
 
 		ret = qc_queue_msgput(queue, message, -1, NULL);
@@ -61,7 +61,7 @@ void* putroutine(void *arg) {
 			return NULL;
 		}
 
-		////qc_message_release(message, 0);
+		////qc_message_release(message);
 	}
 
 	return NULL;

@@ -115,7 +115,7 @@ int qc_proc_msgput(ProcParam *procParam, QcPrtclHead *prtclHead, char *prtcl_bod
 
 	QcPrtclReply prtclReply;
 	prtclReply.result = result;
-	prtclReply.msg_len = msg_len;
+	prtclReply.msg_len = 0;
 	qc_prtcl_reply_hton(&prtclReply);
 	ret = qc_tcp_send(procParam->socket, (char*)&prtclReply, sizeof(QcPrtclReply));
 	if (ret != sizeof(QcPrtclReply)){
@@ -191,7 +191,11 @@ int qc_proc_msgget(ProcParam *procParam, QcPrtclHead *prtclHead, char *prtcl_bod
 	return 0;
 
 failed:
-    if(message) qc_message_release(message);
+    if(message){
+		//try to return this message to queue
+		QcErr _err;
+		qc_qsys_putmsg(procParam->qSystem, prtclMsgGet->qname, message, 1000, &_err);
+	} 
 	return -1;
 }
 

@@ -16,5 +16,5 @@ add_library(qc_net
             )
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
-target_compile_definitions(qc_mqsys PUBLIC "_CRT_SECURE_NO_WARNINGS")
+target_compile_definitions(qc_qsys PUBLIC "_CRT_SECURE_NO_WARNINGS")
 endif()

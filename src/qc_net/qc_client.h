@@ -37,6 +37,11 @@
 #include "qc_error.h"
 
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+
 typedef struct __QcClient QcClient;
 
 
@@ -47,6 +52,11 @@ void qc_client_disconnect(QcClient *client);
 int qc_client_msgput(QcClient *client, const char *qname, QcMessage *message, int msec, QcErr *err);
 
 QcMessage* qc_client_msgget(QcClient *client, const char *qname, int msec, QcErr *err);
+
+
+#ifdef __cplusplus
+}
+#endif
 
 
 #endif /*QC_CLIENT_H*/

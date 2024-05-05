@@ -37,6 +37,11 @@
 #include "qc_qsystem.h"
 
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+
 typedef struct __QcQueueSrv QcQueueSrv;
 
 
@@ -47,6 +52,11 @@ void qc_queuesrv_destory(QcQueueSrv *queueSrv);
 int qc_queuesrv_start(QcQueueSrv *queueSrv, int is_async, QcErr *err);
 
 void qc_queuesrv_stop(QcQueueSrv *queueSrv);
+
+
+#ifdef __cplusplus
+}
+#endif
 
 
 #endif /*QC_SERVICE_H*/

@@ -37,8 +37,12 @@
 #include "qc_error.h"
 
 
-typedef struct __QcQSystem QcQSystem;
+#ifdef __cplusplus
+extern "C" {
+#endif
 
+
+typedef struct __QcQSystem QcQSystem;
 
 
 QcQSystem* qc_qsys_create();
@@ -54,6 +58,11 @@ QcQueue* qc_qsys_queue_get(QcQSystem *qSys, const char *qname, QcErr *err);
 int qc_qsys_putmsg(QcQSystem *qSys, const char *qname, QcMessage *message, int msec, QcErr *err);
 
 QcMessage* qc_qsys_getmsg(QcQSystem *qSys, const char *qname, int msec, QcErr *err);
+
+
+#ifdef __cplusplus
+}
+#endif
 
 
 #endif //QC_QSYSTEM_H

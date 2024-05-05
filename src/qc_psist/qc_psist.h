@@ -38,8 +38,12 @@
 #include "qc_error.h"
 
 
-typedef struct __QcPsist QcPsist;
+#ifdef __cplusplus
+extern "C" {
+#endif
 
+
+typedef struct __QcPsist QcPsist;
 
 
 QcPsist* qc_psist_open(int msgbuff_size, int msgcount_limit, const char *descript, QcErr *err);
@@ -51,6 +55,11 @@ int qc_psist_append(QcPsist *qTable, QcMessage *message, QcErr *err);
 int qc_psist_remove(QcPsist *qTable, QcMessage *message, QcErr *err);
 
 int qc_psist_loadqueue(QcPsist *qTable, QcQueue *queue, QcErr *err);
+
+
+#ifdef __cplusplus
+}
+#endif
 
 
 #endif //H_QC_PERSISTENT

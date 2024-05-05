@@ -3,7 +3,7 @@ project(queue-c LANGUAGES C)
 
 set(CMAKE_BUILD_TYPE Debug CACHE STRING "Build type" FORCE)
 message(STATUS "Build type set to ${CMAKE_BUILD_TYPE}")
-
+#add_compile_options(-D__USE_GNU -std=gnu99)  #for some centos build failed
 
 include(GNUInstallDirs)
 
